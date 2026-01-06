@@ -163,7 +163,7 @@ export default function CartPage() {
                                             )}
 
                                             {/* Total Savings */}
-                                            {((item.mrp || originalPrice) && (item.mrp || originalPrice) > displayPrice) && (
+                                            {((item.mrp || originalPrice || 0) > displayPrice) && (
                                                 <div className="text-xs text-green-600 font-medium">
                                                     Total Savings: ₹{(((item.mrp || originalPrice || item.price) - displayPrice) * item.quantity).toFixed(2)}
                                                 </div>
