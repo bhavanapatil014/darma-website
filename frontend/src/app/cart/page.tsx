@@ -146,9 +146,9 @@ export default function CartPage() {
                                         </div>
                                         <div className="text-right">
                                             {/* Reference Price (MRP or Pre-Coupon) */}
-                                            {(item.mrp || originalPrice) && (item.mrp || originalPrice) > displayPrice && (
+                                            {((item.mrp || originalPrice || 0)) > displayPrice && (
                                                 <div className="text-sm text-gray-400 line-through">
-                                                    ₹{((item.mrp || originalPrice) * item.quantity).toFixed(2)}
+                                                    ₹{((item.mrp || originalPrice || 0) * item.quantity).toFixed(2)}
                                                 </div>
                                             )}
 
