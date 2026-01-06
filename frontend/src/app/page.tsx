@@ -7,7 +7,7 @@ import { fetchProducts } from "@/lib/data";
 
 async function getSettings() {
   try {
-    const res = await fetch('http://localhost:4000/api/settings', { cache: 'no-store' });
+    const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000'}/api/settings`, { cache: 'no-store' });
     return res.json();
   } catch (error) {
     return { heroTitle: 'Your Skin, Our Science', heroSubtitle: 'Doctor Recommended Skincare Solutions' };
