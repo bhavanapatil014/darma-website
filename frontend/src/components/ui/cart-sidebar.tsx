@@ -11,7 +11,7 @@ export function CartSidebar() {
     async function handleApplyCoupon(code: string) {
         if (!code) return;
         try {
-            const res = await fetch('http://localhost:4000/api/coupons/verify', {
+            const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000'}/api/coupons/verify`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ code: code, cartTotal: subtotal, cartItems: items })

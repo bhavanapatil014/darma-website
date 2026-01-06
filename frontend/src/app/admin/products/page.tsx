@@ -45,7 +45,7 @@ export default function ProductsPage() {
                 1,
                 1000
             ),
-            fetch('http://localhost:4000/api/categories').then(res => res.json()).catch(() => [])
+            fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000'}/api/categories`).then(res => res.json()).catch(() => [])
         ])
         setProducts(productsData.products)
         setCategories(categoriesData)
@@ -65,17 +65,17 @@ export default function ProductsPage() {
                 })
 
                 console.log("Uploading multiple to /api/products/upload-multiple...");
-                const uploadRes = await fetch('http://localhost:4000/api/products/upload-multiple', {
+                const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000'}/api/products/upload-multiple`, {
                     method: 'POST',
                     body: uploadData
                 })
 
-                if (!uploadRes.ok) {
-                    const errText = await uploadRes.text();
-                    throw new Error(`Image upload failed: ${uploadRes.status} ${errText}`);
+                if (!res.ok) {
+                    const errText = await res.text();
+                    throw new Error(`Image upload failed: ${res.status} ${errText}`);
                 }
 
-                const { imageUrls } = await uploadRes.json()
+                const { imageUrls } = await res.json()
                 // Append new images to existing ones (if any)
                 uploadedImageUrls = [...uploadedImageUrls, ...imageUrls]
             }
@@ -91,8 +91,8 @@ export default function ProductsPage() {
             console.log("Submitting Product Data:", productData);
 
             const url = isEditing
-                ? `http://localhost:4000/api/products/${isEditing}`
-                : 'http://localhost:4000/api/products'
+                ? `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000'}/api/products/${isEditing}`
+                : `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000'}/api/products`
 
             const method = isEditing ? 'PUT' : 'POST'
 
@@ -116,7 +116,7 @@ export default function ProductsPage() {
     async function handleDelete(id: string) {
         if (!confirm("Are you sure?")) return
         try {
-            await fetch(`http://localhost:4000/api/products/${id}`, { method: 'DELETE' })
+            await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000'}/api/products/${id}`, { method: 'DELETE' })
             loadData()
         } catch (error) {
             console.error(error)
@@ -167,7 +167,7 @@ export default function ProductsPage() {
     async function handleBulkDelete() {
         if (!confirm(`Delete ${selectedProducts.length} products?`)) return
         try {
-            await Promise.all(selectedProducts.map(id => fetch(`http://localhost:4000/api/products/${id}`, { method: 'DELETE' })))
+            await Promise.all(selectedProducts.map(id => fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000'}/api/products/${id}`, { method: 'DELETE' })))
             setSelectedProducts([])
             loadData()
         } catch (error) {

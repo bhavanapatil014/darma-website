@@ -25,7 +25,7 @@ export function Navbar() {
         window.addEventListener('scroll', handleScroll);
 
         // Fetch Settings
-        fetch('http://localhost:4000/api/settings')
+        fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000'}/api/settings`)
             .then(res => res.json())
             .then(data => setSettings(data))
             .catch(err => console.warn("Settings fetch failed (Backend might be offline):", err));

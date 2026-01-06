@@ -16,7 +16,7 @@ export interface Product {
     brand?: string;
 }
 
-const API_URL = 'http://localhost:4000/api';
+const API_URL = (process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000') + '/api';
 
 // Fallback data for build time or error cases (optional, but good for stability)
 export const products: Product[] = [];
