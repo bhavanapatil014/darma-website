@@ -5,13 +5,15 @@ import { Button } from "@/components/ui/button"
 import Link from "next/link"
 import { Mail, Phone, ArrowRight, MessageCircle } from "lucide-react"
 
+import { useSearchParams } from "next/navigation"
+
 export default function LoginPage() {
     const { login, sendOtp, verifyOtp, isLoading } = useAuth()
+    const searchParams = useSearchParams()
+    const redirectPath = searchParams.get('redirect') || undefined
 
-    // View State: 'phone-input' | 'otp-verify' | 'email-login'
+    // ... View State ...
     const [view, setView] = useState<'phone-input' | 'otp-verify' | 'email-login'>('phone-input')
-
-    // Form States
     const [phoneNumber, setPhoneNumber] = useState("")
     const [otp, setOtp] = useState("")
     const [email, setEmail] = useState("")
@@ -30,12 +32,12 @@ export default function LoginPage() {
 
     const handleVerifyOtp = async (e: React.FormEvent) => {
         e.preventDefault()
-        await verifyOtp(phoneNumber, otp)
+        await verifyOtp(phoneNumber, otp, redirectPath)
     }
 
     const handleEmailLogin = async (e: React.FormEvent) => {
         e.preventDefault()
-        await login(email, password)
+        await login(email, password, redirectPath)
     }
 
     return (
@@ -196,8 +198,8 @@ export default function LoginPage() {
                             type="button"
                             onClick={() => setView(view === 'email-login' ? 'phone-input' : 'email-login')}
                             className={`flex items-center justify-center gap-2 px-4 py-2 border rounded-lg transition-colors font-medium ${view === 'email-login'
-                                    ? 'bg-blue-50 border-blue-500 text-blue-700'
-                                    : 'border-gray-200 hover:bg-gray-50 text-gray-700'
+                                ? 'bg-blue-50 border-blue-500 text-blue-700'
+                                : 'border-gray-200 hover:bg-gray-50 text-gray-700'
                                 }`}
                         >
                             {view === 'email-login' ? (

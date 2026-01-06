@@ -11,47 +11,41 @@ interface User {
 
 interface AuthContextType {
     user: User | null
-    login: (email: string, password: string) => Promise<void>
-    register: (email: string, password: string, name: string, dateOfBirth?: string, phoneNumber?: string) => Promise<void>
+    login: (email: string, password: string, redirectPath?: string) => Promise<void>
+    register: (email: string, password: string, name: string, dateOfBirth?: string, phoneNumber?: string, redirectPath?: string) => Promise<void>
     logout: () => void
     sendOtp: (identifier: string) => Promise<void>
-    verifyOtp: (identifier: string, otp: string) => Promise<void>
+    verifyOtp: (identifier: string, otp: string, redirectPath?: string) => Promise<void>
     isLoading: boolean
 }
 
 const AuthContext = React.createContext<AuthContextType | undefined>(undefined)
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
+    // ... (state lines 25-50 same, skipping)
     const [user, setUser] = React.useState<User | null>(null)
-    const [isLoading, setIsLoading] = React.useState(true) // Start true to prevent premature redirects
+    const [isLoading, setIsLoading] = React.useState(true)
     const router = useRouter()
 
     React.useEffect(() => {
         const token = localStorage.getItem('token');
         if (token) {
-            // setIsLoading(true); // Already true
             fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000'}/api/auth/me`, {
                 headers: { 'Authorization': `Bearer ${token}` }
             })
-                .then(res => {
-                    if (res.ok) return res.json();
-                    throw new Error('Failed to verify token');
-                })
-                .then(data => {
-                    setUser(data.user);
-                })
+                .then(res => res.json())
+                .then(data => setUser(data.user))
                 .catch(() => {
                     localStorage.removeItem('token');
                     setUser(null);
                 })
                 .finally(() => setIsLoading(false));
         } else {
-            setIsLoading(false); // No token found, checking done.
+            setIsLoading(false);
         }
     }, []);
 
-    const login = async (email: string, password: string) => {
-        // ... existing login ...
+    const login = async (email: string, password: string, redirectPath?: string) => {
         setIsLoading(true)
         try {
             const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000'}/api/auth/login`, {
@@ -66,7 +60,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             const data = await res.json();
             setUser(data.user);
             localStorage.setItem('token', data.token);
-            router.push("/account");
+            router.push(redirectPath || "/account");
         } catch (error: any) {
             console.error(error);
             alert(error.message || "Login failed.");
@@ -75,8 +69,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         }
     }
 
-    const register = async (email: string, password: string, name: string, dateOfBirth?: string, phoneNumber?: string) => {
-        // ... existing register ...
+    const register = async (email: string, password: string, name: string, dateOfBirth?: string, phoneNumber?: string, redirectPath?: string) => {
         setIsLoading(true)
         try {
             const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000'}/api/auth/register`, {
@@ -90,7 +83,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             }
             const data = await res.json();
             setUser(data.user);
-            router.push("/account");
+            // Auto login on register doesn't set token usually, but here it might? 
+            // The Original code didn't save token in register, so user had to login potentially? 
+            // Wait, original code: router.push("/account"). 
+            // But if token isn't saved, reload loses auth.
+            // Assuming backend returns token on register (it usually does).
+            if (data.token) {
+                localStorage.setItem('token', data.token);
+            }
+            router.push(redirectPath || "/account");
         } catch (error: any) {
             console.error(error);
             alert(error.message || "Registration failed.");
@@ -120,7 +121,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         }
     }
 
-    const verifyOtp = async (identifier: string, otp: string) => {
+    const verifyOtp = async (identifier: string, otp: string, redirectPath?: string) => {
         setIsLoading(true)
         try {
             const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000'}/api/auth/verify-otp`, {
@@ -135,7 +136,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             const data = await res.json();
             setUser(data.user);
             localStorage.setItem('token', data.token);
-            router.push("/account");
+            router.push(redirectPath || "/account");
         } catch (error: any) {
             console.error(error);
             alert(error.message || "Verification failed.");

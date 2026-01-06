@@ -6,8 +6,11 @@ import Link from "next/link"
 import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
 
+import { useAuth } from "@/lib/auth-context"
+
 export default function CartPage() {
     const { items, removeItem, updateQuantity, subtotal, total, coupon, applyCoupon, removeCoupon, refreshCart } = useCart()
+    const { user } = useAuth()
     const [couponCode, setCouponCode] = useState("")
     const [couponError, setCouponError] = useState("")
     const [isApplying, setIsApplying] = useState(false)
@@ -248,7 +251,13 @@ export default function CartPage() {
                             {couponError && <p className="text-xs text-red-500 mt-1">{couponError}</p>}
                         </div>
 
-                        <Button className="w-full py-6 text-lg" size="lg" onClick={() => router.push('/checkout')}>
+                        <Button className="w-full py-6 text-lg" size="lg" onClick={() => {
+                            if (!user) {
+                                router.push('/login?redirect=/cart'); // Send back to cart after login
+                            } else {
+                                router.push('/checkout');
+                            }
+                        }}>
                             Proceed to Checkout
                         </Button>
 
