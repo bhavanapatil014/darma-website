@@ -69,11 +69,11 @@ export function Navbar() {
                 <div className="container mx-auto px-4 flex items-center justify-between">
 
                     {/* Left: Logo */}
-                    <Link href="/" className="text-2xl font-bold tracking-tighter text-primary flex items-center gap-2 shrink-0 mr-8">
+                    <Link href="/" className="text-2xl font-bold tracking-tighter text-teal-800 flex items-center gap-2 shrink-0 mr-8">
                         {settings.logoUrl && !settings.logoUrl.includes('placeholder') ? (
                             <img src={settings.logoUrl.startsWith('http') ? settings.logoUrl : settings.logoUrl} alt="Logo" className="h-12 w-auto object-contain" />
                         ) : (
-                            <span className="text-3xl font-serif text-teal-700 tracking-wide">VENKATA</span>
+                            <span className="text-2xl font-serif text-teal-800 tracking-wide uppercase">New Balaji Gandhi</span>
                         )}
                     </Link>
 
