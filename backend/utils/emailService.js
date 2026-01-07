@@ -167,7 +167,7 @@ const sendWelcomeEmails = async (user) => {
 
         // 2. Send to Admins (Notification)
         const superAdminEmail = 'bhavanapatil5351@gmail.com';
-        const adminEmail = 'bhavnapatil014@gmail.com';
+        const adminEmail = 'bhavanapatil014@gmail.com';
         const recipients = [superAdminEmail, adminEmail].filter(Boolean);
 
         if (recipients.length > 0) {
