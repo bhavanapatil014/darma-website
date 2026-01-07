@@ -19,10 +19,10 @@ import { CartSidebar } from "@/components/ui/cart-sidebar";
 import { ChatWidget } from "@/components/chat-widget";
 
 export const metadata: Metadata = {
-  title: "New Balaji Gandhi - Premium Skincare & Dermatology",
-  description: "Experience the science of beautiful skin with New Balaji Gandhi's premium dermatology products.",
+  title: "Venkata Derma - Premium Skincare & Dermatology",
+  description: "Experience the science of beautiful skin with Venkata Derma's premium dermatology products.",
   other: {
-    "version": "1.8.1-ForceUpdate",
+    "version": "2.4.0",
     "Cache-Control": "no-cache, no-store, must-revalidate"
   }
 };

@@ -72,7 +72,7 @@ export function Navbar() {
                     <Link href="/" className="flex items-center gap-2 shrink-0 mr-8">
                         <img
                             src="/images/venkata-logo.png"
-                            alt="Brand Logo"
+                            alt="Venkata Derma"
                             className="h-16 w-auto object-contain"
                         />
                     </Link>

@@ -10,7 +10,7 @@ export function Footer() {
                     {/* Brand */}
                     <div className="space-y-4">
                         <Link href="/" className="text-2xl font-bold tracking-tighter text-teal-800 uppercase">
-                            New Balaji Gandhi<span className="text-accent"></span>
+                            Venkata Derma<span className="text-accent"></span>
                         </Link>
                         <p className="text-muted-foreground text-sm leading-relaxed">
                             Premium dermatology solutions for your skin's health and beauty. Scientifically formulated, clinically proven.
@@ -54,7 +54,7 @@ export function Footer() {
                 </div>
 
                 <div className="border-t pt-8 text-center text-sm text-muted-foreground">
-                    <p>&copy; {new Date().getFullYear()} New Balaji Gandhi. All rights reserved. <span className="text-xs opacity-50 ml-2">v1.6 (Live)</span></p>
+                    <p>&copy; {new Date().getFullYear()} Venkata Derma. All rights reserved. <span className="text-xs opacity-50 ml-2">v2.4 (Live)</span></p>
                 </div>
             </div>
         </footer>
