@@ -70,12 +70,11 @@ export function Navbar() {
 
                     {/* Left: Logo */}
                     <Link href="/" className="flex items-center gap-2 shrink-0 mr-8">
-                        <img
-                            src="/images/logo.png"
-                            onError={(e) => { e.currentTarget.src = "/images/venkata-logo.png" }}
-                            alt="New Balaji Gandhi"
-                            className="h-16 w-auto object-contain"
-                        />
+                        {settings.logoUrl && !settings.logoUrl.includes('placeholder') ? (
+                            <img src={settings.logoUrl.startsWith('http') ? settings.logoUrl : settings.logoUrl} alt="Logo" className="h-12 w-auto object-contain" />
+                        ) : (
+                            <span className="text-2xl font-serif text-teal-800 tracking-wide uppercase">New Balaji Gandhi</span>
+                        )}
                     </Link>
 
                     {/* Center: Navigation Links (Inline) - Hidden when search is open on mobile? */}
