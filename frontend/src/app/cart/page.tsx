@@ -8,6 +8,9 @@ import { useRouter } from "next/navigation"
 
 import { useAuth } from "@/lib/auth-context"
 
+export const metadata = { title: 'Shopping Cart - Venkata', description: 'View your shopping cart.' }
+export const dynamic = 'force-dynamic';
+
 export default function CartPage() {
     const { items, removeItem, updateQuantity, subtotal, total, coupon, applyCoupon, removeCoupon, refreshCart } = useCart()
     const { user } = useAuth()
