@@ -69,8 +69,13 @@ export function Navbar() {
                 <div className="container mx-auto px-4 flex items-center justify-between">
 
                     {/* Left: Logo */}
-                    <Link href="/" className="text-2xl font-bold tracking-tighter text-teal-800 flex items-center gap-2 shrink-0 mr-8">
-                        <span className="text-2xl font-serif text-teal-800 tracking-wide uppercase">New Balaji Gandhi</span>
+                    <Link href="/" className="flex items-center gap-2 shrink-0 mr-8">
+                        <img
+                            src="/images/logo.png"
+                            onError={(e) => { e.currentTarget.src = "/images/venkata-logo.png" }}
+                            alt="New Balaji Gandhi"
+                            className="h-16 w-auto object-contain"
+                        />
                     </Link>
 
                     {/* Center: Navigation Links (Inline) - Hidden when search is open on mobile? */}
