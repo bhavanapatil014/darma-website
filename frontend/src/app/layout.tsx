@@ -22,7 +22,7 @@ export const metadata: Metadata = {
   title: "New Balaji Gandhi - Premium Skincare & Dermatology",
   description: "Experience the science of beautiful skin with New Balaji Gandhi's premium dermatology products.",
   other: {
-    "version": "1.7.0",
+    "version": "1.8.1-ForceUpdate",
     "Cache-Control": "no-cache, no-store, must-revalidate"
   }
 };
