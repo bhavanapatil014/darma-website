@@ -112,7 +112,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
                 const errData = await res.json();
                 throw new Error(errData.message || 'Failed to send OTP');
             }
-            alert("OTP sent successfully!");
+            const data = await res.json();
+            if (data.debugOtp) {
+                alert(`OTP Sent! (Debug Mode: ${data.debugOtp})`);
+            } else {
+                alert("OTP sent successfully!");
+            }
         } catch (error: any) {
             console.error(error);
             alert(error.message || "Failed to send OTP.");
