@@ -1,3 +1,5 @@
+export const metadata = { title: 'Terms & Conditions - Venkata', description: 'Terms of service and usage for Venkata.' }
+
 export default function TermsPage() {
     return (
         <div className="container mx-auto py-12 px-4 max-w-4xl">

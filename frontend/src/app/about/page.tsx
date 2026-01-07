@@ -1,10 +1,12 @@
+export const metadata = { title: 'About Us - Venkata', description: 'Learn about Venkata and our mission.' }
+
 export default function AboutPage() {
     return (
         <div className="container mx-auto py-12 px-4">
-            <h1 className="text-3xl font-bold mb-6">About DermaKart</h1>
+            <h1 className="text-3xl font-bold mb-6">About Venkata</h1>
             <div className="prose max-w-none">
                 <p className="mb-4">
-                    Welcome to DermaKart, your trusted destination for dermatologist-recommended skincare.
+                    Welcome to Venkata, your trusted destination for dermatologist-recommended skincare.
                     We believe that healthy skin is happy skin, and we are dedicated to bringing you the best products
                     from world-renowned brands.
                 </p>

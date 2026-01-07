@@ -1,3 +1,5 @@
+export const metadata = { title: 'Contact Us - Venkata', description: 'Get in touch with Venkata support.' }
+
 export default function ContactPage() {
     return (
         <div className="container mx-auto py-12 px-4">
@@ -5,7 +7,7 @@ export default function ContactPage() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                 <div>
                     <h2 className="text-xl font-semibold mb-4">Get in Touch</h2>
-                    <p className="mb-2"><strong>Email:</strong> support@dermakart.com</p>
+                    <p className="mb-2"><strong>Email:</strong> support@venkata.com</p>
                     <p className="mb-2"><strong>Phone:</strong> +91 98765 43210</p>
                     <p className="mb-2"><strong>Address:</strong> 123 Skincare Lane, Mumbai, India</p>
                     <p className="mt-4 text-gray-600">

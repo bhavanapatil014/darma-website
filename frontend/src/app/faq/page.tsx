@@ -1,3 +1,5 @@
+export const metadata = { title: 'FAQ - Venkata', description: 'Frequently asked questions about Venkata products and shipping.' }
+
 export default function FAQPage() {
     return (
         <div className="container mx-auto py-12 px-4 max-w-3xl">
