@@ -130,8 +130,8 @@ const CheckoutContent = () => {
                     },
                     prefill: {
                         name: customerData.name,
-                        email: customerData.email,
-                        contact: customerData.phone
+                        email: customerData.email.trim(),
+                        contact: customerData.phone.replace(/\D/g, '').slice(-10) // Ensure only last 10 digits
                     },
                     theme: { color: "#2A9D8F" },
                     modal: { ondismiss: () => setIsLoading(false) }
