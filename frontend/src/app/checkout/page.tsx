@@ -142,7 +142,7 @@ const CheckoutContent = () => {
             }
         } catch (error) {
             console.error(error);
-            alert("Failed to process order.");
+            alert(`Failed to process order. Debug Key: ${process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID?.substring(0, 15)}...`);
             setIsLoading(false);
         }
     };
