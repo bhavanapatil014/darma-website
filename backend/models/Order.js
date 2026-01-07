@@ -3,6 +3,7 @@ const mongoose = require('mongoose');
 const orderSchema = new mongoose.Schema({
     customerName: { type: String, required: true },
     email: { type: String, required: true },
+    userId: { type: String, required: false }, // Optional link to registered user
     address: { type: String, required: true },
     products: [{
         product: { type: String, required: true },

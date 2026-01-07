@@ -23,8 +23,16 @@ router.get('/my-orders', verifyToken, async (req, res) => {
             return res.status(404).json({ message: "User not found" });
         }
 
-        console.log("Fetching orders for user:", user.email);
-        const orders = await Order.find({ email: user.email }).sort({ createdAt: -1 });
+        console.log("Fetching orders for user:", user.email, "and ID:", req.userId);
+
+        // Find orders where EITHER the email matches OR the userId matches
+        const orders = await Order.find({
+            $or: [
+                { email: user.email },
+                { userId: req.userId }
+            ]
+        }).sort({ createdAt: -1 });
+
         res.json(orders);
     } catch (error) {
         console.error("Error fetching my orders:", error);
@@ -49,6 +57,19 @@ router.post('/', async (req, res) => {
         console.log("POST /api/orders Body:", JSON.stringify(req.body, null, 2));
         const { products } = req.body;
         const Product = require('../models/Product');
+        const jwt = require('jsonwebtoken');
+
+        // Optional: Associate with User ID if Token is Present
+        let userId = null;
+        const token = req.headers['authorization']?.split(' ')[1];
+        if (token) {
+            try {
+                const decoded = jwt.verify(token, process.env.JWT_SECRET || 'secretkey');
+                userId = decoded.id;
+            } catch (err) {
+                console.warn("Invalid token for order creation, proceeding as guest.");
+            }
+        }
 
         // 0. Validate Total Quantity (Max 10 items allowed)
         const totalQuantity = products.reduce((sum, item) => sum + item.quantity, 0);
@@ -83,7 +104,10 @@ router.post('/', async (req, res) => {
         }
 
         // 2. Create Order
-        const newOrder = new Order(req.body);
+        const orderData = { ...req.body };
+        if (userId) orderData.userId = userId; // Explicitly link user ID
+
+        const newOrder = new Order(orderData);
         const savedOrder = await newOrder.save();
 
         // 3. Deduct Stock
