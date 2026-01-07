@@ -37,6 +37,17 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased flex flex-col min-h-screen`}
       >
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              window.addEventListener('error', function(e) {
+                if (/Loading chunk [\\d]+ failed/.test(e.message) || /Failed to load chunk/.test(e.message)) {
+                  window.location.reload();
+                }
+              });
+            `,
+          }}
+        />
         <Providers>
           <Navbar />
           <CartSidebar />
