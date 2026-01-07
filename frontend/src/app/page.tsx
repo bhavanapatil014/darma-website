@@ -5,6 +5,9 @@ import Link from "next/link";
 import { ProductCard } from "@/components/ui/product-card";
 import { fetchProducts } from "@/lib/data";
 
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+
 async function getSettings() {
   try {
     const res = await fetch(`https://darma-website.onrender.com/api/settings`, { cache: 'no-store' });
