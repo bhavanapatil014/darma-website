@@ -30,6 +30,10 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className="scroll-smooth" data-scroll-behavior="smooth">
+      <head>
+        <meta name="version" content="1.1.0" />
+        <meta httpEquiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+      </head>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased flex flex-col min-h-screen`}
       >
