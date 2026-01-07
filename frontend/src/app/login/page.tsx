@@ -7,7 +7,7 @@ import { Mail, Phone, ArrowRight, MessageCircle } from "lucide-react"
 
 import { useSearchParams } from "next/navigation"
 
-export default function LoginPage() {
+function LoginContent() {
     const { login, sendOtp, verifyOtp, isLoading } = useAuth()
     const searchParams = useSearchParams()
     const redirectPath = searchParams.get('redirect') || undefined
@@ -229,5 +229,15 @@ export default function LoginPage() {
                 </div>
             </div>
         </div>
+    )
+}
+
+import { Suspense } from "react"
+
+export default function LoginPage() {
+    return (
+        <Suspense fallback={<div className="min-h-screen flex items-center justify-center">Loading...</div>}>
+            <LoginContent />
+        </Suspense>
     )
 }
