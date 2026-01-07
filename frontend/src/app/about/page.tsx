@@ -1,4 +1,5 @@
 export const metadata = { title: 'About Us - Venkata', description: 'Learn about Venkata and our mission.' }
+export const dynamic = 'force-static';
 
 export default function AboutPage() {
     return (

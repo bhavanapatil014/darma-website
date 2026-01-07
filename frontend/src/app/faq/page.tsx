@@ -1,4 +1,5 @@
 export const metadata = { title: 'FAQ - Venkata', description: 'Frequently asked questions about Venkata products and shipping.' }
+export const dynamic = 'force-static';
 
 export default function FAQPage() {
     return (

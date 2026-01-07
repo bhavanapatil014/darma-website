@@ -1,4 +1,5 @@
 export const metadata = { title: 'Terms & Conditions - Venkata', description: 'Terms of service and usage for Venkata.' }
+export const dynamic = 'force-static';
 
 export default function TermsPage() {
     return (

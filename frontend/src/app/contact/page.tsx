@@ -1,4 +1,5 @@
 export const metadata = { title: 'Contact Us - Venkata', description: 'Get in touch with Venkata support.' }
+export const dynamic = 'force-static';
 
 export default function ContactPage() {
     return (
