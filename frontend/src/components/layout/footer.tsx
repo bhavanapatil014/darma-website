@@ -54,7 +54,7 @@ export function Footer() {
                 </div>
 
                 <div className="border-t pt-8 text-center text-sm text-muted-foreground">
-                    <p>&copy; {new Date().getFullYear()} Venkata. All rights reserved.</p>
+                    <p>&copy; {new Date().getFullYear()} Venkata. All rights reserved. <span className="text-xs opacity-50 ml-2">v1.5 (Live)</span></p>
                 </div>
             </div>
         </footer>
