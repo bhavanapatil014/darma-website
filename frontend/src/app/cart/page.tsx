@@ -33,7 +33,7 @@ export default function CartPage() {
         setIsApplying(true);
 
         try {
-            const res = await fetch('http://localhost:4000/api/coupons/verify', {
+            const res = await fetch('https://darma-website.onrender.com/api/coupons/verify', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ code: couponCode, cartTotal: subtotal, cartItems: items })
@@ -252,11 +252,7 @@ export default function CartPage() {
                         </div>
 
                         <Button className="w-full py-6 text-lg" size="lg" onClick={() => {
-                            if (!user) {
-                                router.push('/login?redirect=/cart'); // Send back to cart after login
-                            } else {
-                                router.push('/checkout');
-                            }
+                            router.push('/checkout');
                         }}>
                             Proceed to Checkout
                         </Button>

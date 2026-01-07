@@ -12,7 +12,7 @@ export function AdminSidebar() {
     const [settings, setSettings] = useState({ siteName: 'DARMA', logoUrl: '' })
 
     useEffect(() => {
-        fetch('http://localhost:4000/api/settings')
+        fetch('https://darma-website.onrender.com/api/settings')
             .then(res => res.json())
             .then(data => setSettings(data))
             .catch(err => console.error("Failed to load settings", err))

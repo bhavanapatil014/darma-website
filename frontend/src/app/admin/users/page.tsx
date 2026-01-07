@@ -20,7 +20,7 @@ export default function UsersPage() {
     const fetchUsers = async () => {
         try {
             const token = localStorage.getItem('token')
-            const res = await fetch('http://localhost:4000/api/auth/users', {
+            const res = await fetch('https://darma-website.onrender.com/api/auth/users', {
                 headers: { 'Authorization': `Bearer ${token}` }
             })
             if (res.ok) {
@@ -42,7 +42,7 @@ export default function UsersPage() {
         e.preventDefault()
         try {
             const token = localStorage.getItem('token')
-            const res = await fetch('http://localhost:4000/api/auth/create-admin', {
+            const res = await fetch('https://darma-website.onrender.com/api/auth/create-admin', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',

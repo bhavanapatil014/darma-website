@@ -19,7 +19,7 @@ export function RecentlyViewed({ currentProductId }: { currentProductId: string 
 
         // 3. Fetch Details for these IDs
         Promise.all(uniqueIds.map((id: string) =>
-            fetch(`http://localhost:4000/api/products/${id}`).then(res => res.ok ? res.json() : null)
+            fetch(`https://darma-website.onrender.com/api/products/${id}`).then(res => res.ok ? res.json() : null)
         )).then(results => {
             setRecentProducts(results.filter(p => p !== null));
         });

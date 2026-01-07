@@ -34,7 +34,7 @@ export default function OrdersPage() {
     async function loadOrders() {
         setLoading(true)
         try {
-            const res = await fetch('http://localhost:4000/api/orders')
+            const res = await fetch('https://darma-website.onrender.com/api/orders')
             const data = await res.json()
             setOrders(data)
         } catch (error) {
@@ -66,7 +66,7 @@ export default function OrdersPage() {
                 courierName: newStatus === 'shipped' ? courierName : undefined,
             }
 
-            await fetch(`http://localhost:4000/api/orders/${selectedOrder._id}`, {
+            await fetch(`https://darma-website.onrender.com/api/orders/${selectedOrder._id}`, {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(body)

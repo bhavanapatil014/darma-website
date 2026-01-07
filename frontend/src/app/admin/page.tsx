@@ -19,8 +19,8 @@ export default function AdminDashboard() {
             try {
                 // Fetch all products (limit 2000) for accurate stats
                 const [prodRes, ordRes] = await Promise.all([
-                    fetch('http://localhost:4000/api/products?limit=2000'),
-                    fetch('http://localhost:4000/api/orders')
+                    fetch('https://darma-website.onrender.com/api/products?limit=2000'),
+                    fetch('https://darma-website.onrender.com/api/orders')
                 ])
                 const productData = await prodRes.json()
                 const products = productData.products || [] // Handle paginated response

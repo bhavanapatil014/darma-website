@@ -39,7 +39,7 @@ const CheckoutContent = () => {
             const qty = parseInt(searchParams.get('quantity') || '1');
 
             if (pId) {
-                fetch(`http://localhost:4000/api/products/${pId}`)
+                fetch(`https://darma-website.onrender.com/api/products/${pId}`)
                     .then(res => res.json())
                     .then(product => {
                         setBuyNowItem({ product, quantity: qty });
@@ -66,7 +66,7 @@ const CheckoutContent = () => {
                 await createOrderInDB(customerData, 'pending', 'cod');
             } else {
                 // Razorpay Flow
-                const orderRes = await fetch('http://localhost:4000/api/payment/create-order', {
+                const orderRes = await fetch('https://darma-website.onrender.com/api/payment/create-order', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ amount: total })
@@ -78,7 +78,7 @@ const CheckoutContent = () => {
                 // DUMMY CHECK
                 if (orderData.id.startsWith('order_dummy_')) {
                     await new Promise(resolve => setTimeout(resolve, 1500));
-                    const verifyRes = await fetch('http://localhost:4000/api/payment/verify', {
+                    const verifyRes = await fetch('https://darma-website.onrender.com/api/payment/verify', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({
@@ -105,7 +105,7 @@ const CheckoutContent = () => {
                     description: "Purchase",
                     order_id: orderData.id,
                     handler: async function (response: any) {
-                        const verifyRes = await fetch('http://localhost:4000/api/payment/verify', {
+                        const verifyRes = await fetch('https://darma-website.onrender.com/api/payment/verify', {
                             method: 'POST',
                             headers: { 'Content-Type': 'application/json' },
                             body: JSON.stringify({
@@ -159,7 +159,7 @@ const CheckoutContent = () => {
             paymentStatus: paymentStatus
         };
 
-        const res = await fetch('http://localhost:4000/api/orders', {
+        const res = await fetch('https://darma-website.onrender.com/api/orders', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(orderData)

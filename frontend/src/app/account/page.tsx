@@ -65,7 +65,7 @@ export default function AccountPage() {
                                 onClick={async () => {
                                     if (confirm("Are you sure you want to delete your account? This action cannot be undone.")) {
                                         const token = localStorage.getItem('token');
-                                        await fetch('http://localhost:4000/api/auth/delete-me', {
+                                        await fetch('https://darma-website.onrender.com/api/auth/delete-me', {
                                             method: 'DELETE',
                                             headers: { 'Authorization': `Bearer ${token}` }
                                         });
@@ -103,7 +103,7 @@ function OrderList() {
         const token = localStorage.getItem('token')
         if (!token) return
 
-        fetch('http://localhost:4000/api/orders/my-orders', {
+        fetch('https://darma-website.onrender.com/api/orders/my-orders', {
             headers: { 'Authorization': `Bearer ${token}` }
         })
             .then(res => res.json())

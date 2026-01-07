@@ -18,7 +18,7 @@ export default function SettingsPage() {
 
     async function loadSettings() {
         try {
-            const res = await fetch('http://localhost:4000/api/settings')
+            const res = await fetch('https://darma-website.onrender.com/api/settings')
             const data = await res.json()
             setSettings(data)
         } catch (error) {
@@ -30,7 +30,7 @@ export default function SettingsPage() {
     async function handleSubmit(e: React.FormEvent) {
         e.preventDefault()
         try {
-            const res = await fetch('http://localhost:4000/api/settings', {
+            const res = await fetch('https://darma-website.onrender.com/api/settings', {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(settings)

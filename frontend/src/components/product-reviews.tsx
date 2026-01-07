@@ -20,7 +20,7 @@ export function ProductReviews({ productId }: { productId: string }) {
     const [submitting, setSubmitting] = useState(false);
 
     useEffect(() => {
-        fetch(`http://localhost:4000/api/reviews/${productId}`)
+        fetch(`https://darma-website.onrender.com/api/reviews/${productId}`)
             .then(res => {
                 if (!res.ok) throw new Error("Failed to fetch reviews");
                 return res.json();
@@ -45,7 +45,7 @@ export function ProductReviews({ productId }: { productId: string }) {
         setSubmitting(true);
         try {
             const token = localStorage.getItem('token');
-            const res = await fetch('http://localhost:4000/api/reviews', {
+            const res = await fetch('https://darma-website.onrender.com/api/reviews', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
