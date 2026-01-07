@@ -97,8 +97,14 @@ const CheckoutContent = () => {
                     return;
                 }
 
+                if (!process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID) {
+                    alert("Payment Error: configuration missing. Please contact support.");
+                    setIsLoading(false);
+                    return;
+                }
+
                 const options = {
-                    key: "rzp_test_YOUR_KEY_HERE",
+                    key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID,
                     amount: orderData.amount,
                     currency: "INR",
                     name: "Venkata",
