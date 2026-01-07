@@ -59,7 +59,7 @@ export function AddToCartButton({ product }: { product: Product }) {
             <div className="grid grid-cols-2 gap-4">
                 <Button
                     size="lg"
-                    className={`w-full text-base h-12 rounded-full transition-all ${isAdded ? 'bg-green-600 hover:bg-green-700' : ''}`}
+                    className={`w-full text-base h-12 rounded-full transition-all text-white ${isAdded ? 'bg-green-600 hover:bg-green-700' : 'bg-blue-600 hover:bg-blue-700'}`}
                     onClick={handleAdd}
                     disabled={isOutOfStock}
                 >
