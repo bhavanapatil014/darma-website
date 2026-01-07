@@ -30,7 +30,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     React.useEffect(() => {
         const token = localStorage.getItem('token');
         if (token) {
-            fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000'}/api/auth/me`, {
+            fetch(`https://darma-website.onrender.com/api/auth/me`, {
                 headers: { 'Authorization': `Bearer ${token}` }
             })
                 .then(res => res.json())
@@ -48,7 +48,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const login = async (email: string, password: string, redirectPath?: string) => {
         setIsLoading(true)
         try {
-            const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000'}/api/auth/login`, {
+            const res = await fetch(`https://darma-website.onrender.com/api/auth/login`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ email, password })
@@ -72,7 +72,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const register = async (email: string, password: string, name: string, dateOfBirth?: string, phoneNumber?: string, redirectPath?: string) => {
         setIsLoading(true)
         try {
-            const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000'}/api/auth/register`, {
+            const res = await fetch(`https://darma-website.onrender.com/api/auth/register`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ email, password, name, dateOfBirth, phoneNumber })
@@ -103,7 +103,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const sendOtp = async (identifier: string) => {
         setIsLoading(true)
         try {
-            const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000'}/api/auth/send-otp`, {
+            const res = await fetch(`https://darma-website.onrender.com/api/auth/send-otp`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ identifier })
@@ -124,7 +124,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const verifyOtp = async (identifier: string, otp: string, redirectPath?: string) => {
         setIsLoading(true)
         try {
-            const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000'}/api/auth/verify-otp`, {
+            const res = await fetch(`https://darma-website.onrender.com/api/auth/verify-otp`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ identifier, otp })

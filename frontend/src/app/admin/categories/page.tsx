@@ -22,7 +22,7 @@ export default function CategoriesPage() {
     async function loadCategories() {
         setLoading(true)
         try {
-            const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000'}/api/categories`)
+            const res = await fetch(`https://darma-website.onrender.com/api/categories`)
             const data = await res.json()
             setCategories(data)
         } catch (error) {
@@ -35,7 +35,7 @@ export default function CategoriesPage() {
         e.preventDefault()
         try {
             const slug = name.toLowerCase().replace(/ /g, '-')
-            const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000'}/api/categories`, {
+            const res = await fetch(`https://darma-website.onrender.com/api/categories`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ name, slug, description })
@@ -58,7 +58,7 @@ export default function CategoriesPage() {
     async function handleDelete(id: string) {
         if (!confirm("Are you sure?")) return
         try {
-            await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000'}/api/categories/${id}`, { method: 'DELETE' })
+            await fetch(`https://darma-website.onrender.com/api/categories/${id}`, { method: 'DELETE' })
             loadCategories()
         } catch (error) {
             console.error(error)

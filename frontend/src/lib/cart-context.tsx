@@ -119,7 +119,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
         if (coupon) {
             const currentSubtotal = items.reduce((sum, item) => sum + item.price * item.quantity, 0);
 
-            fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000'}/api/coupons/verify`, {
+            fetch(`https://darma-website.onrender.com/api/coupons/verify`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ code: coupon.code, cartTotal: currentSubtotal, cartItems: items })
@@ -154,7 +154,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
             const updatedItems = await Promise.all(items.map(async (item) => {
                 try {
                     // Add timestamp to force bypass browser cache + Next.js cache option
-                    const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000'}/api/products/${item.id}?t=${Date.now()}`, {
+                    const res = await fetch(`https://darma-website.onrender.com/api/products/${item.id}?t=${Date.now()}`, {
                         cache: 'no-store',
                         headers: { 'Pragma': 'no-cache' }
                     });

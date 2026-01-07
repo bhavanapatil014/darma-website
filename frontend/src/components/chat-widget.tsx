@@ -16,7 +16,7 @@ export function ChatWidget() {
     const [messages, setMessages] = useState<Message[]>([
         {
             id: '1',
-            text: "Hi there! 👋 Welcome to DermaKart. How can I help you today?",
+            text: "Hi there! 👋 Welcome to Venkata. How can I help you today?",
             sender: 'bot',
             options: [
                 { label: "Track my Order", value: "track_order" },
@@ -104,7 +104,7 @@ export function ChatWidget() {
             } else if (lowerText.includes('contact') || lowerText === 'contact') {
                 botResponse = {
                     id: (Date.now() + 1).toString(),
-                    text: "You can reach us at:\n📞 +91 98765 43210\n📧 support@dermakart.com\n\nOperating Hours: 9 AM - 6 PM (Mon-Sat)",
+                    text: "You can reach us at:\n📞 +91 98765 43210\n📧 support@venkata.com\n\nOperating Hours: 9 AM - 6 PM (Mon-Sat)",
                     sender: 'bot',
                     options: [{ label: "Back to Menu", value: "menu" }]
                 }
@@ -154,7 +154,7 @@ export function ChatWidget() {
                                 <Bot className="w-5 h-5 text-white" />
                             </div>
                             <div>
-                                <h3 className="font-semibold text-sm">DermaBot</h3>
+                                <h3 className="font-semibold text-sm">Venkata Bot</h3>
                                 <p className="text-xs text-gray-300 flex items-center gap-1">
                                     <span className="w-1.5 h-1.5 bg-green-400 rounded-full animate-pulse"></span>
                                     Online

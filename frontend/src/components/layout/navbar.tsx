@@ -16,7 +16,7 @@ export function Navbar() {
     const { wishlistCount } = useWishlist();
     const cartCount = items.reduce((acc, item) => acc + item.quantity, 0);
 
-    const [settings, setSettings] = React.useState({ siteName: 'DARMA', logoUrl: '' });
+    const [settings, setSettings] = React.useState({ siteName: 'VENKATA', logoUrl: '/images/venkata-logo.png' });
 
     React.useEffect(() => {
         const handleScroll = () => {
@@ -25,7 +25,7 @@ export function Navbar() {
         window.addEventListener('scroll', handleScroll);
 
         // Fetch Settings
-        fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000'}/api/settings`)
+        fetch(`https://darma-website.onrender.com/api/settings`)
             .then(res => res.json())
             .then(data => setSettings(data))
             .catch(err => console.warn("Settings fetch failed (Backend might be offline):", err));
@@ -71,9 +71,9 @@ export function Navbar() {
                     {/* Left: Logo */}
                     <Link href="/" className="text-2xl font-bold tracking-tighter text-primary flex items-center gap-2 shrink-0 mr-8">
                         {settings.logoUrl && !settings.logoUrl.includes('placeholder') ? (
-                            <img src={settings.logoUrl.startsWith('http') ? settings.logoUrl : settings.logoUrl} alt="Logo" className="h-10 w-auto object-contain" />
+                            <img src={settings.logoUrl.startsWith('http') ? settings.logoUrl : settings.logoUrl} alt="Logo" className="h-12 w-auto object-contain" />
                         ) : (
-                            <span className="text-3xl font-serif text-teal-700 tracking-wide">DERMA<span className="text-teal-500">KART</span></span>
+                            <span className="text-3xl font-serif text-teal-700 tracking-wide">VENKATA</span>
                         )}
                     </Link>
 

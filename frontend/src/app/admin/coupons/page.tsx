@@ -56,7 +56,7 @@ export default function CouponsPage() {
     async function loadData() {
         setLoading(true)
         try {
-            const res = await fetch('http://localhost:4000/api/coupons')
+            const res = await fetch('https://darma-website.onrender.com/api/coupons')
             if (res.ok) {
                 const data = await res.json()
                 setCoupons(data)
@@ -69,7 +69,7 @@ export default function CouponsPage() {
 
     async function loadProducts() {
         try {
-            const res = await fetch('http://localhost:4000/api/products?limit=1000')
+            const res = await fetch('https://darma-website.onrender.com/api/products?limit=1000')
             if (res.ok) {
                 const text = await res.text();
                 try {
@@ -86,7 +86,7 @@ export default function CouponsPage() {
 
     async function loadCategories() {
         try {
-            const res = await fetch('http://localhost:4000/api/categories')
+            const res = await fetch('https://darma-website.onrender.com/api/categories')
             if (res.ok) {
                 const text = await res.text();
                 try {
@@ -106,7 +106,7 @@ export default function CouponsPage() {
         if (isEditing && editId) {
             // Update
             console.log("Updating Coupon Payload:", formData);
-            const res = await fetch(`http://localhost:4000/api/coupons/${editId}`, {
+            const res = await fetch(`https://darma-website.onrender.com/api/coupons/${editId}`, {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(formData)
@@ -121,7 +121,7 @@ export default function CouponsPage() {
         } else {
             // Create
             console.log("Creating Coupon Payload:", formData);
-            const res = await fetch('http://localhost:4000/api/coupons', {
+            const res = await fetch('https://darma-website.onrender.com/api/coupons', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(formData)
@@ -179,7 +179,7 @@ export default function CouponsPage() {
     async function handleDelete(id: string) {
         if (!confirm("Are you sure?")) return
         try {
-            await fetch(`http://localhost:4000/api/coupons/${id}`, { method: 'DELETE' })
+            await fetch(`https://darma-website.onrender.com/api/coupons/${id}`, { method: 'DELETE' })
             loadData()
         } catch (err) {
             console.error(err)

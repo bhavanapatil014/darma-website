@@ -10,7 +10,7 @@ export function Footer() {
                     {/* Brand */}
                     <div className="space-y-4">
                         <Link href="/" className="text-2xl font-bold tracking-tighter text-primary">
-                            DARMA<span className="text-accent">.</span>
+                            VENKATA<span className="text-accent">.</span>
                         </Link>
                         <p className="text-muted-foreground text-sm leading-relaxed">
                             Premium dermatology solutions for your skin's health and beauty. Scientifically formulated, clinically proven.
@@ -54,7 +54,7 @@ export function Footer() {
                 </div>
 
                 <div className="border-t pt-8 text-center text-sm text-muted-foreground">
-                    <p>&copy; {new Date().getFullYear()} Darma Karts. All rights reserved.</p>
+                    <p>&copy; {new Date().getFullYear()} Venkata. All rights reserved.</p>
                 </div>
             </div>
         </footer>

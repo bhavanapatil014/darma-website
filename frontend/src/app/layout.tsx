@@ -19,8 +19,8 @@ import { CartSidebar } from "@/components/ui/cart-sidebar";
 import { ChatWidget } from "@/components/chat-widget";
 
 export const metadata: Metadata = {
-  title: "Darma - Premium Skincare & Dermatology",
-  description: "Experience the science of beautiful skin with Darma's premium dermatology products.",
+  title: "Venkata - Premium Skincare & Dermatology",
+  description: "Experience the science of beautiful skin with Venkata's premium dermatology products.",
 };
 
 export default function RootLayout({

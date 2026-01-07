@@ -101,7 +101,7 @@ const CheckoutContent = () => {
                     key: "rzp_test_YOUR_KEY_HERE",
                     amount: orderData.amount,
                     currency: "INR",
-                    name: "Darma Shop",
+                    name: "Venkata",
                     description: "Purchase",
                     order_id: orderData.id,
                     handler: async function (response: any) {

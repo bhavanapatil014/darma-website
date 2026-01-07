@@ -45,7 +45,7 @@ export default function ProductsPage() {
                 1,
                 1000
             ),
-            fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000'}/api/categories`).then(res => res.json()).catch(() => [])
+            fetch(`https://darma-website.onrender.com/api/categories`).then(res => res.json()).catch(() => [])
         ])
         setProducts(productsData.products)
         setCategories(categoriesData)
@@ -65,7 +65,7 @@ export default function ProductsPage() {
                 })
 
                 console.log("Uploading multiple to /api/products/upload-multiple...");
-                const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000'}/api/products/upload-multiple`, {
+                const res = await fetch(`https://darma-website.onrender.com/api/products/upload-multiple`, {
                     method: 'POST',
                     body: uploadData
                 })
@@ -91,8 +91,8 @@ export default function ProductsPage() {
             console.log("Submitting Product Data:", productData);
 
             const url = isEditing
-                ? `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000'}/api/products/${isEditing}`
-                : `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000'}/api/products`
+                ? `https://darma-website.onrender.com/api/products/${isEditing}`
+                : `https://darma-website.onrender.com/api/products`
 
             const method = isEditing ? 'PUT' : 'POST'
 
@@ -116,7 +116,7 @@ export default function ProductsPage() {
     async function handleDelete(id: string) {
         if (!confirm("Are you sure?")) return
         try {
-            await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000'}/api/products/${id}`, { method: 'DELETE' })
+            await fetch(`https://darma-website.onrender.com/api/products/${id}`, { method: 'DELETE' })
             loadData()
         } catch (error) {
             console.error(error)
@@ -167,7 +167,7 @@ export default function ProductsPage() {
     async function handleBulkDelete() {
         if (!confirm(`Delete ${selectedProducts.length} products?`)) return
         try {
-            await Promise.all(selectedProducts.map(id => fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000'}/api/products/${id}`, { method: 'DELETE' })))
+            await Promise.all(selectedProducts.map(id => fetch(`https://darma-website.onrender.com/api/products/${id}`, { method: 'DELETE' })))
             setSelectedProducts([])
             loadData()
         } catch (error) {
