@@ -386,7 +386,7 @@ export default function CartPage() {
                                 availableCoupons
                                     .filter(c => !c.expirationDate || new Date(c.expirationDate) > new Date())
                                     .map(c => {
-                                        const minAmount = c.minPurchaseAmount || 0;
+                                        const minAmount = c.minOrderAmount || c.minPurchaseAmount || 0;
                                         const currentSubtotal = subtotal || 0;
                                         const isEligible = currentSubtotal >= minAmount;
                                         const amountNeeded = Math.max(0, minAmount - currentSubtotal);
