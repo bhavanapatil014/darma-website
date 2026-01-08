@@ -85,12 +85,16 @@ export function ProductFilters() {
                 )}
             </div>
 
-            <div className="flex md:hidden justify-between items-center mb-4 border p-4 rounded-lg bg-gray-50" onClick={() => setIsOpen(!isOpen)}>
-                <h2 className="font-bold text-lg">Show Filters</h2>
-                <Button variant="ghost" size="sm">
+            <button
+                className="w-full md:hidden flex justify-between items-center mb-4 p-4 rounded-lg transition-colors"
+                style={{ backgroundColor: '#2563eb', color: '#ffffff' }}
+                onClick={() => setIsOpen(!isOpen)}
+            >
+                <span className="font-bold text-lg">Filters & Sort</span>
+                <span className="text-sm font-semibold bg-white/20 px-3 py-1 rounded">
                     {isOpen ? 'Hide' : 'Show'}
-                </Button>
-            </div>
+                </span>
+            </button>
 
             <div className={`space-y-8 ${isOpen ? 'block px-4 pb-4 md:p-0' : 'hidden md:block'}`}>
 
