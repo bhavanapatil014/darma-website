@@ -3,6 +3,7 @@ import { useState } from "react"
 import { useAuth } from "@/lib/auth-context"
 import { Button } from "@/components/ui/button"
 import Link from "next/link"
+import { toast } from "sonner"
 
 export default function RegisterPage() {
     const { register, isLoading } = useAuth()
@@ -12,9 +13,7 @@ export default function RegisterPage() {
     const [phoneNumber, setPhoneNumber] = useState("")
     const [error, setError] = useState("")
 
-    import { toast } from "sonner"
 
-    // ... inside component ...
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault()
         // Removed setError calls
