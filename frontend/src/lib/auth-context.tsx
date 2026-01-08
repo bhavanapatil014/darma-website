@@ -1,6 +1,7 @@
 "use client"
 import * as React from "react"
 import { useRouter } from "next/navigation"
+import { toast } from "sonner"
 
 interface User {
     id: string
@@ -78,7 +79,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             router.push(redirectPath || "/account");
         } catch (error: any) {
             console.error(error);
-            alert(error.message || "Login failed.");
+            toast.error(error.message || "Login failed.");
         } finally {
             setIsLoading(false)
         }
@@ -109,7 +110,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             router.push(redirectPath || "/account");
         } catch (error: any) {
             console.error(error);
-            alert(error.message || "Registration failed.");
+            toast.error(error.message || "Registration failed.");
         } finally {
             setIsLoading(false)
         }
@@ -129,13 +130,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             }
             const data = await res.json();
             if (data.debugOtp) {
-                alert(`OTP Sent! (Debug Mode: ${data.debugOtp})`);
+                toast.success(`OTP Sent! (Code: ${data.debugOtp})`);
             } else {
-                alert("OTP sent successfully!");
+                toast.success("OTP sent successfully!");
             }
         } catch (error: any) {
             console.error(error);
-            alert(error.message || "Failed to send OTP.");
+            toast.error(error.message || "Failed to send OTP.");
         } finally {
             setIsLoading(false)
         }
@@ -159,7 +160,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             router.push(redirectPath || "/account");
         } catch (error: any) {
             console.error(error);
-            alert(error.message || "Verification failed.");
+            toast.error(error.message || "Verification failed.");
         } finally {
             setIsLoading(false)
         }
