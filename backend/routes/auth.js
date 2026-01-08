@@ -19,36 +19,50 @@ router.get('/debug-users', async (req, res) => {
 // TEST EMAIL ROUTE
 router.get('/test-email', async (req, res) => {
     try {
-        const nodemailer = require('nodemailer');
+        const nodemailer = require('nodemailer'); // Ensure nodemailer is imported here if not globally
+        console.log("Testing Email Sending...");
+
+        // Check if Envs are loaded
+        const configStatus = {
+            user: process.env.SMTP_USER ? (process.env.SMTP_USER.includes('put-your') ? "Default/Exem" : "Set") : "Missing",
+            pass: process.env.SMTP_PASS ? "Set" : "Missing",
+            host: process.env.SMTP_HOST || 'Default (gmail)',
+            port: process.env.SMTP_PORT || 'Default (587)'
+        };
+
         const transporter = nodemailer.createTransport({
             host: process.env.SMTP_HOST || 'smtp.gmail.com',
-            port: process.env.SMTP_PORT || 587,
-            secure: false,
+            port: parseInt(process.env.SMTP_PORT || '587'),
+            secure: process.env.SMTP_SECURE === 'true',
             auth: {
                 user: process.env.SMTP_USER,
                 pass: process.env.SMTP_PASS,
             },
-            tls: {
-                rejectUnauthorized: false
-            }
+            tls: { rejectUnauthorized: false },
+            connectionTimeout: 10000, // 10s timeout
+            greetingTimeout: 5000,
+            socketTimeout: 10000
         });
-
-        console.log("Testing Email with User:", process.env.SMTP_USER);
 
         const info = await transporter.sendMail({
-            from: process.env.SMTP_FROM || 'test@darma.com',
+            from: process.env.SMTP_FROM || '"Test" <noreply@dermakart.com>',
             to: process.env.SMTP_USER, // Send to self
             subject: "Test Email from DermaKart",
-            text: "If you see this, email configuration is working!",
+            text: "If you receive this, email service is working.",
+            html: "<b>Email Service Working!</b>"
         });
 
-        res.json({ message: "Email Sent Successfully", info });
+        res.json({ message: 'Email sent successfully', info, config: configStatus });
     } catch (error) {
-        console.error("Email Test Failed:", error);
+        console.error("Test Email Failed:", error);
         res.status(500).json({
-            message: "Email Failed",
+            message: 'Email sending failed',
             error: error.message,
-            creds: { user: process.env.SMTP_USER, pass: process.env.SMTP_PASS ? '******' : 'MISSING' }
+            stack: error.stack,
+            config: {
+                user: process.env.SMTP_USER ? "Set" : "Missing",
+                host: process.env.SMTP_HOST
+            }
         });
     }
 });
