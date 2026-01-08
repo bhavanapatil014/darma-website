@@ -12,6 +12,10 @@ type Message = {
 }
 
 export function ChatWidget() {
+    const pathname = usePathname();
+    // Hide on admin
+    if (pathname?.startsWith('/admin')) return null;
+
     const [isOpen, setIsOpen] = useState(false)
     const [messages, setMessages] = useState<Message[]>([
         {

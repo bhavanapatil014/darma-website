@@ -3,6 +3,9 @@ import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 
 export function Footer() {
+    const pathname = usePathname();
+    if (pathname?.startsWith('/admin')) return null;
+
     return (
         <footer className="bg-gray-50 border-t pt-16 pb-8">
             <div className="container mx-auto px-4">
