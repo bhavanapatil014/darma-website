@@ -334,9 +334,14 @@ const CheckoutContent = () => {
                             </label>
                         </div>
 
-                        <Button size="lg" className="w-full mt-6" type="submit" disabled={isLoading || items.reduce((sum, item) => sum + item.quantity, 0) > 10}>
+                        <button
+                            type="submit"
+                            style={{ backgroundColor: '#0f172a', color: '#ffffff' }}
+                            className="w-full mt-6 py-4 text-lg font-bold rounded-md hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed"
+                            disabled={isLoading || items.reduce((sum, item) => sum + item.quantity, 0) > 10}
+                        >
                             {isLoading ? "Processing..." : `Place Order - ₹${total.toFixed(2)}`}
-                        </Button>
+                        </button>
                         {items.reduce((sum, item) => sum + item.quantity, 0) > 10 && (
                             <p className="text-red-500 text-sm mt-2 text-center">
                                 Maximum limit is 10 items per order. Please reduce quantity.
