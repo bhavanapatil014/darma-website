@@ -66,12 +66,10 @@ export function AddToCartButton({ product }: { product: Product }) {
                     {isOutOfStock ? "Out of Stock" : (isAdded ? "Added! ✓" : `Add to Cart`)}
                 </button>
 
-                <Button
-                    size="lg"
-                    variant="outline"
-                    className="w-full text-base h-12 rounded-full border-black text-black hover:bg-black hover:text-white transition-colors"
+                <button
+                    style={{ backgroundColor: '#ffffff', color: '#000000', border: '1px solid #000000' }}
+                    className="w-full text-base h-12 rounded-full font-medium flex items-center justify-center hover:bg-black hover:text-white transition-colors disabled:opacity-50"
                     onClick={() => {
-                        // Pass as Query Params to NOT clear the main cart
                         const params = new URLSearchParams({
                             buyNow: "true",
                             productId: product.id,
@@ -82,7 +80,7 @@ export function AddToCartButton({ product }: { product: Product }) {
                     disabled={isOutOfStock}
                 >
                     Buy It Now
-                </Button>
+                </button>
             </div>
         </div>
     )
