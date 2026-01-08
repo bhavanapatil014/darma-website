@@ -2,6 +2,8 @@ import Link from 'next/link';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 
+import { usePathname } from "next/navigation";
+
 export function Footer() {
     const pathname = usePathname();
     if (pathname?.startsWith('/admin')) return null;

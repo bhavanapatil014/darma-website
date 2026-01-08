@@ -11,6 +11,8 @@ type Message = {
     options?: { label: string; value: string }[]
 }
 
+import { usePathname } from "next/navigation";
+
 export function ChatWidget() {
     const pathname = usePathname();
     // Hide on admin

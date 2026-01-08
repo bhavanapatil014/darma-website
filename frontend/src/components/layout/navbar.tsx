@@ -9,6 +9,8 @@ import { useCart } from '@/lib/cart-context';
 import { useAuth } from '@/lib/auth-context';
 import { useWishlist } from '@/lib/wishlist-context';
 
+import { usePathname } from "next/navigation";
+
 export function Navbar() {
     const [isScrolled, setIsScrolled] = React.useState(false);
     const { setIsOpen, items } = useCart();
