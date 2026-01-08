@@ -28,6 +28,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const router = useRouter()
 
     React.useEffect(() => {
+        // Pre-warm backend (Render Cold Start mitigation)
+        fetch(`https://darma-website.onrender.com/api/settings`).catch(() => { });
+
         const token = localStorage.getItem('token');
         if (token) {
             fetch(`https://darma-website.onrender.com/api/auth/me`, {
