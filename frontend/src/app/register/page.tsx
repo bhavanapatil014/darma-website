@@ -12,27 +12,30 @@ export default function RegisterPage() {
     const [phoneNumber, setPhoneNumber] = useState("")
     const [error, setError] = useState("")
 
+    import { toast } from "sonner"
+
+    // ... inside component ...
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault()
-        setError("");
+        // Removed setError calls
 
         // Validation
         if (name.trim().length < 2) {
-            setError("Name must be at least 2 characters long.");
+            toast.error("Name must be at least 2 characters long.");
             return;
         }
         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
         if (!emailRegex.test(email)) {
-            setError("Please enter a valid email address.");
+            toast.error("Please enter a valid email address.");
             return;
         }
         const phoneRegex = /^\d{10}$/;
         if (!phoneRegex.test(phoneNumber)) {
-            setError("Phone number must be exactly 10 digits.");
+            toast.error("Phone number must be exactly 10 digits.");
             return;
         }
         if (password.length < 6) {
-            setError("Password must be at least 6 characters long.");
+            toast.error("Password must be at least 6 characters long.");
             return;
         }
 
