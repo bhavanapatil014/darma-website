@@ -301,66 +301,76 @@ export default function CartPage() {
                                     {/* Available Coupons List */}
                                     <div className="mt-4 space-y-3 max-h-60 overflow-y-auto custom-scrollbar pr-1">
                                         <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Available Coupons</p>
-                                        {availableCoupons.length === 0 ? (
-                                            <p className="text-xs text-gray-400 italic">No coupons available at the moment.</p>
+                                        {availableCoupons.filter(c => {
+                                            if (!c.expirationDate) return true;
+                                            return new Date(c.expirationDate) > new Date();
+                                        }).length === 0 ? (
+                                            <p className="text-xs text-gray-400 italic">No valid coupons available.</p>
                                         ) : (
-                                            availableCoupons.map((c) => {
-                                                const isEligible = subtotal >= c.minPurchaseAmount;
-                                                const amountNeeded = c.minPurchaseAmount - subtotal;
+                                            availableCoupons
+                                                .filter(c => {
+                                                    // Filter Expired
+                                                    if (!c.expirationDate) return true;
+                                                    return new Date(c.expirationDate) > new Date();
+                                                })
+                                                .map((c) => {
+                                                    const isEligible = subtotal >= c.minPurchaseAmount;
+                                                    const amountNeeded = c.minPurchaseAmount - subtotal;
 
-                                                return (
-                                                    <div
-                                                        key={c._id}
-                                                        className={`relative p-3 border rounded-lg transition-all ${isEligible
-                                                            ? 'bg-white border-dashed border-blue-300 hover:border-blue-500 hover:shadow-sm'
-                                                            : 'bg-gray-50 border-gray-200 opacity-70 grayscale-[0.5]'
-                                                            }`}
-                                                    >
-                                                        <div className={`flex justify-between items-start ${!isEligible ? 'blur-[0.5px]' : ''}`}>
-                                                            <div>
-                                                                <span className="font-bold text-sm text-gray-800 bg-gray-100 px-2 py-0.5 rounded border border-gray-200">{c.code}</span>
-                                                                <p className="text-xs text-gray-600 mt-1 lines-clamp-2">{c.description || `${c.discountValue}${c.discountType === 'percentage' ? '%' : ' OFF'}`}</p>
+                                                    return (
+                                                        <div
+                                                            key={c._id}
+                                                            className={`relative p-3 border rounded-lg transition-all ${isEligible
+                                                                    ? 'bg-white border-dashed border-blue-300 hover:border-blue-500 hover:shadow-sm'
+                                                                    : 'bg-gray-50 border-gray-200 opacity-70 grayscale-[0.5]'
+                                                                }`}
+                                                        >
+                                                            <div className={`flex justify-between items-start ${!isEligible ? 'blur-[0.5px]' : ''}`}>
+                                                                <div>
+                                                                    <span className="font-bold text-sm text-gray-800 bg-gray-100 px-2 py-0.5 rounded border border-gray-200">{c.code}</span>
+                                                                    <p className="text-xs text-gray-600 mt-1 lines-clamp-2">{c.description || `${c.discountValue}${c.discountType === 'percentage' ? '%' : ' OFF'}`}</p>
+                                                                    {c.expirationDate && (
+                                                                        <p className="text-[10px] text-gray-400 mt-0.5">Expires: {new Date(c.expirationDate).toLocaleDateString()}</p>
+                                                                    )}
+                                                                </div>
+                                                                {isEligible && (
+                                                                    <button
+                                                                        onClick={() => {
+                                                                            setCouponCode(c.code);
+                                                                            setIsApplying(true); // Manually trigger loading state if needed
+                                                                            // Since we just set code, user clicks Apply. 
+                                                                            // Or we can invoke handleApplyCoupon if we decouple it from state. 
+                                                                            // For now, let's just set code to encourage manual apply or we modify handleApplyCoupon.
+                                                                            // Actually, let's just set it. 
+                                                                        }}
+                                                                        className="text-xs font-bold text-blue-600 hover:underline shrink-0 ml-2"
+                                                                    >
+                                                                        SELECT
+                                                                    </button>
+                                                                )}
                                                             </div>
+
+                                                            {/* Ineligible Overlay/Message */}
+                                                            {!isEligible && (
+                                                                <div className="absolute inset-0 flex items-center justify-center bg-white/40 backdrop-blur-[0.5px] rounded-lg">
+                                                                    <div className="bg-white/90 px-3 py-1.5 rounded shadow-sm border border-orange-100 text-center z-10">
+                                                                        <p className="text-[10px] font-semibold text-orange-600">
+                                                                            Add ₹{amountNeeded.toFixed(0)} more
+                                                                        </p>
+                                                                        <p className="text-[9px] text-gray-500">to unlock {c.code}</p>
+                                                                    </div>
+                                                                </div>
+                                                            )}
+
                                                             {isEligible && (
-                                                                <button
-                                                                    onClick={() => {
-                                                                        setCouponCode(c.code);
-                                                                        // Optional: Auto-apply logic could be triggered here separately if desired
-                                                                        // For now just fill input. Or call apply directly?
-                                                                        // Let's call apply directly for better UX
-                                                                        // But handleApplyCoupon depends on couponCode state which is async set.
-                                                                        // Better to just set code and let user click, OR refactor handler.
-                                                                        // Actually, I can allow user to click Apply.
-                                                                        // Or better: call API directly here.
-                                                                    }}
-                                                                    className="text-xs font-bold text-blue-600 hover:underline shrink-0 ml-2"
-                                                                >
-                                                                    APPLY
-                                                                </button>
+                                                                <div className="mt-2 text-[10px] text-green-600 font-medium flex items-center gap-1">
+                                                                    <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path></svg>
+                                                                    You save ₹{c.discountType === 'percentage' ? ((subtotal * c.discountValue) / 100).toFixed(0) : c.discountValue}
+                                                                </div>
                                                             )}
                                                         </div>
-
-                                                        {/* Ineligible Overlay/Message */}
-                                                        {!isEligible && (
-                                                            <div className="absolute inset-0 flex items-center justify-center bg-white/40 backdrop-blur-[0.5px] rounded-lg">
-                                                                <div className="bg-white/90 px-3 py-1.5 rounded shadow-sm border border-orange-100 text-center">
-                                                                    <p className="text-[10px] font-semibold text-orange-600">
-                                                                        Add ₹{amountNeeded.toFixed(0)} more
-                                                                    </p>
-                                                                    <p className="text-[9px] text-gray-500">to unlock {c.code}</p>
-                                                                </div>
-                                                            </div>
-                                                        )}
-
-                                                        {isEligible && (
-                                                            <div className="mt-2 text-[10px] text-green-600 font-medium flex items-center gap-1">
-                                                                <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path></svg>
-                                                                You save ₹{c.discountType === 'percentage' ? ((subtotal * c.discountValue) / 100).toFixed(0) : c.discountValue}
-                                                            </div>
-                                                        )}
-                                                    </div>
-                                                )
-                                            })
+                                                    )
+                                                })
                                         )}
                                     </div>
                                 </>
