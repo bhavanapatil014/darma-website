@@ -10,6 +10,7 @@ export function AdminSidebar() {
     const pathname = usePathname()
     const { user, logout } = useAuth()
     const [settings, setSettings] = useState({ siteName: 'DARMA', logoUrl: '' })
+    const [isOpen, setIsOpen] = useState(false)
 
     useEffect(() => {
         fetch('https://darma-website.onrender.com/api/settings')
@@ -30,9 +31,6 @@ export function AdminSidebar() {
     if (user?.role === "superadmin") {
         links.push({ href: "/admin/users", label: "Users" })
     }
-
-    return (
-    const [isOpen, setIsOpen] = useState(false)
 
     return (
         <>
