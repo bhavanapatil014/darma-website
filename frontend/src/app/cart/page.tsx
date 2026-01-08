@@ -254,11 +254,14 @@ export default function CartPage() {
                             {couponError && <p className="text-xs text-red-500 mt-1">{couponError}</p>}
                         </div>
 
-                        <Button className="w-full py-6 text-lg" size="lg" onClick={() => {
-                            router.push('/checkout');
-                        }}>
+                        <button
+                            style={{ backgroundColor: '#0f172a', color: '#ffffff' }}
+                            className="w-full py-4 text-lg font-bold rounded-md hover:opacity-90 transition-opacity"
+                            onClick={() => {
+                                router.push('/checkout');
+                            }}>
                             Proceed to Checkout
-                        </Button>
+                        </button>
 
                         <p className="text-xs text-gray-500 text-center mt-4">
                             Shipping and taxes calculated at checkout.

@@ -57,14 +57,14 @@ export function AddToCartButton({ product }: { product: Product }) {
             </div>
 
             <div className="grid grid-cols-2 gap-4">
-                <Button
-                    size="lg"
-                    className={`w-full text-base h-12 rounded-full transition-all text-white ${isAdded ? 'bg-green-600 hover:bg-green-700' : 'bg-blue-600 hover:bg-blue-700'}`}
+                <button
+                    style={{ backgroundColor: isAdded ? '#16a34a' : '#2563eb', color: '#ffffff' }}
+                    className={`w-full text-base h-12 rounded-full transition-all font-medium flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed`}
                     onClick={handleAdd}
                     disabled={isOutOfStock}
                 >
                     {isOutOfStock ? "Out of Stock" : (isAdded ? "Added! ✓" : `Add to Cart`)}
-                </Button>
+                </button>
 
                 <Button
                     size="lg"
