@@ -104,8 +104,8 @@ router.post('/register', async (req, res) => {
 
         await user.save();
 
-        // Send Welcome Emails (Async)
-        await sendWelcomeEmails(user);
+        // Send Welcome Emails (Async - Fire & Forget)
+        sendWelcomeEmails(user).catch(err => console.error("Welcome Email Failed:", err));
 
         // Send Login Notification (since they are auto-logged in)
         // Send Login Notification (REMOVED as per user request)
@@ -143,7 +143,8 @@ router.post('/send-otp', async (req, res) => {
                 role: 'user'
             });
             await user.save();
-            await sendWelcomeEmails(user); // ONLY sent if user is NEW
+            // Async Welcome Email
+            sendWelcomeEmails(user).catch(err => console.error("Welcome Email Failed (OTP):", err));
         }
         // If user already existed, we skip sendWelcomeEmails and just send OTP below
         // Generate OTP
