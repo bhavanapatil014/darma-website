@@ -96,6 +96,10 @@ function LoginContent() {
                                         const val = e.target.value.replace(/\D/g, '');
                                         if (val.length <= 10) setPhoneNumber(val);
                                     }}
+                                    onFocus={() => {
+                                        // Attempt to wake up backend if sleeping
+                                        fetch('https://darma-website.onrender.com/api/settings').catch(() => { });
+                                    }}
                                 />
                             </div>
 
