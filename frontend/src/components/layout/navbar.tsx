@@ -100,18 +100,25 @@ export function Navbar() {
                         <Link href="/shop" className="hover:text-teal-600 transition-colors">Shop All</Link>
                     </nav>
 
-                    {/* Search Overlay (Absolute Centered/Leftish) */}
-                    <div className={`absolute left-0 right-0 mx-auto w-full max-w-2xl transition-all duration-300 ${isSearchOpen ? 'opacity-100 visible top-1/2 -translate-y-1/2 z-10' : 'opacity-0 invisible top-0 -z-10'}`}>
-                        <form onSubmit={handleSearch} className="container px-4">
+                    {/* Search Overlay - Full Cover on Mobile */}
+                    <div className={`absolute inset-0 bg-white z-50 flex items-center px-4 transition-all duration-300 ${isSearchOpen ? 'opacity-100 visible' : 'opacity-0 invisible pointer-events-none'}`}>
+                        <form onSubmit={handleSearch} className="flex-1 flex items-center gap-2">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-gray-400"><circle cx="11" cy="11" r="8" /><path d="m21 21-4.3-4.3" /></svg>
                             <input
                                 type="text"
-                                placeholder="Search for products..."
-                                className="w-full py-3 px-6 text-base border-b-2 border-teal-500 bg-white focus:outline-none placeholder:text-gray-400 font-medium"
+                                placeholder="Search products..."
+                                className="flex-1 py-2 text-base bg-transparent focus:outline-none placeholder:text-gray-400"
                                 value={searchQuery}
                                 onChange={(e) => setSearchQuery(e.target.value)}
-                                onBlur={() => { if (!searchQuery) setIsSearchOpen(false); }}
                                 ref={(input) => { if (input && isSearchOpen) input.focus(); }}
                             />
+                            <button
+                                type="button"
+                                onClick={() => setIsSearchOpen(false)}
+                                className="p-2 text-gray-500 hover:text-black"
+                            >
+                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" /></svg>
+                            </button>
                         </form>
                     </div>
 
