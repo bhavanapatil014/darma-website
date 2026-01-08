@@ -3,6 +3,7 @@
 import { useRouter, useSearchParams } from "next/navigation"
 import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
+import { createPortal } from "react-dom"
 
 export function ProductFilters() {
     const router = useRouter()
@@ -69,30 +70,39 @@ export function ProductFilters() {
     const [isMobileModalOpen, setIsMobileModalOpen] = useState(false);
     const [activeTab, setActiveTab] = useState<'filter' | 'sort'>('filter');
 
+    const [mounted, setMounted] = useState(false);
+
+    useEffect(() => {
+        setMounted(true);
+    }, []);
+
     // Desktop View
     return (
         <>
-            {/* Mobile Fixed Bottom Bar (Myntra Style) */}
-            <div className="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-white border-t border-gray-200 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.1)] flex">
-                <button
-                    onClick={() => { setActiveTab('sort'); setIsMobileModalOpen(true); }}
-                    className="flex-1 py-4 flex items-center justify-center gap-2 border-r border-gray-100 font-bold uppercase text-sm tracking-wide bg-white text-black"
-                >
-                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m3 16 4 4 4-4" /><path d="M7 20V4" /><path d="m21 8-4-4-4 4" /><path d="M17 4v16" /></svg>
-                    Sort
-                </button>
-                <button
-                    onClick={() => { setActiveTab('filter'); setIsMobileModalOpen(true); }}
-                    className="flex-1 py-4 flex items-center justify-center gap-2 font-bold uppercase text-sm tracking-wide bg-white text-black"
-                >
-                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3" /></svg>
-                    Filter
-                </button>
-            </div>
+            {/* Mobile Fixed Bottom Bar (Myntra Style) - Portal to Body to ensure Fixed Stacking */}
+            {mounted && typeof document !== 'undefined' && createPortal(
+                <div className="md:hidden fixed bottom-0 left-0 right-0 z-[100] bg-white border-t border-gray-200 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.1)] flex safe-area-bottom">
+                    <button
+                        onClick={() => { setActiveTab('sort'); setIsMobileModalOpen(true); }}
+                        className="flex-1 py-4 flex items-center justify-center gap-2 border-r border-gray-100 font-bold uppercase text-sm tracking-wide bg-white text-black"
+                    >
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m3 16 4 4 4-4" /><path d="M7 20V4" /><path d="m21 8-4-4-4 4" /><path d="M17 4v16" /></svg>
+                        Sort
+                    </button>
+                    <button
+                        onClick={() => { setActiveTab('filter'); setIsMobileModalOpen(true); }}
+                        className="flex-1 py-4 flex items-center justify-center gap-2 font-bold uppercase text-sm tracking-wide bg-white text-black"
+                    >
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3" /></svg>
+                        Filter
+                    </button>
+                </div>,
+                document.body
+            )}
 
-            {/* Mobile Modal Overlay */}
-            {isMobileModalOpen && (
-                <div className="md:hidden fixed inset-0 z-50 bg-white flex flex-col animate-in slide-in-from-bottom-full duration-200">
+            {/* Mobile Modal Overlay - Portal to Body */}
+            {mounted && isMobileModalOpen && typeof document !== 'undefined' && createPortal(
+                <div className="md:hidden fixed inset-0 z-[110] bg-white flex flex-col animate-in slide-in-from-bottom-full duration-200">
                     <div className="flex items-center justify-between p-4 border-b">
                         <h2 className="text-lg font-bold uppercase tracking-wide">{activeTab === 'sort' ? 'Sort By' : 'Filters'}</h2>
                         <button onClick={() => setIsMobileModalOpen(false)} className="p-2">
@@ -188,7 +198,8 @@ export function ProductFilters() {
                             Apply
                         </button>
                     </div>
-                </div>
+                </div>,
+                document.body
             )}
 
 
