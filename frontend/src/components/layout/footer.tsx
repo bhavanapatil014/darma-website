@@ -8,6 +8,9 @@ import { usePathname } from "next/navigation";
 
 export function Footer() {
     const pathname = usePathname();
+
+    // Hide footer on admin routes (Move check inside render or just before return if no other hooks)
+    // Footer has no other hooks shown in previous view, BUT to be safe and consistent:
     if (pathname?.startsWith('/admin')) return null;
 
     return (

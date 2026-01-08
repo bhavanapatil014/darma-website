@@ -15,15 +15,14 @@ import { usePathname } from "next/navigation";
 
 export function ChatWidget() {
     const pathname = usePathname();
-    // Hide on admin
-    if (pathname?.startsWith('/admin')) return null;
 
     const [isOpen, setIsOpen] = useState(false)
     const [messages, setMessages] = useState<Message[]>([
         {
             id: '1',
-            text: "Hi there! 👋 Welcome to Venkata. How can I help you today?",
+            text: 'Hello! How can we help you with your skincare journey today?',
             sender: 'bot',
+            timestamp: new Date(),
             options: [
                 { label: "Track my Order", value: "track_order" },
                 { label: "Shipping Info", value: "shipping" },

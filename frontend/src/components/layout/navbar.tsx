@@ -16,8 +16,6 @@ export function Navbar() {
     const { setIsOpen, items } = useCart();
     const { user } = useAuth();
     const pathname = usePathname()
-    // Hide navbar on admin routes
-    if (pathname?.startsWith('/admin')) return null;
     const { wishlistCount } = useWishlist();
     const cartCount = items.reduce((acc, item) => acc + item.quantity, 0);
 
