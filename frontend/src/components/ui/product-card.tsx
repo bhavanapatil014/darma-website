@@ -89,12 +89,13 @@ export function ProductCard({ product, isWishlist = false }: ProductCardProps) {
                         {product.description}
                     </p>
                     {/* Price Row */}
-                    <div className="flex items-center gap-2 mb-3">
-                        <span className="font-bold text-sm text-gray-900">Rs. {product.price}</span>
+                    {/* Price Row - One Line Standard Format */}
+                    <div className="flex items-baseline gap-1.5 mb-3 whitespace-nowrap overflow-hidden text-ellipsis">
+                        <span className="font-bold text-sm text-gray-900">₹{product.price}</span>
                         {product.mrp && product.mrp > product.price && (
                             <>
-                                <span className="text-xs text-gray-400 line-through">Rs. {product.mrp}</span>
-                                <span className="text-xs font-bold text-orange-500">
+                                <span className="text-xs text-gray-400 line-through decoration-gray-400">₹{product.mrp}</span>
+                                <span className="text-[10px] font-bold text-orange-500 truncate">
                                     ({Math.round(((product.mrp - product.price) / product.mrp) * 100)}% OFF)
                                 </span>
                             </>
