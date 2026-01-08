@@ -97,9 +97,14 @@ export default function RegisterPage() {
                         placeholder="••••••••"
                     />
                 </div>
-                <Button className="w-full" type="submit" disabled={isLoading}>
+                <button
+                    style={{ backgroundColor: '#2563eb', color: '#ffffff' }}
+                    className="w-full h-10 font-bold rounded-md hover:opacity-90 disabled:opacity-50 transition-all"
+                    type="submit"
+                    disabled={isLoading}
+                >
                     {isLoading ? "Creating Account..." : "Sign Up"}
-                </Button>
+                </button>
             </form>
             <div className="mt-6 text-center text-sm">
                 Already have an account? <Link href="/login" className="text-primary hover:underline">Sign in</Link>
