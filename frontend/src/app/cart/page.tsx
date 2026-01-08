@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button"
 import Link from "next/link"
 import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
+import { Trash2, Heart } from "lucide-react"
 
 import { useAuth } from "@/lib/auth-context"
 
@@ -178,108 +179,115 @@ export default function CartPage() {
                                             )}
                                         </div>
                                     </div>
-                                    <div className="flex justify-between items-center mt-4">
-                                        <div className="flex items-center border rounded-md">
-                                            <button
-                                                className="px-3 py-1 hover:bg-gray-100 disabled:opacity-50"
-                                                onClick={() => updateQuantity(item.id, item.quantity - 1)}
-                                                disabled={item.quantity <= 1}
-                                            >
-                                                -
-                                            </button>
-                                            <span className="px-3 py-1 w-8 text-center text-sm">{item.quantity}</span>
-                                            <button
-                                                className="px-3 py-1 hover:bg-gray-100"
-                                                onClick={() => updateQuantity(item.id, item.quantity + 1)}
-                                            >
-                                                +
-                                            </button>
-                                        </div>
+                                </div>
+                                <div className="flex justify-between items-center mt-4">
+                                    <div className="flex items-center border rounded-md">
+                                        <button
+                                            className="px-3 py-1 hover:bg-gray-100 disabled:opacity-50"
+                                            onClick={() => updateQuantity(item.id, item.quantity - 1)}
+                                            disabled={item.quantity <= 1}
+                                        >
+                                            -
+                                        </button>
+                                        <span className="px-3 py-1 w-8 text-center text-sm">{item.quantity}</span>
+                                        <button
+                                            className="px-3 py-1 hover:bg-gray-100"
+                                            onClick={() => updateQuantity(item.id, item.quantity + 1)}
+                                        >
+                                            +
+                                        </button>
+                                    </div>
+                                    <div className="flex gap-4">
                                         <button
                                             onClick={() => removeItem(item.id)}
-                                            className="text-sm text-red-500 hover:text-red-600 font-medium"
+                                            className="flex items-center gap-1 text-sm text-gray-500 hover:text-red-600 transition-colors"
+                                            title="Remove Item"
                                         >
-                                            Remove
+                                            <Trash2 className="w-4 h-4" />
+                                            <span className="hidden sm:inline">Remove</span>
                                         </button>
                                         <button
                                             onClick={() => {
                                                 addToWishlist(item);
                                                 removeItem(item.id);
                                             }}
-                                            className="text-sm text-blue-600 hover:text-blue-800 font-medium ml-4"
+                                            className="flex items-center gap-1 text-sm text-gray-500 hover:text-blue-600 transition-colors"
+                                            title="Move to Wishlist"
                                         >
-                                            Move to Wishlist
+                                            <Heart className="w-4 h-4" />
+                                            <span className="hidden sm:inline">Save for Later</span>
                                         </button>
                                     </div>
                                 </div>
                             </div>
-                        )
+                            </div>
+                )
                     })}
-                </div>
+            </div>
 
-                {/* Order Summary */}
-                <div className="lg:col-span-4 mt-8 lg:mt-0">
-                    <div className="bg-gray-50 p-6 rounded-lg border sticky top-24">
-                        <h2 className="text-xl font-bold mb-6">Order Summary</h2>
+            {/* Order Summary */}
+            <div className="lg:col-span-4 mt-8 lg:mt-0">
+                <div className="bg-gray-50 p-6 rounded-lg border sticky top-24">
+                    <h2 className="text-xl font-bold mb-6">Order Summary</h2>
 
-                        <div className="space-y-4 mb-6">
-                            <div className="flex justify-between text-sm">
-                                <span className="text-gray-600">Subtotal</span>
-                                <span className="font-medium">₹{subtotal.toFixed(2)}</span>
-                            </div>
-
-                            {coupon && (
-                                <div className="flex justify-between text-sm text-green-600">
-                                    <span>Discount ({coupon.code})</span>
-                                    <span>-₹{coupon.discountAmount.toFixed(2)}</span>
-                                </div>
-                            )}
-
-                            <div className="border-t pt-4 flex justify-between font-bold text-lg">
-                                <span>Total</span>
-                                <span>₹{total.toFixed(2)}</span>
-                            </div>
+                    <div className="space-y-4 mb-6">
+                        <div className="flex justify-between text-sm">
+                            <span className="text-gray-600">Subtotal</span>
+                            <span className="font-medium">₹{subtotal.toFixed(2)}</span>
                         </div>
 
-                        {/* Coupon Input */}
-                        <div className="mb-6 space-y-2">
-                            {coupon ? (
-                                <div className="p-3 bg-green-50 border border-green-200 rounded flex justify-between items-center">
-                                    <span className="text-green-700 font-medium text-sm">Applied: {coupon.code}</span>
-                                    <button onClick={removeCoupon} className="text-red-500 hover:text-red-700 text-xs font-semibold">Remove</button>
-                                </div>
-                            ) : (
-                                <div className="flex gap-2">
-                                    <input
-                                        type="text"
-                                        placeholder="Coupon code"
-                                        className="flex-1 p-2 border rounded uppercase text-sm"
-                                        value={couponCode}
-                                        onChange={(e) => setCouponCode(e.target.value.toUpperCase())}
-                                    />
-                                    <Button variant="outline" size="sm" onClick={handleApplyCoupon} disabled={isApplying}>
-                                        {isApplying ? '...' : 'Apply'}
-                                    </Button>
-                                </div>
-                            )}
-                            {couponError && <p className="text-xs text-red-500 mt-1">{couponError}</p>}
+                        {coupon && (
+                            <div className="flex justify-between text-sm text-green-600">
+                                <span>Discount ({coupon.code})</span>
+                                <span>-₹{coupon.discountAmount.toFixed(2)}</span>
+                            </div>
+                        )}
+
+                        <div className="border-t pt-4 flex justify-between font-bold text-lg">
+                            <span>Total</span>
+                            <span>₹{total.toFixed(2)}</span>
                         </div>
-
-                        <button
-                            style={{ backgroundColor: '#0f172a', color: '#ffffff' }}
-                            className="w-full py-4 text-lg font-bold rounded-md hover:opacity-90 transition-opacity"
-                            onClick={() => {
-                                router.push('/checkout');
-                            }}>
-                            Proceed to Checkout
-                        </button>
-
-                        <p className="text-xs text-gray-500 text-center mt-4">
-                            Shipping and taxes calculated at checkout.
-                        </p>
                     </div>
+
+                    {/* Coupon Input */}
+                    <div className="mb-6 space-y-2">
+                        {coupon ? (
+                            <div className="p-3 bg-green-50 border border-green-200 rounded flex justify-between items-center">
+                                <span className="text-green-700 font-medium text-sm">Applied: {coupon.code}</span>
+                                <button onClick={removeCoupon} className="text-red-500 hover:text-red-700 text-xs font-semibold">Remove</button>
+                            </div>
+                        ) : (
+                            <div className="flex gap-2">
+                                <input
+                                    type="text"
+                                    placeholder="Coupon code"
+                                    className="flex-1 p-2 border rounded uppercase text-sm"
+                                    value={couponCode}
+                                    onChange={(e) => setCouponCode(e.target.value.toUpperCase())}
+                                />
+                                <Button variant="outline" size="sm" onClick={handleApplyCoupon} disabled={isApplying}>
+                                    {isApplying ? '...' : 'Apply'}
+                                </Button>
+                            </div>
+                        )}
+                        {couponError && <p className="text-xs text-red-500 mt-1">{couponError}</p>}
+                    </div>
+
+                    <button
+                        style={{ backgroundColor: '#0f172a', color: '#ffffff' }}
+                        className="w-full py-4 text-lg font-bold rounded-md hover:opacity-90 transition-opacity"
+                        onClick={() => {
+                            router.push('/checkout');
+                        }}>
+                        Proceed to Checkout
+                    </button>
+
+                    <p className="text-xs text-gray-500 text-center mt-4">
+                        Shipping and taxes calculated at checkout.
+                    </p>
                 </div>
             </div>
         </div>
+        </div >
     )
 }
