@@ -6,8 +6,8 @@ const getTransporter = async () => {
     if (process.env.SMTP_USER && !process.env.SMTP_USER.includes('put-your') && process.env.SMTP_PASS && !process.env.SMTP_PASS.includes('put-your')) {
         return nodemailer.createTransport({
             host: process.env.SMTP_HOST || 'smtp.gmail.com',
-            port: process.env.SMTP_PORT || 587,
-            secure: process.env.SMTP_SECURE === 'true',
+            port: process.env.SMTP_PORT || 465,
+            secure: true, // 465 requires secure: true
             auth: {
                 user: process.env.SMTP_USER,
                 pass: process.env.SMTP_PASS,
