@@ -1,6 +1,7 @@
 "use client"
 
 import { useCart } from "@/lib/cart-context"
+import { useWishlist } from "@/lib/wishlist-context"
 import { Button } from "@/components/ui/button"
 import Link from "next/link"
 import { useState, useEffect } from "react"
@@ -13,6 +14,7 @@ import { useAuth } from "@/lib/auth-context"
 
 export default function CartPage() {
     const { items, removeItem, updateQuantity, subtotal, total, coupon, applyCoupon, removeCoupon, refreshCart } = useCart()
+    const { addToWishlist } = useWishlist()
     const { user } = useAuth()
     const [couponCode, setCouponCode] = useState("")
     const [couponError, setCouponError] = useState("")
@@ -198,6 +200,15 @@ export default function CartPage() {
                                             className="text-sm text-red-500 hover:text-red-600 font-medium"
                                         >
                                             Remove
+                                        </button>
+                                        <button
+                                            onClick={() => {
+                                                addToWishlist(item);
+                                                removeItem(item.id);
+                                            }}
+                                            className="text-sm text-blue-600 hover:text-blue-800 font-medium ml-4"
+                                        >
+                                            Move to Wishlist
                                         </button>
                                     </div>
                                 </div>
