@@ -17,6 +17,7 @@ import { Footer } from "@/components/layout/footer";
 import { Providers } from "@/components/providers";
 import { CartSidebar } from "@/components/ui/cart-sidebar";
 import { ChatWidget } from "@/components/chat-widget";
+import { Toaster } from "sonner";
 
 export const metadata: Metadata = {
   title: "Venkata Derma - Premium Skincare & Dermatology",
@@ -56,6 +57,7 @@ export default function RootLayout({
           </main>
           <Footer />
           <ChatWidget />
+          <Toaster position="top-center" richColors />
         </Providers>
         <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
       </body>

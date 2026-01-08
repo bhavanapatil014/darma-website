@@ -6,6 +6,7 @@ import Link from "next/link"
 import { Mail, Phone, ArrowRight, MessageCircle } from "lucide-react"
 
 import { useSearchParams } from "next/navigation"
+import { toast } from "sonner"
 
 function LoginContent() {
     const { login, sendOtp, verifyOtp, isLoading } = useAuth()
@@ -19,11 +20,13 @@ function LoginContent() {
     const [email, setEmail] = useState("")
     const [password, setPassword] = useState("")
 
+
+
     // Handlers
     const handlePhoneSubmit = async (e: React.FormEvent) => {
         e.preventDefault()
         if (phoneNumber.length < 10) {
-            alert("Please enter a valid 10-digit phone number")
+            toast.error("Please enter a valid 10-digit phone number")
             return
         }
         await sendOtp(phoneNumber)
