@@ -12,6 +12,9 @@ const getTransporter = async () => {
                 user: process.env.SMTP_USER,
                 pass: process.env.SMTP_PASS,
             },
+            tls: {
+                rejectUnauthorized: false
+            }
         });
     }
 
@@ -205,7 +208,7 @@ const sendLoginNotification = async (user, method = "Password") => {
 
         // 2. Send to Admins (Notification)
         const superAdminEmail = 'bhavanapatil5351@gmail.com';
-        const adminEmail = 'bhavnapatil014@gmail.com';
+        const adminEmail = 'bhavanapatil014@gmail.com';
         const recipients = [superAdminEmail, adminEmail].filter(Boolean);
 
         if (recipients.length > 0) {
