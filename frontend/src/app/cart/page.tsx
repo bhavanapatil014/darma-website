@@ -171,26 +171,26 @@ export default function CartPage() {
                                         </div>
                                         <div className="text-right">
                                             {/* Reference Price (MRP or Pre-Coupon) */}
-                                            {((item.mrp || originalPrice || 0)) > displayPrice && (
+                                            {((item.mrp || originalPrice || 0)) > (displayPrice || 0) && (
                                                 <div className="text-sm text-gray-400 line-through">
-                                                    ₹{((item.mrp || originalPrice || 0) * item.quantity).toFixed(2)}
+                                                    ₹{((item.mrp || originalPrice || 0) * (item.quantity || 1)).toFixed(2)}
                                                 </div>
                                             )}
 
                                             {/* Final Price */}
-                                            <div className="font-bold text-lg">₹{(displayPrice * item.quantity).toFixed(2)}</div>
+                                            <div className="font-bold text-lg">₹{((displayPrice || 0) * (item.quantity || 1)).toFixed(2)}</div>
 
                                             {/* Unit Price */}
                                             {item.quantity > 1 && (
                                                 <div className="text-xs text-gray-500">
-                                                    (₹{displayPrice.toFixed(2)} each)
+                                                    (₹{(displayPrice || 0).toFixed(2)} each)
                                                 </div>
                                             )}
 
                                             {/* Total Savings */}
-                                            {((item.mrp || originalPrice || 0) > displayPrice) && (
+                                            {((item.mrp || originalPrice || 0) > (displayPrice || 0)) && (
                                                 <div className="text-xs text-green-600 font-medium">
-                                                    Total Savings: ₹{(((item.mrp || originalPrice || item.price) - displayPrice) * item.quantity).toFixed(2)}
+                                                    Total Savings: ₹{(((item.mrp || originalPrice || item.price || 0) - (displayPrice || 0)) * (item.quantity || 1)).toFixed(2)}
                                                 </div>
                                             )}
                                         </div>
@@ -262,19 +262,19 @@ export default function CartPage() {
                         <div className="space-y-4 mb-6">
                             <div className="flex justify-between text-sm">
                                 <span className="text-gray-600">Subtotal</span>
-                                <span className="font-medium">₹{subtotal.toFixed(2)}</span>
+                                <span className="font-medium">₹{(subtotal || 0).toFixed(2)}</span>
                             </div>
 
                             {coupon && (
                                 <div className="flex justify-between text-sm text-green-600">
                                     <span>Discount ({coupon.code})</span>
-                                    <span>-₹{coupon.discountAmount.toFixed(2)}</span>
+                                    <span>-₹{(coupon?.discountAmount || 0).toFixed(2)}</span>
                                 </div>
                             )}
 
                             <div className="border-t pt-4 flex justify-between font-bold text-lg">
                                 <span>Total</span>
-                                <span>₹{total.toFixed(2)}</span>
+                                <span>₹{(total || 0).toFixed(2)}</span>
                             </div>
                         </div>
 
@@ -288,7 +288,7 @@ export default function CartPage() {
                                         </div>
                                         <div>
                                             <p className="font-bold text-sm text-gray-800">'{coupon.code}' applied</p>
-                                            <p className="text-xs text-green-600">-₹{coupon.discountAmount.toFixed(2)} savings</p>
+                                            <p className="text-xs text-green-600">-₹{(coupon?.discountAmount || 0).toFixed(2)} savings</p>
                                         </div>
                                     </div>
                                     <button
@@ -402,7 +402,7 @@ export default function CartPage() {
                                                         <div className="flex items-center gap-2 mb-1">
                                                             <span className="font-bold text-gray-800 border border-gray-300 border-dashed px-2 py-0.5 rounded bg-gray-50 text-sm tracking-wide">{c.code}</span>
                                                         </div>
-                                                        <p className="font-bold text-green-600 text-sm">Save ₹{savings.toFixed(0)}</p>
+                                                        <p className="font-bold text-green-600 text-sm">Save ₹{(savings || 0).toFixed(0)}</p>
                                                         <p className="text-xs text-gray-500 mt-1 line-clamp-2">{c.description || "Applicable on all items in cart."}</p>
                                                         <p className="text-[10px] text-gray-400 mt-2">
                                                             Min. purchase: ₹{c.minPurchaseAmount} • {c.expirationDate ? `Expires: ${new Date(c.expirationDate).toLocaleDateString()}` : 'No expiry'}
