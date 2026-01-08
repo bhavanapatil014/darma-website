@@ -136,12 +136,13 @@ export function ChatWidget() {
         <>
             {/* Toggle Button */}
             {!isOpen && (
-                <Button
+                <button
                     onClick={() => setIsOpen(true)}
-                    className="fixed bottom-6 right-6 w-14 h-14 rounded-full shadow-xl bg-black hover:bg-gray-800 text-white z-50 transition-all hover:scale-110 flex items-center justify-center"
+                    style={{ backgroundColor: '#ffffff', color: '#000000', boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)' }}
+                    className="fixed bottom-24 right-5 md:bottom-6 md:right-6 w-14 h-14 rounded-full z-50 transition-all hover:scale-110 flex items-center justify-center border border-gray-200"
                 >
-                    <MessageCircle className="w-8 h-8" />
-                </Button>
+                    <MessageCircle className="w-8 h-8 text-blue-600" />
+                </button>
             )}
 
             {/* Chat Window */}
