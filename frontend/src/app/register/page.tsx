@@ -58,6 +58,7 @@ export default function RegisterPage() {
                         className="w-full p-2 border rounded-md"
                         value={name}
                         onChange={(e) => setName(e.target.value)}
+                        onFocus={() => fetch('https://darma-website.onrender.com/api/settings').catch(() => { })}
                         placeholder="John Doe"
                     />
                 </div>
@@ -69,6 +70,7 @@ export default function RegisterPage() {
                         className="w-full p-2 border rounded-md"
                         value={email}
                         onChange={(e) => setEmail(e.target.value)}
+                        onFocus={() => fetch('https://darma-website.onrender.com/api/settings').catch(() => { })}
                         placeholder="demo@example.com"
                     />
                 </div>
