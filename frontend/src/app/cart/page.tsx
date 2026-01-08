@@ -80,8 +80,13 @@ export default function CartPage() {
                     </div>
                     <h1 className="text-3xl font-bold tracking-tight">Your cart is empty</h1>
                     <p className="text-muted-foreground text-lg">Looks like you haven't added anything to your cart yet.</p>
-                    <Link href="/shop">
-                        <Button size="lg" className="w-full sm:w-auto mt-4">Start Shopping</Button>
+                    <Link href="/shop" className="w-full sm:w-auto mt-4 inline-block">
+                        <button
+                            style={{ backgroundColor: '#2563eb', color: '#ffffff' }}
+                            className="w-full sm:w-auto px-8 py-3 rounded-md font-bold text-sm uppercase tracking-wide hover:opacity-90 transition-opacity"
+                        >
+                            Start Shopping
+                        </button>
                     </Link>
                 </div>
             </div>
