@@ -105,7 +105,8 @@ export function ProductCard({ product, isWishlist = false }: ProductCardProps) {
                 {/* Add to Cart - Always Visible */}
                 <div className="mt-auto">
                     <button
-                        className="w-full bg-blue-600 text-white hover:bg-blue-700 shadow-sm font-bold uppercase tracking-wide text-xs h-9 rounded-md flex items-center justify-center transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                        style={{ backgroundColor: '#2563eb', color: '#ffffff' }}
+                        className="w-full shadow-sm font-bold uppercase tracking-wide text-xs h-9 rounded-md flex items-center justify-center transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                         disabled={!product.stockQuantity || product.stockQuantity <= 0}
                         onClick={(e) => {
                             e.preventDefault();
