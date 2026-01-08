@@ -114,6 +114,9 @@ export function ProductCard({ product, isWishlist = false }: ProductCardProps) {
                             e.stopPropagation();
                             if (product.stockQuantity && product.stockQuantity > 0) {
                                 addItem(product);
+                                if (isWishlist) {
+                                    removeFromWishlist(product.id);
+                                }
                                 router.push('/cart');
                             }
                         }}
