@@ -6,22 +6,12 @@ const path = require('path');
 
 const fs = require('fs');
 
-// Multer Storage
-const storage = multer.diskStorage({
-    destination: function (req, file, cb) {
-        const uploadPath = path.join(__dirname, '../../frontend/public/uploads');
-        // Ensure directory exists
-        if (!fs.existsSync(uploadPath)) {
-            fs.mkdirSync(uploadPath, { recursive: true });
-        }
-        cb(null, uploadPath);
-    },
-    filename: function (req, file, cb) {
-        const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
-        cb(null, 'product-' + uniqueSuffix + path.extname(file.originalname));
-    }
+// Multer Storage (Memory for Base64)
+const storage = multer.memoryStorage();
+const upload = multer({
+    storage: storage,
+    limits: { fileSize: 5 * 1024 * 1024 } // 5MB limit
 });
-const upload = multer({ storage: storage });
 
 // Helper Constant
 const NEW_ARRIVAL_DAYS = 7;
@@ -188,21 +178,30 @@ router.delete('/:id', async (req, res) => {
     }
 });
 
-// POST Upload Single Image (Legacy/Single)
+// POST Upload Single Image (Base64)
 router.post('/upload', upload.single('image'), (req, res) => {
     if (!req.file) {
         return res.status(400).json({ message: 'No file uploaded' });
     }
-    const publicPath = `/uploads/${req.file.filename}`;
-    res.json({ imageUrl: publicPath });
+    // Convert buffer to base64
+    const b64 = Buffer.from(req.file.buffer).toString('base64');
+    const dataURI = `data:${req.file.mimetype};base64,${b64}`;
+
+    console.log(`Image converted to Base64 (Size: ${b64.length} chars)`);
+    res.json({ imageUrl: dataURI }); // Return Base64 string as URL
 });
 
-// POST Upload Multiple Images
-router.post('/upload-multiple', upload.array('images', 10), (req, res) => {
+// POST Upload Multiple Images (Base64)
+router.post('/upload-multiple', upload.array('images', 5), (req, res) => {
     if (!req.files || req.files.length === 0) {
         return res.status(400).json({ message: 'No files uploaded' });
     }
-    const imageUrls = req.files.map(file => `/uploads/${file.filename}`);
+    const imageUrls = req.files.map(file => {
+        const b64 = Buffer.from(file.buffer).toString('base64');
+        return `data:${file.mimetype};base64,${b64}`;
+    });
+
+    console.log(`Converted ${imageUrls.length} images to Base64`);
     res.json({ imageUrls });
 });
 
