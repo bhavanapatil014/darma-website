@@ -180,21 +180,35 @@ export default function CartPage() {
                                         </div>
                                     </div>
                                     <div className="flex justify-between items-center mt-4">
-                                        <div className="flex items-center border rounded-md">
-                                            <button
-                                                className="px-3 py-1 hover:bg-gray-100 disabled:opacity-50"
-                                                onClick={() => updateQuantity(item.id, item.quantity - 1)}
-                                                disabled={item.quantity <= 1}
-                                            >
-                                                -
-                                            </button>
-                                            <span className="px-3 py-1 w-8 text-center text-sm">{item.quantity}</span>
-                                            <button
-                                                className="px-3 py-1 hover:bg-gray-100"
-                                                onClick={() => updateQuantity(item.id, item.quantity + 1)}
-                                            >
-                                                +
-                                            </button>
+                                        <div className="flex flex-col items-start gap-1">
+                                            <div className="flex items-center border rounded-md">
+                                                <button
+                                                    className="px-3 py-1 hover:bg-gray-100 disabled:opacity-50"
+                                                    onClick={() => updateQuantity(item.id, item.quantity - 1)}
+                                                    disabled={item.quantity <= 1}
+                                                >
+                                                    -
+                                                </button>
+                                                <span className="px-3 py-1 w-8 text-center text-sm">{item.quantity}</span>
+                                                <button
+                                                    className="px-3 py-1 hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed"
+                                                    onClick={() => {
+                                                        const max = item.stockQuantity ? Math.min(item.stockQuantity, 10) : 10;
+                                                        if (item.quantity < max) {
+                                                            updateQuantity(item.id, item.quantity + 1);
+                                                        }
+                                                    }}
+                                                    disabled={item.quantity >= (item.stockQuantity ? Math.min(item.stockQuantity, 10) : 10)}
+                                                    title={item.quantity >= (item.stockQuantity ? Math.min(item.stockQuantity, 10) : 10) ? `Max quantity reached` : "Add"}
+                                                >
+                                                    +
+                                                </button>
+                                            </div>
+                                            {item.quantity >= (item.stockQuantity ? Math.min(item.stockQuantity, 10) : 10) && (
+                                                <span className="text-[10px] text-red-500 font-medium">
+                                                    Max {Math.min(item.stockQuantity || 10, 10)} allowed
+                                                </span>
+                                            )}
                                         </div>
                                         <div className="flex gap-4">
                                             <button
