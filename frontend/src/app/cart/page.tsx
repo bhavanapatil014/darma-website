@@ -285,103 +285,104 @@ export default function CartPage() {
                                     <button onClick={removeCoupon} className="text-red-500 hover:text-red-700 text-xs font-semibold">Remove</button>
                                 </div>
                             ) : (
-                                <div className="flex gap-2">
-                                    <input
-                                        type="text"
-                                        placeholder="Enter coupon code"
-                                        className="flex-1 p-2 border rounded uppercase text-sm"
-                                        value={couponCode}
-                                        onChange={(e) => setCouponCode(e.target.value.toUpperCase())}
-                                    />
-                                    <Button variant="outline" size="sm" onClick={handleApplyCoupon} disabled={isApplying}>
-                                        {isApplying ? '...' : 'Apply'}
-                                    </Button>
-                                </div>
+                                <>
+                                    <div className="flex gap-2">
+                                        <input
+                                            type="text"
+                                            placeholder="Enter coupon code"
+                                            className="flex-1 p-2 border rounded uppercase text-sm"
+                                            value={couponCode}
+                                            onChange={(e) => setCouponCode(e.target.value.toUpperCase())}
+                                        />
+                                        <Button variant="outline" size="sm" onClick={handleApplyCoupon} disabled={isApplying}>
+                                            {isApplying ? '...' : 'Apply'}
+                                        </Button>
+                                    </div>
                                     {/* Available Coupons List */}
-                            <div className="mt-4 space-y-3 max-h-60 overflow-y-auto custom-scrollbar pr-1">
-                                <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Available Coupons</p>
-                                {availableCoupons.length === 0 ? (
-                                    <p className="text-xs text-gray-400 italic">No coupons available at the moment.</p>
-                                ) : (
-                                    availableCoupons.map((c) => {
-                                        const isEligible = subtotal >= c.minPurchaseAmount;
-                                        const amountNeeded = c.minPurchaseAmount - subtotal;
+                                    <div className="mt-4 space-y-3 max-h-60 overflow-y-auto custom-scrollbar pr-1">
+                                        <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Available Coupons</p>
+                                        {availableCoupons.length === 0 ? (
+                                            <p className="text-xs text-gray-400 italic">No coupons available at the moment.</p>
+                                        ) : (
+                                            availableCoupons.map((c) => {
+                                                const isEligible = subtotal >= c.minPurchaseAmount;
+                                                const amountNeeded = c.minPurchaseAmount - subtotal;
 
-                                        return (
-                                            <div
-                                                key={c._id}
-                                                className={`relative p-3 border rounded-lg transition-all ${isEligible
-                                                    ? 'bg-white border-dashed border-blue-300 hover:border-blue-500 hover:shadow-sm'
-                                                    : 'bg-gray-50 border-gray-200 opacity-70 grayscale-[0.5]'
-                                                    }`}
-                                            >
-                                                <div className={`flex justify-between items-start ${!isEligible ? 'blur-[0.5px]' : ''}`}>
-                                                    <div>
-                                                        <span className="font-bold text-sm text-gray-800 bg-gray-100 px-2 py-0.5 rounded border border-gray-200">{c.code}</span>
-                                                        <p className="text-xs text-gray-600 mt-1 lines-clamp-2">{c.description || `${c.discountValue}${c.discountType === 'percentage' ? '%' : ' OFF'}`}</p>
-                                                    </div>
-                                                    {isEligible && (
-                                                        <button
-                                                            onClick={() => {
-                                                                setCouponCode(c.code);
-                                                                // Optional: Auto-apply logic could be triggered here separately if desired
-                                                                // For now just fill input. Or call apply directly?
-                                                                // Let's call apply directly for better UX
-                                                                // But handleApplyCoupon depends on couponCode state which is async set.
-                                                                // Better to just set code and let user click, OR refactor handler.
-                                                                // Actually, I can allow user to click Apply.
-                                                                // Or better: call API directly here.
-                                                            }}
-                                                            className="text-xs font-bold text-blue-600 hover:underline shrink-0 ml-2"
-                                                        >
-                                                            APPLY
-                                                        </button>
-                                                    )}
-                                                </div>
-
-                                                {/* Ineligible Overlay/Message */}
-                                                {!isEligible && (
-                                                    <div className="absolute inset-0 flex items-center justify-center bg-white/40 backdrop-blur-[0.5px] rounded-lg">
-                                                        <div className="bg-white/90 px-3 py-1.5 rounded shadow-sm border border-orange-100 text-center">
-                                                            <p className="text-[10px] font-semibold text-orange-600">
-                                                                Add ₹{amountNeeded.toFixed(0)} more
-                                                            </p>
-                                                            <p className="text-[9px] text-gray-500">to unlock {c.code}</p>
+                                                return (
+                                                    <div
+                                                        key={c._id}
+                                                        className={`relative p-3 border rounded-lg transition-all ${isEligible
+                                                            ? 'bg-white border-dashed border-blue-300 hover:border-blue-500 hover:shadow-sm'
+                                                            : 'bg-gray-50 border-gray-200 opacity-70 grayscale-[0.5]'
+                                                            }`}
+                                                    >
+                                                        <div className={`flex justify-between items-start ${!isEligible ? 'blur-[0.5px]' : ''}`}>
+                                                            <div>
+                                                                <span className="font-bold text-sm text-gray-800 bg-gray-100 px-2 py-0.5 rounded border border-gray-200">{c.code}</span>
+                                                                <p className="text-xs text-gray-600 mt-1 lines-clamp-2">{c.description || `${c.discountValue}${c.discountType === 'percentage' ? '%' : ' OFF'}`}</p>
+                                                            </div>
+                                                            {isEligible && (
+                                                                <button
+                                                                    onClick={() => {
+                                                                        setCouponCode(c.code);
+                                                                        // Optional: Auto-apply logic could be triggered here separately if desired
+                                                                        // For now just fill input. Or call apply directly?
+                                                                        // Let's call apply directly for better UX
+                                                                        // But handleApplyCoupon depends on couponCode state which is async set.
+                                                                        // Better to just set code and let user click, OR refactor handler.
+                                                                        // Actually, I can allow user to click Apply.
+                                                                        // Or better: call API directly here.
+                                                                    }}
+                                                                    className="text-xs font-bold text-blue-600 hover:underline shrink-0 ml-2"
+                                                                >
+                                                                    APPLY
+                                                                </button>
+                                                            )}
                                                         </div>
-                                                    </div>
-                                                )}
 
-                                                {isEligible && (
-                                                    <div className="mt-2 text-[10px] text-green-600 font-medium flex items-center gap-1">
-                                                        <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path></svg>
-                                                        You save ₹{c.discountType === 'percentage' ? ((subtotal * c.discountValue) / 100).toFixed(0) : c.discountValue}
+                                                        {/* Ineligible Overlay/Message */}
+                                                        {!isEligible && (
+                                                            <div className="absolute inset-0 flex items-center justify-center bg-white/40 backdrop-blur-[0.5px] rounded-lg">
+                                                                <div className="bg-white/90 px-3 py-1.5 rounded shadow-sm border border-orange-100 text-center">
+                                                                    <p className="text-[10px] font-semibold text-orange-600">
+                                                                        Add ₹{amountNeeded.toFixed(0)} more
+                                                                    </p>
+                                                                    <p className="text-[9px] text-gray-500">to unlock {c.code}</p>
+                                                                </div>
+                                                            </div>
+                                                        )}
+
+                                                        {isEligible && (
+                                                            <div className="mt-2 text-[10px] text-green-600 font-medium flex items-center gap-1">
+                                                                <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path></svg>
+                                                                You save ₹{c.discountType === 'percentage' ? ((subtotal * c.discountValue) / 100).toFixed(0) : c.discountValue}
+                                                            </div>
+                                                        )}
                                                     </div>
-                                                )}
-                                            </div>
-                                        )
-                                    })
-                                )}
-                            </div>
-                        </>
+                                                )
+                                            })
+                                        )}
+                                    </div>
+                                </>
                             )}
-                        {couponError && <p className="text-xs text-red-500 mt-1">{couponError}</p>}
+                            {couponError && <p className="text-xs text-red-500 mt-1">{couponError}</p>}
+                        </div>
+
+                        <button
+                            style={{ backgroundColor: '#0f172a', color: '#ffffff' }}
+                            className="w-full py-4 text-lg font-bold rounded-md hover:opacity-90 transition-opacity"
+                            onClick={() => {
+                                router.push('/checkout');
+                            }}>
+                            Proceed to Checkout
+                        </button>
+
+                        <p className="text-xs text-gray-500 text-center mt-4">
+                            Shipping and taxes calculated at checkout.
+                        </p>
                     </div>
-
-                    <button
-                        style={{ backgroundColor: '#0f172a', color: '#ffffff' }}
-                        className="w-full py-4 text-lg font-bold rounded-md hover:opacity-90 transition-opacity"
-                        onClick={() => {
-                            router.push('/checkout');
-                        }}>
-                        Proceed to Checkout
-                    </button>
-
-                    <p className="text-xs text-gray-500 text-center mt-4">
-                        Shipping and taxes calculated at checkout.
-                    </p>
                 </div>
             </div>
-        </div>
         </div >
     )
 }
