@@ -386,10 +386,13 @@ export default function CartPage() {
                                 availableCoupons
                                     .filter(c => !c.expirationDate || new Date(c.expirationDate) > new Date())
                                     .map(c => {
-                                        const isEligible = subtotal >= c.minPurchaseAmount;
-                                        const amountNeeded = c.minPurchaseAmount - subtotal;
+                                        const minAmount = c.minPurchaseAmount || 0;
+                                        const currentSubtotal = subtotal || 0;
+                                        const isEligible = currentSubtotal >= minAmount;
+                                        const amountNeeded = Math.max(0, minAmount - currentSubtotal);
+
                                         const savings = c.discountType === 'percentage'
-                                            ? (subtotal * c.discountValue / 100)
+                                            ? (currentSubtotal * (c.discountValue || 0) / 100)
                                             : c.discountValue;
 
                                         return (
