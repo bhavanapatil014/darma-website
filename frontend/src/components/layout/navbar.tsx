@@ -49,6 +49,9 @@ export function Navbar() {
         }
     };
 
+    // Hide navbar on admin routes
+    if (pathname?.startsWith('/admin')) return null;
+
     return (
         <div className="flex flex-col w-full z-50 fixed top-0">
             {/* Top Bar - Marketing/Contact (Blue Background) */}
