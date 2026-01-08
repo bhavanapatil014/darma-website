@@ -20,6 +20,7 @@ export default function CartPage() {
     const [couponCode, setCouponCode] = useState("")
     const [couponError, setCouponError] = useState("")
     const [isApplying, setIsApplying] = useState(false)
+    const [isCouponModalOpen, setIsCouponModalOpen] = useState(false) // Myntra-Modal state
     const router = useRouter()
 
     const [availableCoupons, setAvailableCoupons] = useState<any[]>([]);
@@ -277,105 +278,43 @@ export default function CartPage() {
                             </div>
                         </div>
 
-                        {/* Coupon Input */}
-                        <div className="mb-6 space-y-2">
+                        {/* Coupon Trigger Row (Myntra Style) */}
+                        <div className="mb-6">
                             {coupon ? (
-                                <div className="p-3 bg-green-50 border border-green-200 rounded flex justify-between items-center">
-                                    <span className="text-green-700 font-medium text-sm">Applied: {coupon.code}</span>
-                                    <button onClick={removeCoupon} className="text-red-500 hover:text-red-700 text-xs font-semibold">Remove</button>
+                                <div className="p-4 border border-green-200 bg-green-50 rounded-lg flex justify-between items-center group cursor-pointer hover:shadow-sm" onClick={() => setIsCouponModalOpen(true)}>
+                                    <div className="flex items-center gap-3">
+                                        <div className="w-8 h-8 rounded-full bg-green-100 flex items-center justify-center text-green-600">
+                                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M7 7h10v10H7zM7 3L3 7v10a4 4 0 004 4h10a4 4 0 004-4V7l-4-4H7z"></path></svg>
+                                        </div>
+                                        <div>
+                                            <p className="font-bold text-sm text-gray-800">'{coupon.code}' applied</p>
+                                            <p className="text-xs text-green-600">-₹{coupon.discountAmount.toFixed(2)} savings</p>
+                                        </div>
+                                    </div>
+                                    <button
+                                        onClick={(e) => { e.stopPropagation(); removeCoupon(); }}
+                                        className="text-xs font-bold text-red-500 uppercase hover:underline p-2"
+                                    >
+                                        Remove
+                                    </button>
                                 </div>
                             ) : (
-                                <>
-                                    <div className="flex gap-2">
-                                        <input
-                                            type="text"
-                                            placeholder="Enter coupon code"
-                                            className="flex-1 p-2 border rounded uppercase text-sm"
-                                            value={couponCode}
-                                            onChange={(e) => setCouponCode(e.target.value.toUpperCase())}
-                                        />
-                                        <Button variant="outline" size="sm" onClick={handleApplyCoupon} disabled={isApplying}>
-                                            {isApplying ? '...' : 'Apply'}
-                                        </Button>
+                                <button
+                                    onClick={() => setIsCouponModalOpen(true)}
+                                    className="w-full bg-white border border-dashed border-gray-300 p-4 rounded-lg flex justify-between items-center hover:bg-gray-50 hover:border-gray-400 transition-all group"
+                                >
+                                    <div className="flex items-center gap-3">
+                                        <div className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center text-gray-500 group-hover:text-gray-700">
+                                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 5v2m0 4v2m0 4v2M5 5a2 2 0 00-2 2v3a2 2 0 110 4v3a2 2 0 002 2h14a2 2 0 002-2v-3a2 2 0 110-4V7a2 2 0 00-2-2H5z"></path></svg>
+                                        </div>
+                                        <div className="text-left">
+                                            <p className="font-bold text-sm text-gray-800">Apply Coupon</p>
+                                            <p className="text-xs text-green-600 font-medium">{availableCoupons.length > 0 ? `${availableCoupons.length} offers available` : 'Check offers'}</p>
+                                        </div>
                                     </div>
-                                    {/* Available Coupons List */}
-                                    <div className="mt-4 space-y-3 max-h-60 overflow-y-auto custom-scrollbar pr-1">
-                                        <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Available Coupons</p>
-                                        {availableCoupons.filter(c => {
-                                            if (!c.expirationDate) return true;
-                                            return new Date(c.expirationDate) > new Date();
-                                        }).length === 0 ? (
-                                            <p className="text-xs text-gray-400 italic">No valid coupons available.</p>
-                                        ) : (
-                                            availableCoupons
-                                                .filter(c => {
-                                                    // Filter Expired
-                                                    if (!c.expirationDate) return true;
-                                                    return new Date(c.expirationDate) > new Date();
-                                                })
-                                                .map((c) => {
-                                                    const isEligible = subtotal >= c.minPurchaseAmount;
-                                                    const amountNeeded = c.minPurchaseAmount - subtotal;
-
-                                                    return (
-                                                        <div
-                                                            key={c._id}
-                                                            className={`relative p-3 border rounded-lg transition-all ${isEligible
-                                                                    ? 'bg-white border-dashed border-blue-300 hover:border-blue-500 hover:shadow-sm'
-                                                                    : 'bg-gray-50 border-gray-200 opacity-70 grayscale-[0.5]'
-                                                                }`}
-                                                        >
-                                                            <div className={`flex justify-between items-start ${!isEligible ? 'blur-[0.5px]' : ''}`}>
-                                                                <div>
-                                                                    <span className="font-bold text-sm text-gray-800 bg-gray-100 px-2 py-0.5 rounded border border-gray-200">{c.code}</span>
-                                                                    <p className="text-xs text-gray-600 mt-1 lines-clamp-2">{c.description || `${c.discountValue}${c.discountType === 'percentage' ? '%' : ' OFF'}`}</p>
-                                                                    {c.expirationDate && (
-                                                                        <p className="text-[10px] text-gray-400 mt-0.5">Expires: {new Date(c.expirationDate).toLocaleDateString()}</p>
-                                                                    )}
-                                                                </div>
-                                                                {isEligible && (
-                                                                    <button
-                                                                        onClick={() => {
-                                                                            setCouponCode(c.code);
-                                                                            setIsApplying(true); // Manually trigger loading state if needed
-                                                                            // Since we just set code, user clicks Apply. 
-                                                                            // Or we can invoke handleApplyCoupon if we decouple it from state. 
-                                                                            // For now, let's just set code to encourage manual apply or we modify handleApplyCoupon.
-                                                                            // Actually, let's just set it. 
-                                                                        }}
-                                                                        className="text-xs font-bold text-blue-600 hover:underline shrink-0 ml-2"
-                                                                    >
-                                                                        SELECT
-                                                                    </button>
-                                                                )}
-                                                            </div>
-
-                                                            {/* Ineligible Overlay/Message */}
-                                                            {!isEligible && (
-                                                                <div className="absolute inset-0 flex items-center justify-center bg-white/40 backdrop-blur-[0.5px] rounded-lg">
-                                                                    <div className="bg-white/90 px-3 py-1.5 rounded shadow-sm border border-orange-100 text-center z-10">
-                                                                        <p className="text-[10px] font-semibold text-orange-600">
-                                                                            Add ₹{amountNeeded.toFixed(0)} more
-                                                                        </p>
-                                                                        <p className="text-[9px] text-gray-500">to unlock {c.code}</p>
-                                                                    </div>
-                                                                </div>
-                                                            )}
-
-                                                            {isEligible && (
-                                                                <div className="mt-2 text-[10px] text-green-600 font-medium flex items-center gap-1">
-                                                                    <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path></svg>
-                                                                    You save ₹{c.discountType === 'percentage' ? ((subtotal * c.discountValue) / 100).toFixed(0) : c.discountValue}
-                                                                </div>
-                                                            )}
-                                                        </div>
-                                                    )
-                                                })
-                                        )}
-                                    </div>
-                                </>
+                                    <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7"></path></svg>
+                                </button>
                             )}
-                            {couponError && <p className="text-xs text-red-500 mt-1">{couponError}</p>}
                         </div>
 
                         <button
@@ -393,6 +332,140 @@ export default function CartPage() {
                     </div>
                 </div>
             </div>
+
+            {/* Myntra-Style Coupon Modal */}
+            {isCouponModalOpen && (
+                <div className="fixed inset-0 z-50 flex justify-end sm:justify-center sm:items-center">
+                    {/* Backdrop */}
+                    <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setIsCouponModalOpen(false)}></div>
+
+                    {/* Content */}
+                    <div className="relative w-full h-[80vh] sm:h-auto sm:max-h-[85vh] sm:w-[450px] bg-white sm:rounded-xl rounded-t-2xl shadow-2xl flex flex-col animate-in slide-in-from-bottom-10 sm:slide-in-from-bottom-0 sm:zoom-in-95 duration-200">
+                        {/* Header */}
+                        <div className="p-4 border-b flex justify-between items-center bg-white rounded-t-xl sticky top-0 z-10">
+                            <h3 className="font-bold text-lg text-gray-900">Apply Coupon</h3>
+                            <button onClick={() => setIsCouponModalOpen(false)} className="p-2 hover:bg-gray-100 rounded-full">
+                                <svg className="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                            </button>
+                        </div>
+
+                        {/* Input Area */}
+                        <div className="p-4 bg-gray-50 border-b">
+                            <div className="flex gap-2">
+                                <input
+                                    type="text"
+                                    placeholder="Enter Coupon Code"
+                                    className="flex-1 px-3 py-2 border rounded-md uppercase text-sm focus:outline-none focus:ring-1 focus:ring-blue-500"
+                                    value={couponCode}
+                                    onChange={(e) => setCouponCode(e.target.value.toUpperCase())}
+                                />
+                                <button
+                                    className="px-6 py-2 bg-gray-900 text-white text-sm font-bold rounded-md disabled:opacity-50 hover:bg-black"
+                                    disabled={!couponCode || isApplying}
+                                    onClick={() => {
+                                        handleApplyCoupon();
+                                        // Close modal on success logic handled in separate effect or here if filtered
+                                        setIsCouponModalOpen(false);
+                                    }}
+                                >
+                                    CHECK
+                                </button>
+                            </div>
+                            {couponError && <p className="text-xs text-red-500 mt-2 font-medium">{couponError}</p>}
+                        </div>
+
+                        {/* Coupon List */}
+                        <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-gray-50/50">
+                            <p className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Available Offers</p>
+
+                            {availableCoupons.filter(c => !c.expirationDate || new Date(c.expirationDate) > new Date()).length === 0 ? (
+                                <div className="text-center py-12 text-gray-400">
+                                    <p className="text-sm">No coupons available right now.</p>
+                                </div>
+                            ) : (
+                                availableCoupons
+                                    .filter(c => !c.expirationDate || new Date(c.expirationDate) > new Date())
+                                    .map(c => {
+                                        const isEligible = subtotal >= c.minPurchaseAmount;
+                                        const amountNeeded = c.minPurchaseAmount - subtotal;
+                                        const savings = c.discountType === 'percentage'
+                                            ? (subtotal * c.discountValue / 100)
+                                            : c.discountValue;
+
+                                        return (
+                                            <div key={c._id} className={`bg-white border rounded-lg p-4 shadow-sm relative overflow-hidden ${isEligible ? 'border-gray-200' : 'border-gray-100'}`}>
+                                                {/* Left color bar */}
+                                                <div className="absolute left-0 top-0 bottom-0 w-1 bg-gradient-to-b from-blue-400 to-purple-400"></div>
+
+                                                <div className={`flex justify-between items-start pl-3 ${!isEligible ? 'opacity-60 blur-[0.5px] select-none' : ''}`}>
+                                                    <div className="flex-1">
+                                                        <div className="flex items-center gap-2 mb-1">
+                                                            <span className="font-bold text-gray-800 border border-gray-300 border-dashed px-2 py-0.5 rounded bg-gray-50 text-sm tracking-wide">{c.code}</span>
+                                                        </div>
+                                                        <p className="font-bold text-green-600 text-sm">Save ₹{savings.toFixed(0)}</p>
+                                                        <p className="text-xs text-gray-500 mt-1 line-clamp-2">{c.description || "Applicable on all items in cart."}</p>
+                                                        <p className="text-[10px] text-gray-400 mt-2">
+                                                            Min. purchase: ₹{c.minPurchaseAmount} • {c.expirationDate ? `Expires: ${new Date(c.expirationDate).toLocaleDateString()}` : 'No expiry'}
+                                                        </p>
+                                                    </div>
+
+                                                    {isEligible && (
+                                                        <button
+                                                            onClick={() => {
+                                                                setCouponCode(c.code);
+                                                                // We must call the async apply logic
+                                                                // Since handleApplyCoupon relies on state 'couponCode', we set state then call.
+                                                                // But setState is async. 
+                                                                // Correct pattern: Refactor handleApplyCoupon to accept code arg.
+                                                                // For now, hack: setTimeout or better, just reuse the logic.
+                                                                const performApply = async () => {
+                                                                    setIsApplying(true);
+                                                                    try {
+                                                                        // Copied logic from handleApplyCoupon but with Explicit Code
+                                                                        const res = await fetch('https://darma-website.onrender.com/api/coupons/verify', {
+                                                                            method: 'POST',
+                                                                            headers: { 'Content-Type': 'application/json' },
+                                                                            body: JSON.stringify({ code: c.code, cartTotal: subtotal, cartItems: items })
+                                                                        });
+                                                                        const text = await res.text();
+                                                                        const json = JSON.parse(text);
+                                                                        if (res.ok && json.success) {
+                                                                            applyCoupon({ ...json, code: c.code });
+                                                                            setCouponCode("");
+                                                                            setIsCouponModalOpen(false);
+                                                                            import("sonner").then(mod => mod.toast.success(`Coupon ${c.code} Applied!`));
+                                                                        } else {
+                                                                            setCouponError(json.message);
+                                                                        }
+                                                                    } catch (err) { console.error(err) }
+                                                                    setIsApplying(false);
+                                                                };
+                                                                performApply();
+                                                            }}
+                                                            className="text-sm font-bold text-blue-600 hover:text-blue-800 uppercase px-2 py-1"
+                                                        >
+                                                            APPLY
+                                                        </button>
+                                                    )}
+                                                </div>
+
+                                                {/* Ineligible Overlay */}
+                                                {!isEligible && (
+                                                    <div className="absolute inset-0 flex items-center justify-center bg-white/50 backdrop-blur-[1px]">
+                                                        <div className="bg-white px-4 py-2 rounded-full shadow-md border border-orange-100 flex items-center gap-2">
+                                                            <span className="w-2 h-2 rounded-full bg-orange-500"></span>
+                                                            <span className="text-xs font-bold text-gray-700">Add items worth ₹{amountNeeded.toFixed(0)} more</span>
+                                                        </div>
+                                                    </div>
+                                                )}
+                                            </div>
+                                        )
+                                    })
+                            )}
+                        </div>
+                    </div>
+                </div>
+            )}
         </div >
     )
 }
