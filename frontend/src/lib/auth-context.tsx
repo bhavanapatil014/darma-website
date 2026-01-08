@@ -36,11 +36,23 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             fetch(`https://darma-website.onrender.com/api/auth/me`, {
                 headers: { 'Authorization': `Bearer ${token}` }
             })
-                .then(res => res.json())
-                .then(data => setUser(data.user))
-                .catch(() => {
-                    localStorage.removeItem('token');
-                    setUser(null);
+                .then(async res => {
+                    if (res.ok) {
+                        const data = await res.json();
+                        setUser(data.user);
+                    } else if (res.status === 401 || res.status === 403) {
+                        // Only remove token if explicitly unauthorized
+                        console.warn("Token expired or invalid (401/403). Logging out.");
+                        localStorage.removeItem('token');
+                        setUser(null);
+                    } else {
+                        console.warn(`Auth check failed with status ${res.status}. Preserving token.`);
+                        // Do not clear token. Backend might be starting up (502) or erroring (500).
+                    }
+                })
+                .catch((err) => {
+                    console.error("Network error during auth check. Preserving token.", err);
+                    // Do not clear token.
                 })
                 .finally(() => setIsLoading(false));
         } else {
