@@ -161,7 +161,7 @@ function LoginContent() {
                                     className="w-full p-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
                                     placeholder="john@example.com"
                                     value={email}
-                                    onChange={(e) => setEmail(e.target.value)}
+                                    onChange={(e) => setEmail(e.target.value.replace(/\s/g, ''))}
                                 />
                             </div>
                             <div>
