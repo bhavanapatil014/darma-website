@@ -392,8 +392,8 @@ export default function CartPage() {
                                         const amountNeeded = Math.max(0, minAmount - currentSubtotal);
 
                                         const savings = c.discountType === 'percentage'
-                                            ? (currentSubtotal * (c.discountValue || 0) / 100)
-                                            : c.discountValue;
+                                            ? (currentSubtotal * (c.value || 0) / 100)
+                                            : (c.value || 0);
 
                                         return (
                                             <div key={c._id} className={`bg-white border rounded-lg p-4 shadow-sm relative overflow-hidden ${isEligible ? 'border-gray-200' : 'border-gray-100'}`}>
