@@ -268,25 +268,31 @@ export default function CartPage() {
                                         {isApplying ? '...' : 'Apply'}
                                     </Button>
                                 </div>
+                                <div className="text-right">
+                                    <Link href="/offers" className="text-xs text-blue-600 hover:underline">
+                                        View Available Coupons
+                                    </Link>
+                                </div>
+                            </>
                             )}
-                            {couponError && <p className="text-xs text-red-500 mt-1">{couponError}</p>}
-                        </div>
-
-                        <button
-                            style={{ backgroundColor: '#0f172a', color: '#ffffff' }}
-                            className="w-full py-4 text-lg font-bold rounded-md hover:opacity-90 transition-opacity"
-                            onClick={() => {
-                                router.push('/checkout');
-                            }}>
-                            Proceed to Checkout
-                        </button>
-
-                        <p className="text-xs text-gray-500 text-center mt-4">
-                            Shipping and taxes calculated at checkout.
-                        </p>
+                        {couponError && <p className="text-xs text-red-500 mt-1">{couponError}</p>}
                     </div>
+
+                    <button
+                        style={{ backgroundColor: '#0f172a', color: '#ffffff' }}
+                        className="w-full py-4 text-lg font-bold rounded-md hover:opacity-90 transition-opacity"
+                        onClick={() => {
+                            router.push('/checkout');
+                        }}>
+                        Proceed to Checkout
+                    </button>
+
+                    <p className="text-xs text-gray-500 text-center mt-4">
+                        Shipping and taxes calculated at checkout.
+                    </p>
                 </div>
             </div>
+        </div>
         </div >
     )
 }
