@@ -99,145 +99,151 @@ function LoginContent() {
                                 />
                             </div>
 
-                            <Button
+                            <button
                                 type="submit"
-                                className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 rounded-lg shadow-sm flex items-center justify-center gap-2 h-12"
+                                style={{ backgroundColor: '#2563eb', color: '#ffffff' }}
+                                className="w-full hover:opacity-90 font-semibold py-3 rounded-lg shadow-sm flex items-center justify-center gap-2 h-12 transition-all disabled:opacity-50"
                                 disabled={isLoading || phoneNumber.length < 10}
                             >
                                 {isLoading ? "Sending..." : (
                                     <>Request OTP <ArrowRight className="w-4 h-4" /></>
                                 )}
-                            </Button>
-                        </form>
+                            </button>
                     )}
 
-                    {view === 'otp-verify' && (
-                        <form onSubmit={handleVerifyOtp} className="space-y-6">
-                            <div>
-                                <input
-                                    type="text"
-                                    required
-                                    className="block w-full text-center tracking-[1em] py-3 border border-gray-300 rounded-md text-2xl font-bold text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                    placeholder="------"
-                                    maxLength={6}
-                                    value={otp}
-                                    onChange={(e) => setOtp(e.target.value)}
-                                />
+                            {view === 'otp-verify' && (
+                                <form onSubmit={handleVerifyOtp} className="space-y-6">
+                                    <div>
+                                        <input
+                                            type="text"
+                                            required
+                                            className="block w-full text-center tracking-[1em] py-3 border border-gray-300 rounded-md text-2xl font-bold text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                            placeholder="------"
+                                            maxLength={6}
+                                            value={otp}
+                                            onChange={(e) => setOtp(e.target.value)}
+                                        />
+                                    </div>
+
+                                    <button
+                                        type="submit"
+                                        style={{ backgroundColor: '#2563eb', color: '#ffffff' }}
+                                        className="w-full hover:opacity-90 font-semibold py-3 rounded-lg h-12 transition-all disabled:opacity-50"
+                                        disabled={isLoading || otp.length < 4}
+                                    >
+                                        {isLoading ? "Verifying..." : "Verify & Login"}
+                                    </button>
+
+                                    <div className="text-center">
+                                        <button
+                                            type="button"
+                                            onClick={() => setView('phone-input')}
+                                            className="text-sm text-blue-600 hover:underline"
+                                        >
+                                            Use a different number
+                                        </button>
+                                    </div>
+                                </form>
+                            )}
+
+                            {view === 'email-login' && (
+                                <form onSubmit={handleEmailLogin} className="space-y-4">
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700 mb-1">Email Address</label>
+                                        <input
+                                            type="email"
+                                            required
+                                            className="w-full p-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+                                            placeholder="john@example.com"
+                                            value={email}
+                                            onChange={(e) => setEmail(e.target.value)}
+                                        />
+                                    </div>
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700 mb-1">Password</label>
+                                        <input
+                                            type="password"
+                                            required
+                                            className="w-full p-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+                                            placeholder="••••••••"
+                                            value={password}
+                                            onChange={(e) => setPassword(e.target.value)}
+                                        />
+                                    </div>
+                                    <button
+                                        style={{ backgroundColor: '#2563eb', color: '#ffffff' }}
+                                        className="w-full hover:opacity-90 h-12 font-semibold rounded-lg transition-all disabled:opacity-50"
+                                        type="submit"
+                                        disabled={isLoading}
+                                    >
+                                        {isLoading ? "Signing in..." : "Login"}
+                                    </button>
+                                </form>
+                            )}
+
+                            {/* Divider */}
+                            <div className="relative mt-8 mb-6">
+                                <div className="absolute inset-0 flex items-center">
+                                    <div className="w-full border-t border-gray-200"></div>
+                                </div>
+                                <div className="relative flex justify-center text-sm">
+                                    <span className="px-4 bg-white text-gray-500">Or Login Using</span>
+                                </div>
                             </div>
 
-                            <Button
-                                type="submit"
-                                className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 rounded-lg h-12"
-                                disabled={isLoading || otp.length < 4}
-                            >
-                                {isLoading ? "Verifying..." : "Verify & Login"}
-                            </Button>
-
-                            <div className="text-center">
+                            {/* Social Buttons */}
+                            <div className="grid grid-cols-2 gap-4">
                                 <button
                                     type="button"
-                                    onClick={() => setView('phone-input')}
-                                    className="text-sm text-blue-600 hover:underline"
+                                    className="flex items-center justify-center gap-2 px-4 py-2 border border-blue-200 rounded-lg hover:bg-blue-50 transition-colors text-gray-700 font-medium"
                                 >
-                                    Use a different number
+                                    <MessageCircle className="w-5 h-5 text-green-500" />
+                                    WhatsApp
+                                </button>
+                                <button
+                                    type="button"
+                                    onClick={() => setView(view === 'email-login' ? 'phone-input' : 'email-login')}
+                                    className={`flex items-center justify-center gap-2 px-4 py-2 border rounded-lg transition-colors font-medium ${view === 'email-login'
+                                        ? 'bg-blue-50 border-blue-500 text-blue-700'
+                                        : 'border-gray-200 hover:bg-gray-50 text-gray-700'
+                                        }`}
+                                >
+                                    {view === 'email-login' ? (
+                                        <>
+                                            <Phone className="w-4 h-4" />
+                                            Phone
+                                        </>
+                                    ) : (
+                                        <>
+                                            <Mail className="w-4 h-4 text-gray-500" />
+                                            Email
+                                        </>
+                                    )}
                                 </button>
                             </div>
-                        </form>
-                    )}
 
-                    {view === 'email-login' && (
-                        <form onSubmit={handleEmailLogin} className="space-y-4">
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">Email Address</label>
-                                <input
-                                    type="email"
-                                    required
-                                    className="w-full p-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
-                                    placeholder="john@example.com"
-                                    value={email}
-                                    onChange={(e) => setEmail(e.target.value)}
-                                />
+                            {/* Footer Terms */}
+                            <div className="mt-8 text-center">
+                                <p className="text-xs text-gray-400">
+                                    I accept that I have read & understood <Link href="#" className="underline hover:text-gray-600">Privacy Policy</Link> and <Link href="#" className="underline hover:text-gray-600">T&Cs</Link>
+                                </p>
                             </div>
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">Password</label>
-                                <input
-                                    type="password"
-                                    required
-                                    className="w-full p-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
-                                    placeholder="••••••••"
-                                    value={password}
-                                    onChange={(e) => setPassword(e.target.value)}
-                                />
+
+                            <div className="mt-4 text-center text-sm">
+                                Don't have an account? <Link href="/register" className="text-blue-600 font-semibold hover:underline">Sign up</Link>
                             </div>
-                            <Button className="w-full bg-blue-600 hover:bg-blue-700 h-12" type="submit" disabled={isLoading}>
-                                {isLoading ? "Signing in..." : "Login"}
-                            </Button>
-                        </form>
-                    )}
-
-                    {/* Divider */}
-                    <div className="relative mt-8 mb-6">
-                        <div className="absolute inset-0 flex items-center">
-                            <div className="w-full border-t border-gray-200"></div>
                         </div>
-                        <div className="relative flex justify-center text-sm">
-                            <span className="px-4 bg-white text-gray-500">Or Login Using</span>
-                        </div>
-                    </div>
-
-                    {/* Social Buttons */}
-                    <div className="grid grid-cols-2 gap-4">
-                        <button
-                            type="button"
-                            className="flex items-center justify-center gap-2 px-4 py-2 border border-blue-200 rounded-lg hover:bg-blue-50 transition-colors text-gray-700 font-medium"
-                        >
-                            <MessageCircle className="w-5 h-5 text-green-500" />
-                            WhatsApp
-                        </button>
-                        <button
-                            type="button"
-                            onClick={() => setView(view === 'email-login' ? 'phone-input' : 'email-login')}
-                            className={`flex items-center justify-center gap-2 px-4 py-2 border rounded-lg transition-colors font-medium ${view === 'email-login'
-                                ? 'bg-blue-50 border-blue-500 text-blue-700'
-                                : 'border-gray-200 hover:bg-gray-50 text-gray-700'
-                                }`}
-                        >
-                            {view === 'email-login' ? (
-                                <>
-                                    <Phone className="w-4 h-4" />
-                                    Phone
-                                </>
-                            ) : (
-                                <>
-                                    <Mail className="w-4 h-4 text-gray-500" />
-                                    Email
-                                </>
-                            )}
-                        </button>
-                    </div>
-
-                    {/* Footer Terms */}
-                    <div className="mt-8 text-center">
-                        <p className="text-xs text-gray-400">
-                            I accept that I have read & understood <Link href="#" className="underline hover:text-gray-600">Privacy Policy</Link> and <Link href="#" className="underline hover:text-gray-600">T&Cs</Link>
-                        </p>
-                    </div>
-
-                    <div className="mt-4 text-center text-sm">
-                        Don't have an account? <Link href="/register" className="text-blue-600 font-semibold hover:underline">Sign up</Link>
-                    </div>
-                </div>
             </div>
-        </div>
-    )
+            </div>
+            )
 }
 
-import { Suspense } from "react"
+            import {Suspense} from "react"
 
-export default function LoginPage() {
+            export default function LoginPage() {
     return (
-        <Suspense fallback={<div className="min-h-screen flex items-center justify-center">Loading...</div>}>
-            <LoginContent />
-        </Suspense>
-    )
+            <Suspense fallback={<div className="min-h-screen flex items-center justify-center">Loading...</div>}>
+                <LoginContent />
+            </Suspense>
+            )
 }
