@@ -137,25 +137,14 @@ export default function UsersPage() {
                                 <th className="p-4 font-semibold">Email</th>
                                 <th className="p-4 font-semibold">Role</th>
                                 <th className="p-4 font-semibold">Joined Date</th>
+                                <th className="p-4 font-semibold">Status</th>
                                 <th className="p-4 font-semibold text-right">Actions</th>
                             </tr>
                         </thead>
                         <tbody className="divide-y">
                             {(activeTab === 'admins' ? admins : customers).map(u => (
                                 <tr key={u._id} className={`hover:bg-gray-50 transition-colors ${u.isDeleted ? 'bg-red-50/50 opacity-75' : ''}`}>
-                                    <td className="p-4 font-medium">
-                                        <div className="flex flex-col">
-                                            <span>{u.name}</span>
-                                            {u.isDeleted && (
-                                                <span className="mt-1 text-xs font-bold flex flex-col gap-0.5">
-                                                    <span className={`${u.deletedBy === 'admin' ? 'text-red-700' : 'text-orange-600'}`}>
-                                                        {u.deletedBy === 'admin' ? 'ADMIN REMOVED' : 'USER DELETED ACCOUNT'}
-                                                    </span>
-                                                    {u.deletedAt && <span className="font-normal opacity-75 text-gray-500 text-[10px]">on {new Date(u.deletedAt).toLocaleDateString()}</span>}
-                                                </span>
-                                            )}
-                                        </div>
-                                    </td>
+                                    <td className="p-4 font-medium">{u.name}</td>
                                     <td className="p-4 text-gray-600 space-y-1">
                                         <div>{u.email}</div>
                                         {u.phoneNumber && <div className="text-xs text-gray-400">{u.phoneNumber}</div>}
@@ -166,6 +155,20 @@ export default function UsersPage() {
                                         </span>
                                     </td>
                                     <td className="p-4 text-gray-500">{new Date(u.createdAt).toLocaleDateString()}</td>
+                                    <td className="p-4">
+                                        {u.isDeleted ? (
+                                            <div className="flex flex-col gap-1">
+                                                <span className={`inline-flex items-center px-2 py-1 rounded text-xs font-bold ${u.deletedBy === 'admin' ? 'bg-red-100 text-red-700' : 'bg-orange-100 text-orange-700'}`}>
+                                                    {u.deletedBy === 'admin' ? 'ADMIN REMOVED' : 'USER DELETED'}
+                                                </span>
+                                                {u.deletedAt && <span className="text-[10px] text-gray-400">on {new Date(u.deletedAt).toLocaleDateString()}</span>}
+                                            </div>
+                                        ) : (
+                                            <span className="inline-flex items-center px-2 py-1 rounded text-xs font-medium bg-green-100 text-green-700">
+                                                ACTIVE
+                                            </span>
+                                        )}
+                                    </td>
                                     <td className="p-4 text-right">
                                         {!u.isDeleted && u._id !== user?.id && (
                                             <button
