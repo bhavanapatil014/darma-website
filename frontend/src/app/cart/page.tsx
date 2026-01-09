@@ -384,7 +384,10 @@ export default function CartPage() {
                     <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setIsCouponModalOpen(false)}></div>
 
                     {/* Content */}
-                    <div className="relative w-full h-[80vh] sm:h-auto sm:max-h-[85vh] sm:w-[450px] bg-white sm:rounded-xl rounded-t-2xl shadow-2xl flex flex-col animate-in slide-in-from-bottom-10 sm:slide-in-from-bottom-0 sm:zoom-in-95 duration-200">
+                    <div
+                        onClick={(e) => e.stopPropagation()}
+                        className="relative w-full h-[80vh] sm:h-auto sm:max-h-[85vh] sm:w-[450px] bg-white sm:rounded-xl rounded-t-2xl shadow-2xl flex flex-col animate-in slide-in-from-bottom-10 sm:slide-in-from-bottom-0 sm:zoom-in-95 duration-200"
+                    >
                         {/* Header */}
                         <div className="p-4 border-b flex justify-between items-center bg-white rounded-t-xl sticky top-0 z-10">
                             <h3 className="font-bold text-lg text-gray-900">Apply Coupon</h3>
@@ -477,6 +480,7 @@ export default function CartPage() {
                                                                         const text = await res.text();
                                                                         const json = JSON.parse(text);
                                                                         if (res.ok && json.success) {
+                                                                            removeCoupon(); // Remove previous
                                                                             applyCoupon({ ...json, code: c.code });
                                                                             setCouponCode("");
                                                                             setIsCouponModalOpen(false);
