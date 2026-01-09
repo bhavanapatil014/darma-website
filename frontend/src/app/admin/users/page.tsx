@@ -147,9 +147,11 @@ export default function UsersPage() {
                                         <div className="flex flex-col">
                                             <span>{u.name}</span>
                                             {u.isDeleted && (
-                                                <span className="mt-1 text-xs text-red-600 font-bold flex items-center gap-1">
-                                                    DELETED
-                                                    {u.deletedAt && <span className="font-normal opacity-75">on {new Date(u.deletedAt).toLocaleDateString()}</span>}
+                                                <span className="mt-1 text-xs font-bold flex flex-col gap-0.5">
+                                                    <span className={`${u.deletedBy === 'admin' ? 'text-red-700' : 'text-orange-600'}`}>
+                                                        {u.deletedBy === 'admin' ? 'ADMIN REMOVED' : 'USER DELETED ACCOUNT'}
+                                                    </span>
+                                                    {u.deletedAt && <span className="font-normal opacity-75 text-gray-500 text-[10px]">on {new Date(u.deletedAt).toLocaleDateString()}</span>}
                                                 </span>
                                             )}
                                         </div>
