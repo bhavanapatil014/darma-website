@@ -101,7 +101,17 @@ router.post('/register', async (req, res) => {
         email = email.trim().toLowerCase(); // Sanitize & Lowercase
         // Check if user exists
         const existingUser = await User.findOne({ email });
-        if (existingUser) return res.status(400).json({ message: 'User already exists' });
+        if (existingUser) {
+            if (existingUser.isDeleted) {
+                // Archive the old deleted account to free up the email
+                existingUser.originalEmail = existingUser.email;
+                existingUser.email = `deleted_${Date.now()}_${existingUser.email}`;
+                await existingUser.save();
+                // Proceed to create new user below...
+            } else {
+                return res.status(400).json({ message: 'User already exists' });
+            }
+        }
 
         // Hash password
         const hashedPassword = await bcrypt.hash(password, 10);
