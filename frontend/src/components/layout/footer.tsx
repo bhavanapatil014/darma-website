@@ -64,7 +64,7 @@ export function Footer() {
                 </div>
 
                 <div className="border-t pt-8 text-center text-sm text-muted-foreground">
-                    <p>&copy; {new Date().getFullYear()} Venkata Derma. All rights reserved. <span className="text-xs opacity-50 ml-2">v3.49 (Live)</span></p>
+                    <p>&copy; {new Date().getFullYear()} Venkata Derma. All rights reserved. <span className="text-xs opacity-50 ml-2">v3.50 (Live)</span></p>
                 </div>
             </div>
         </footer>
