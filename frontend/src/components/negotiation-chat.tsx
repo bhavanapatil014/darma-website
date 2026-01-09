@@ -82,16 +82,17 @@ export default function NegotiationChat({ product }: { product: any }) {
     if (!user) return null
 
     return (
-        <>
+    return (
+        <div className="relative w-full">
             <Button onClick={() => setIsOpen(true)} className="w-full mt-4 bg-teal-600 hover:bg-teal-700 text-white flex items-center justify-center gap-2">
                 <MessageSquare className="w-4 h-4" />
                 Negotiate / Chat with Dealer
             </Button>
 
             {isOpen && (
-                <div className="fixed bottom-4 left-4 right-4 md:right-auto md:w-96 md:left-4 bg-white rounded-lg shadow-2xl border z-[200] flex flex-col max-h-[80vh] overflow-hidden">
+                <div className="absolute top-full left-0 right-0 mt-2 bg-white rounded-lg shadow-xl border z-50 flex flex-col h-[500px] overflow-hidden animate-in fade-in zoom-in-95 duration-200">
                     {/* Header */}
-                    <div className="bg-teal-700 text-white p-3 flex justify-between items-center">
+                    <div className="bg-teal-700 text-white p-3 flex justify-between items-center shrink-0">
                         <h3 className="font-bold text-sm truncate pr-4">Negotiation: {product.name}</h3>
                         <button onClick={() => setIsOpen(false)} className="p-1 hover:bg-teal-600 rounded-full transition-colors">
                             <X className="w-5 h-5" />
@@ -99,7 +100,7 @@ export default function NegotiationChat({ product }: { product: any }) {
                     </div>
 
                     {/* Messages */}
-                    <div ref={scrollRef} className="flex-1 p-4 overflow-y-auto bg-gray-50 space-y-3 min-h-[300px]">
+                    <div ref={scrollRef} className="flex-1 p-4 overflow-y-auto bg-gray-50 space-y-3 min-h-0">
                         {messages.length === 0 && <p className="text-center text-xs text-gray-400 mt-10">Start the conversation...</p>}
                         {messages.map((m, i) => (
                             <div key={i} className={`flex ${m.sender === 'user' ? 'justify-end' : 'justify-start'}`}>
@@ -117,14 +118,14 @@ export default function NegotiationChat({ product }: { product: any }) {
 
                     {/* Image Preview */}
                     {image && (
-                        <div className="p-2 bg-gray-100 border-t flex justify-between items-center">
+                        <div className="p-2 bg-gray-100 border-t flex justify-between items-center shrink-0">
                             <span className="text-xs text-gray-500">Image attached</span>
                             <button onClick={() => setImage('')} className="text-red-500 text-xs hover:underline">Remove</button>
                         </div>
                     )}
 
                     {/* Input */}
-                    <div className="p-3 bg-white border-t flex gap-2 items-center">
+                    <div className="p-3 bg-white border-t flex gap-2 items-center shrink-0">
                         <label className="cursor-pointer text-gray-400 hover:text-gray-600 p-1">
                             <Paperclip className="w-5 h-5" />
                             <input type="file" accept="image/*" className="hidden" onChange={handleImageUpload} />
@@ -148,6 +149,7 @@ export default function NegotiationChat({ product }: { product: any }) {
                     </div>
                 </div>
             )}
-        </>
+        </div>
+    )
     )
 }
