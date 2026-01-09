@@ -321,26 +321,38 @@ function NegotiationList() {
 
     return (
         <div className="space-y-4">
-            {offers.map((offer) => (
-                <div key={offer._id} className="bg-white rounded-lg border p-4 shadow-sm flex justify-between items-center">
-                    <div>
-                        <div className="font-semibold text-sm">{offer.product?.name || 'Unknown Product'}</div>
-                        <div className="text-xs text-gray-500">
-                            Offer: <span className="font-bold text-teal-700">₹{offer.offerPrice}</span> (was ₹{offer.originalPrice})
+            {offers.map((offer) => {
+                const lastMsg = offer.messages && offer.messages.length > 0 ? offer.messages[offer.messages.length - 1] : null
+                return (
+                    <Link href={`/product/${offer.product?._id || offer.product?.id}`} key={offer._id} className="block group">
+                        <div className="bg-white rounded-lg border p-4 shadow-sm flex justify-between items-center group-hover:border-teal-500 transition-colors">
+                            <div>
+                                <div className="font-semibold text-sm">{offer.product?.name || 'Unknown Product'}</div>
+                                <div className="text-xs text-gray-500 mt-1">
+                                    {lastMsg ? (
+                                        <span className={lastMsg.sender === 'admin' ? 'text-blue-600 font-medium' : 'text-gray-400'}>
+                                            {lastMsg.sender === 'admin' ? 'Dealer: ' : 'You: '} {lastMsg.text || 'Sent an attachment'}
+                                        </span>
+                                    ) : 'No messages'}
+                                </div>
+                                {offer.couponCode && (
+                                    <div className="mt-2 inline-flex items-center px-2 py-0.5 rounded bg-green-100 text-green-700 text-[10px] font-bold">
+                                        Coupon Received: {offer.couponCode}
+                                    </div>
+                                )}
+                            </div>
+                            <div>
+                                <span className={`px-2 py-1 rounded text-[10px] uppercase font-bold ${offer.status === 'deal_reached' ? 'bg-green-100 text-green-700' :
+                                        offer.status === 'closed' ? 'bg-gray-100 text-gray-600' :
+                                            'bg-blue-100 text-blue-700'
+                                    }`}>
+                                    {offer.status?.replace('_', ' ')}
+                                </span>
+                            </div>
                         </div>
-                        {offer.message && <div className="text-xs text-gray-400 italic mt-1">"{offer.message}"</div>}
-                        {offer.adminResponse && <div className="text-xs text-blue-600 mt-1 font-medium">Dealer: "{offer.adminResponse}"</div>}
-                    </div>
-                    <div>
-                        <span className={`px-2 py-1 rounded text-[10px] uppercase font-bold ${offer.status === 'accepted' ? 'bg-green-100 text-green-700' :
-                            offer.status === 'rejected' ? 'bg-red-100 text-red-700' :
-                                'bg-yellow-100 text-yellow-700'
-                            }`}>
-                            {offer.status}
-                        </span>
-                    </div>
-                </div>
-            ))}
+                    </Link>
+                )
+            })}
         </div>
     )
 }
