@@ -105,11 +105,10 @@ export function ProductCard({ product, isWishlist = false }: ProductCardProps) {
                 </Link>
 
                 {/* Add to Cart - Always Visible */}
-                <div className="mt-auto flex gap-2">
-                    <NegotiationBtn product={product} />
+                <div className="mt-auto">
                     <button
                         style={{ backgroundColor: '#2563eb', color: '#ffffff' }}
-                        className="flex-1 shadow-sm font-bold uppercase tracking-wide text-xs h-9 rounded-md flex items-center justify-center transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                        className="w-full shadow-sm font-bold uppercase tracking-wide text-xs h-9 rounded-md flex items-center justify-center transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                         disabled={!product.stockQuantity || product.stockQuantity <= 0}
                         onClick={(e) => {
                             e.preventDefault();
