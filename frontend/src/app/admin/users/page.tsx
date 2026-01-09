@@ -124,8 +124,14 @@ export default function UsersPage() {
                         <tbody className="divide-y">
                             {(activeTab === 'admins' ? admins : customers).map(u => (
                                 <tr key={u._id} className="hover:bg-gray-50">
-                                    <td className="p-4 font-medium">{u.name}</td>
-                                    <td className="p-4 text-gray-600">{u.email}</td>
+                                    <td className="p-4 font-medium">
+                                        {u.name}
+                                        {u.isDeleted && <span className="ml-2 text-xs text-red-600 bg-red-100 px-2 py-0.5 rounded font-bold">DELETED</span>}
+                                    </td>
+                                    <td className="p-4 text-gray-600 space-y-1">
+                                        <div>{u.email}</div>
+                                        {u.phoneNumber && <div className="text-xs text-gray-400">{u.phoneNumber}</div>}
+                                    </td>
                                     <td className="p-4">
                                         <span className={`px-2 py-1 rounded-full text-xs font-medium ${u.role === 'superadmin' ? 'bg-purple-100 text-purple-700' : u.role === 'admin' ? 'bg-teal-100 text-teal-700' : 'bg-blue-50 text-blue-600'}`}>
                                             {u.role.toUpperCase()}
