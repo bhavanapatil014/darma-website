@@ -355,7 +355,16 @@ router.delete('/users/:id', verifyToken, async (req, res) => {
         return res.status(403).json({ message: 'Require Super Admin Role' });
     }
     try {
-        await User.findByIdAndUpdate(req.params.id, { isDeleted: true, deletedAt: new Date(), deletedBy: 'admin' });
+        const user = await User.findById(req.params.id);
+        if (!user) return res.status(404).json({ message: "User not found" });
+
+        user.isDeleted = true;
+        user.deletedAt = new Date();
+        user.deletedBy = 'admin';
+        user.originalEmail = user.email;
+        user.email = `deleted_${Date.now()}_${user.email}`;
+
+        await user.save();
         res.json({ message: "User deleted successfully" });
     } catch (error) {
         res.status(500).json({ message: "Failed to delete user", error: error.message });
@@ -365,7 +374,16 @@ router.delete('/users/:id', verifyToken, async (req, res) => {
 // DELETE /api/auth/delete-me
 router.delete('/delete-me', verifyToken, async (req, res) => {
     try {
-        await User.findByIdAndUpdate(req.userId, { isDeleted: true, deletedAt: new Date(), deletedBy: 'self' });
+        const user = await User.findById(req.userId);
+        if (!user) return res.status(404).json({ message: "User not found" });
+
+        user.isDeleted = true;
+        user.deletedAt = new Date();
+        user.deletedBy = 'self';
+        user.originalEmail = user.email;
+        user.email = `deleted_${Date.now()}_${user.email}`;
+
+        await user.save();
         res.json({ message: "Account deleted successfully" });
     } catch (error) {
         res.status(500).json({ message: "Failed to delete account", error: error.message });
