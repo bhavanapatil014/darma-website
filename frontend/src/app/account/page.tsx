@@ -295,3 +295,51 @@ function OrderStepper({ status }: { status: string }) {
         </div>
     )
 }
+
+function NegotiationList() {
+    const [offers, setOffers] = useState<any[]>([])
+    const [loading, setLoading] = useState(true)
+
+    useEffect(() => {
+        const token = localStorage.getItem('token')
+        if (!token) return
+
+        fetch('https://darma-website.onrender.com/api/negotiate/my-offers', {
+            headers: { 'Authorization': `Bearer ${token}` }
+        })
+            .then(res => res.json())
+            .then(data => {
+                if (Array.isArray(data)) setOffers(data)
+                setLoading(false)
+            })
+            .catch(err => setLoading(false))
+    }, [])
+
+    if (loading) return <div className="text-gray-400 text-sm">Loading offers...</div>
+    if (offers.length === 0) return <div className="text-center py-6 bg-gray-50 rounded-lg border text-gray-500 text-sm">No negotiations yet.</div>
+
+    return (
+        <div className="space-y-4">
+            {offers.map((offer) => (
+                <div key={offer._id} className="bg-white rounded-lg border p-4 shadow-sm flex justify-between items-center">
+                    <div>
+                        <div className="font-semibold text-sm">{offer.product?.name || 'Unknown Product'}</div>
+                        <div className="text-xs text-gray-500">
+                            Offer: <span className="font-bold text-teal-700">₹{offer.offerPrice}</span> (was ₹{offer.originalPrice})
+                        </div>
+                        {offer.message && <div className="text-xs text-gray-400 italic mt-1">"{offer.message}"</div>}
+                        {offer.adminResponse && <div className="text-xs text-blue-600 mt-1 font-medium">Dealer: "{offer.adminResponse}"</div>}
+                    </div>
+                    <div>
+                        <span className={`px-2 py-1 rounded text-[10px] uppercase font-bold ${offer.status === 'accepted' ? 'bg-green-100 text-green-700' :
+                                offer.status === 'rejected' ? 'bg-red-100 text-red-700' :
+                                    'bg-yellow-100 text-yellow-700'
+                            }`}>
+                            {offer.status}
+                        </span>
+                    </div>
+                </div>
+            ))}
+        </div>
+    )
+}
