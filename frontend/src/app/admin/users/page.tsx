@@ -20,7 +20,7 @@ export default function UsersPage() {
     const fetchUsers = async () => {
         try {
             const token = localStorage.getItem('token')
-            const res = await fetch('https://darma-website.onrender.com/api/auth/users', {
+            const res = await fetch(`https://darma-website.onrender.com/api/auth/users?_t=${Date.now()}`, {
                 headers: { 'Authorization': `Bearer ${token}` }
             })
             if (res.ok) {
