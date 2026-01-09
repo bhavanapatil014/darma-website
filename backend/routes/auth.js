@@ -349,6 +349,19 @@ router.post('/create-admin', verifyToken, async (req, res) => {
         res.status(500).json({ message: 'Failed to create admin', error: error.message });
     }
 });
+// DELETE /api/auth/users/:id (Super Admin Only)
+router.delete('/users/:id', verifyToken, async (req, res) => {
+    if (req.userRole !== 'superadmin') {
+        return res.status(403).json({ message: 'Require Super Admin Role' });
+    }
+    try {
+        await User.findByIdAndUpdate(req.params.id, { isDeleted: true, deletedAt: new Date() });
+        res.json({ message: "User deleted successfully" });
+    } catch (error) {
+        res.status(500).json({ message: "Failed to delete user", error: error.message });
+    }
+});
+
 // DELETE /api/auth/delete-me
 router.delete('/delete-me', verifyToken, async (req, res) => {
     try {
