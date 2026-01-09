@@ -11,6 +11,7 @@ export default function AdminNegotiations() {
     const [chatData, setChatData] = useState<any>(null)
     const [reply, setReply] = useState('')
     const [couponAmount, setCouponAmount] = useState('')
+    const [couponScope, setCouponScope] = useState<'specific' | 'global'>('specific')
     const [showCouponInput, setShowCouponInput] = useState(false)
     const scrollRef = useRef<HTMLDivElement>(null)
 
@@ -65,6 +66,7 @@ export default function AdminNegotiations() {
                 // Request Server to Create Logic
                 body.createCoupon = true
                 body.discountAmount = couponAmount
+                body.couponScope = couponScope
             }
 
             const res = await fetch(`https://darma-website.onrender.com/api/negotiate/${selectedId}/reply`, {
@@ -162,6 +164,26 @@ export default function AdminNegotiations() {
                         <div className="flex justify-between items-center mb-2">
                             <div className="font-semibold text-green-800 text-xs uppercase">Issue Discount Coupon</div>
                             <button onClick={() => setShowCouponInput(false)} className="text-gray-400 hover:text-gray-600"><span className="sr-only">Close</span>✕</button>
+                        </div>
+                        <div className="flex gap-3 mb-2 px-1">
+                            <label className="flex items-center gap-1.5 cursor-pointer text-xs text-green-900 font-medium">
+                                <input
+                                    type="radio"
+                                    className="accent-green-600"
+                                    checked={couponScope === 'specific'}
+                                    onChange={() => setCouponScope('specific')}
+                                />
+                                Limit to this item
+                            </label>
+                            <label className="flex items-center gap-1.5 cursor-pointer text-xs text-green-900 font-medium">
+                                <input
+                                    type="radio"
+                                    className="accent-green-600"
+                                    checked={couponScope === 'global'}
+                                    onChange={() => setCouponScope('global')}
+                                />
+                                Valid on next order (Any item)
+                            </label>
                         </div>
                         <div className="flex gap-2">
                             <input

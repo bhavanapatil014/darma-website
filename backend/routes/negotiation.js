@@ -123,14 +123,18 @@ router.post('/:id/reply', verifyToken, async (req, res) => {
                 // Generate Unique Code
                 const code = 'DEAL-' + Math.random().toString(36).substring(2, 8).toUpperCase();
 
+                // Scope Logic
+                const scope = req.body.couponScope || 'specific'; // 'specific' | 'global'
+                const applicableProducts = scope === 'specific' ? [product.id, product._id.toString()] : []; // Empty = Global
+
                 // Create Real Coupon in DB
                 const coupon = new Coupon({
                     code,
-                    description: `Negotiated deal for ${product.name}`,
+                    description: `Negotiated deal for ${product.name} (${scope})`,
                     discountType: 'fixed',
                     value: Number(discountAmount),
                     minPurchaseAmount: 0,
-                    eligibleItemIds: [product._id.toString(), product.id], // Support both ID types
+                    applicableProducts: applicableProducts, // Fixed field name
                     usageLimit: 1,
                     expirationDate: new Date(Date.now() + 48 * 60 * 60 * 1000) // 48 Hours Validity
                 });
@@ -139,7 +143,8 @@ router.post('/:id/reply', verifyToken, async (req, res) => {
                 neg.couponCode = code;
                 neg.status = 'deal_reached';
                 // Append coupon info to message
-                replyText = `${text || 'Offer Accepted!'} (Use Coupon Code: ${code} for ₹${discountAmount} OFF)`;
+                const scopeText = scope === 'global' ? 'on your next order' : 'for this item';
+                replyText = `${text || 'Offer Accepted!'} (Use Coupon Code: ${code} for ₹${discountAmount} OFF ${scopeText})`;
             }
         } else if (status) {
             neg.status = status;
