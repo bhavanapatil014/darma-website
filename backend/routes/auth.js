@@ -352,7 +352,7 @@ router.post('/create-admin', verifyToken, async (req, res) => {
 // DELETE /api/auth/delete-me
 router.delete('/delete-me', verifyToken, async (req, res) => {
     try {
-        await User.findByIdAndUpdate(req.userId, { isDeleted: true });
+        await User.findByIdAndUpdate(req.userId, { isDeleted: true, deletedAt: new Date() });
         res.json({ message: "Account deleted successfully" });
     } catch (error) {
         res.status(500).json({ message: "Failed to delete account", error: error.message });
