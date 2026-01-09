@@ -264,7 +264,7 @@ export default function CartPage() {
                                         <div className="flex gap-4">
                                             <button
                                                 onClick={() => removeItem(item.id)}
-                                                className="flex items-center gap-1 text-sm text-gray-500 hover:text-red-600 transition-colors"
+                                                className="hidden sm:flex items-center gap-1 text-sm text-gray-500 hover:text-red-600 transition-colors"
                                                 title="Remove Item"
                                             >
                                                 <Trash2 className="w-4 h-4" />
