@@ -136,7 +136,6 @@ export default function UsersPage() {
                                 <th className="p-4 font-semibold">Name</th>
                                 <th className="p-4 font-semibold">Email</th>
                                 <th className="p-4 font-semibold">Role</th>
-                                <th className="p-4 font-semibold">Role</th>
                                 <th className="p-4 font-semibold">Joined Date</th>
                                 <th className="p-4 font-semibold text-right">Actions</th>
                             </tr>
@@ -180,11 +179,10 @@ export default function UsersPage() {
                             ))}
                             {(activeTab === 'admins' ? admins : customers).length === 0 && (
                                 <tr>
-                                    <tr>
-                                        <td colSpan={5} className="p-8 text-center text-muted-foreground">No users found in this category.</td>
-                                    </tr>
+                                    <td colSpan={5} className="p-8 text-center text-muted-foreground">No users found in this category.</td>
+                                </tr>
                             )}
-                                </tbody>
+                        </tbody>
                     </table>
                 </div>
             </div>
