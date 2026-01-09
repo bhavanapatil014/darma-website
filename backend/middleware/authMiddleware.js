@@ -9,7 +9,7 @@ const verifyToken = (req, res, next) => {
     const tokenVal = bearer[1];
 
     jwt.verify(tokenVal, process.env.JWT_SECRET || 'secretkey', (err, decoded) => {
-        if (err) return res.status(500).json({ message: 'Failed to authenticate token' });
+        if (err) return res.status(401).json({ message: 'Failed to authenticate token' });
         req.userId = decoded.id;
         req.userRole = decoded.role;
         next();

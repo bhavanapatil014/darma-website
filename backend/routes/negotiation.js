@@ -1,4 +1,6 @@
 const express = require('express');
+const mongoose = require('mongoose');
+const fs = require('fs');
 const router = express.Router();
 const Negotiation = require('../models/Negotiation');
 const Product = require('../models/Product');
@@ -10,20 +12,24 @@ router.post('/message', verifyToken, async (req, res) => {
     try {
         const { productId, text, image, offerPrice } = req.body;
 
+        // Find product by Custom ID (String) or ObjectId
+        let product = await Product.findOne({ id: productId });
+        if (!product && mongoose.isValidObjectId(productId)) {
+            product = await Product.findById(productId);
+        }
+        if (!product) return res.status(404).json({ message: "Product not found" });
+
         let neg = await Negotiation.findOne({
             user: req.userId,
-            product: productId,
-            status: { $in: ['active', 'deal_reached'] } // Keep conversation alive? Or force new if closed?
+            product: product._id,
+            status: { $in: ['active', 'deal_reached'] }
         });
 
         if (!neg) {
             // Start New
-            const product = await Product.findById(productId);
-            if (!product) return res.status(404).json({ message: "Product not found" });
-
             neg = new Negotiation({
                 user: req.userId,
-                product: productId,
+                product: product._id,
                 originalPrice: product.price,
                 status: 'active',
                 messages: []
@@ -44,6 +50,7 @@ router.post('/message', verifyToken, async (req, res) => {
 
         res.status(201).json(neg);
     } catch (error) {
+        console.error("Negotiation POST Error:", error);
         res.status(500).json({ message: "Failed to send message", error: error.message });
     }
 });
@@ -63,13 +70,21 @@ router.get('/my-offers', verifyToken, async (req, res) => {
 // GET /api/negotiate/product/:productId - Get specific chat for UI
 router.get('/product/:productId', verifyToken, async (req, res) => {
     try {
+        let product = await Product.findOne({ id: req.params.productId });
+        if (!product && mongoose.isValidObjectId(req.params.productId)) {
+            product = await Product.findById(req.params.productId);
+        }
+
+        if (!product) return res.json(null);
+
         const neg = await Negotiation.findOne({
             user: req.userId,
-            product: req.params.productId,
-            status: { $ne: 'closed' } // Get active one
+            product: product._id,
+            status: { $ne: 'closed' }
         });
         res.json(neg || null);
     } catch (error) {
+        console.error("Negotiation GET Error:", error);
         res.status(500).json({ message: "Failed to fetch negotiation", error: error.message });
     }
 });

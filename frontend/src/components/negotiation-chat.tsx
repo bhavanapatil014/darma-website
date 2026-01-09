@@ -43,6 +43,7 @@ export default function NegotiationChat({ product }: { product: any }) {
     const handleSend = async () => {
         if (!text.trim() && !image) return
         setLoading(true)
+        console.log("Sending negotiation...", { text, hasImage: !!image })
         try {
             const token = localStorage.getItem('token')
             const res = await fetch('https://darma-website.onrender.com/api/negotiate/message', {
@@ -54,8 +55,15 @@ export default function NegotiationChat({ product }: { product: any }) {
                 setText('')
                 setImage('')
                 fetchChat()
+            } else {
+                console.error("Failed to send", res.status)
+                const errorData = await res.json().catch(() => ({}))
+                alert(`Failed to send: ${res.status} ${errorData.message || res.statusText}`)
             }
-        } catch (e) { alert("Failed to send") }
+        } catch (e) {
+            console.error("Negotiation send error", e)
+            alert("Failed to send message due to network error.")
+        }
         setLoading(false)
     }
 
@@ -81,7 +89,7 @@ export default function NegotiationChat({ product }: { product: any }) {
             </Button>
 
             {isOpen && (
-                <div className="fixed bottom-4 right-4 w-96 bg-white rounded-lg shadow-2xl border z-50 flex flex-col max-h-[600px] overflow-hidden">
+                <div className="fixed bottom-4 left-4 right-4 md:right-auto md:w-96 md:left-4 bg-white rounded-lg shadow-2xl border z-[200] flex flex-col max-h-[600px] overflow-hidden">
                     {/* Header */}
                     <div className="bg-teal-700 text-white p-3 flex justify-between items-center">
                         <h3 className="font-bold text-sm">Negotiation: {product.name}</h3>
@@ -127,8 +135,13 @@ export default function NegotiationChat({ product }: { product: any }) {
                             onChange={e => setText(e.target.value)}
                             onKeyDown={e => e.key === 'Enter' && handleSend()}
                         />
-                        <button onClick={handleSend} disabled={loading} className="text-teal-600 hover:bg-teal-50 p-2 rounded-full">
-                            <Send className="w-5 h-5" />
+                        <button
+                            type="button"
+                            onClick={handleSend}
+                            disabled={(!text.trim() && !image) || loading}
+                            className={`p-2 rounded-full transition-colors flex items-center justify-center shrink-0 ${(!text.trim() && !image) || loading ? 'bg-gray-100 text-gray-400 cursor-not-allowed' : 'bg-teal-600 text-white hover:bg-teal-700 shadow-md'}`}
+                        >
+                            <Send className="w-4 h-4" />
                         </button>
                     </div>
                 </div>

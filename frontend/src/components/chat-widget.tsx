@@ -8,6 +8,7 @@ type Message = {
     id: string
     text: string
     sender: 'user' | 'bot'
+    timestamp?: Date
     options?: { label: string; value: string }[]
 }
 
@@ -234,7 +235,12 @@ export function ChatWidget() {
                                 placeholder="Type a message..."
                                 className="flex-1 bg-gray-100 border-none rounded-full px-4 text-sm focus:ring-1 focus:ring-black outline-none"
                             />
-                            <Button type="submit" size="icon" className="rounded-full w-10 h-10 shrink-0">
+                            <Button
+                                type="submit"
+                                size="icon"
+                                className="rounded-full w-10 h-10 shrink-0"
+                                disabled={!inputValue.trim()}
+                            >
                                 <Send className="w-4 h-4" />
                             </Button>
                         </form>
