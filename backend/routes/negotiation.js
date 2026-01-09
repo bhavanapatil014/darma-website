@@ -111,28 +111,53 @@ router.post('/:id/reply', verifyToken, async (req, res) => {
     try {
         if (req.userRole !== 'admin' && req.userRole !== 'superadmin') return res.status(403).json({ message: "Access denied" });
 
-        const { text, image, couponCode, status } = req.body;
+        const { text, image, createCoupon, discountAmount, status } = req.body;
         const neg = await Negotiation.findById(req.params.id);
         if (!neg) return res.status(404).json({ message: "Negotiation not found" });
 
+        let replyText = text;
+
+        if (createCoupon && discountAmount) {
+            const product = await Product.findById(neg.product);
+            if (product) {
+                // Generate Unique Code
+                const code = 'DEAL-' + Math.random().toString(36).substring(2, 8).toUpperCase();
+
+                // Create Real Coupon in DB
+                const coupon = new Coupon({
+                    code,
+                    description: `Negotiated deal for ${product.name}`,
+                    discountType: 'fixed',
+                    value: Number(discountAmount),
+                    minPurchaseAmount: 0,
+                    eligibleItemIds: [product._id.toString(), product.id], // Support both ID types
+                    usageLimit: 1,
+                    expirationDate: new Date(Date.now() + 48 * 60 * 60 * 1000) // 48 Hours Validity
+                });
+                await coupon.save();
+
+                neg.couponCode = code;
+                neg.status = 'deal_reached';
+                // Append coupon info to message
+                replyText = `${text || 'Offer Accepted!'} (Use Coupon Code: ${code} for ₹${discountAmount} OFF)`;
+            }
+        } else if (status) {
+            neg.status = status;
+        }
+
         const msg = {
             sender: 'admin',
-            text,
+            text: replyText,
             image,
             createdAt: new Date()
         };
         neg.messages.push(msg);
 
-        if (status) neg.status = status;
-        if (couponCode) {
-            neg.couponCode = couponCode;
-            neg.status = 'deal_reached';
-        }
-
         neg.updatedAt = new Date();
         await neg.save();
         res.json(neg);
     } catch (error) {
+        console.error("Reply Error:", error);
         res.status(500).json({ message: "Failed to reply", error: error.message });
     }
 });

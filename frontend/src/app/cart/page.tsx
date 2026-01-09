@@ -326,12 +326,21 @@ export default function CartPage() {
                                             <p className="text-xs text-green-600">-₹{(coupon?.discountAmount || 0).toFixed(2)} savings</p>
                                         </div>
                                     </div>
-                                    <button
-                                        onClick={(e) => { e.stopPropagation(); removeCoupon(); }}
-                                        className="text-xs font-bold text-red-500 uppercase hover:underline p-2"
-                                    >
-                                        Remove
-                                    </button>
+                                    <div className="flex items-center">
+                                        <button
+                                            onClick={(e) => { e.stopPropagation(); setIsCouponModalOpen(true); }}
+                                            className="text-xs font-bold text-blue-600 uppercase hover:underline p-2"
+                                        >
+                                            Change
+                                        </button>
+                                        <div className="h-3 w-px bg-gray-300 mx-1"></div>
+                                        <button
+                                            onClick={(e) => { e.stopPropagation(); removeCoupon(); }}
+                                            className="text-xs font-bold text-red-500 uppercase hover:underline p-2"
+                                        >
+                                            Remove
+                                        </button>
+                                    </div>
                                 </div>
                             ) : (
                                 <button

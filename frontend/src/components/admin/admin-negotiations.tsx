@@ -62,12 +62,9 @@ export default function AdminNegotiations() {
             const body: any = { text: reply }
 
             if (showCouponInput && couponAmount) {
-                // Generate Coupon Logic (Admin determines value)
-                // We'll generate a random code suffix
-                const code = `DEAL-${Math.random().toString(36).substring(2, 7).toUpperCase()}`
-                body.couponCode = code
-                body.text = `${reply} (Use Coupon: ${code} for ₹${couponAmount} OFF)`
-                body.status = 'deal_reached'
+                // Request Server to Create Logic
+                body.createCoupon = true
+                body.discountAmount = couponAmount
             }
 
             const res = await fetch(`https://darma-website.onrender.com/api/negotiate/${selectedId}/reply`, {
@@ -114,7 +111,7 @@ export default function AdminNegotiations() {
                                             </td>
                                             <td className="p-3">
                                                 <span className={`px-2 py-1 rounded text-xs uppercase font-bold ${o.status === 'deal_reached' ? 'bg-green-100 text-green-700' :
-                                                        'bg-blue-100 text-blue-700'
+                                                    'bg-blue-100 text-blue-700'
                                                     }`}>
                                                     {o.status.replace('_', ' ')}
                                                 </span>
