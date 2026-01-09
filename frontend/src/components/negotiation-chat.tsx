@@ -82,7 +82,6 @@ export default function NegotiationChat({ product }: { product: any }) {
     if (!user) return null
 
     return (
-    return (
         <div className="relative w-full">
             <Button onClick={() => setIsOpen(true)} className="w-full mt-4 bg-teal-600 hover:bg-teal-700 text-white flex items-center justify-center gap-2">
                 <MessageSquare className="w-4 h-4" />
@@ -150,6 +149,5 @@ export default function NegotiationChat({ product }: { product: any }) {
                 </div>
             )}
         </div>
-    )
     )
 }
