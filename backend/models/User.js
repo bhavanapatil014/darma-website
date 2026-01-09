@@ -15,7 +15,8 @@ const userSchema = new mongoose.Schema({
     otpExpires: { type: Date },
     isDeleted: { type: Boolean, default: false },
     deletedAt: { type: Date },
-    deletedBy: { type: String, enum: ['self', 'admin'] }
+    deletedBy: { type: String, enum: ['self', 'admin'] },
+    originalEmail: { type: String }
 }, { timestamps: true });
 
 module.exports = mongoose.model('User', userSchema);
