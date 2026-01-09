@@ -160,6 +160,9 @@ router.post('/send-otp', async (req, res) => {
             // Async Welcome Email
             sendWelcomeEmails(user).catch(err => console.error("Welcome Email Failed (OTP):", err));
         }
+        if (user.isDeleted) {
+            return res.status(403).json({ message: "Account is deleted. Please contact support." });
+        }
         // If user already existed, we skip sendWelcomeEmails and just send OTP below
         // Generate OTP
         const otp = Math.floor(100000 + Math.random() * 900000).toString();
@@ -218,6 +221,10 @@ router.post('/verify-otp', async (req, res) => {
         });
 
         if (!user) return res.status(404).json({ message: "User not found" });
+
+        if (user.isDeleted) {
+            return res.status(403).json({ message: "Account is deleted." });
+        }
 
         if (!user.otp || !user.otpExpires || user.otp !== otp) {
             return res.status(400).json({ message: "Invalid OTP" });
@@ -294,6 +301,10 @@ router.post('/login', async (req, res) => {
                 return res.status(404).json({ message: 'User not found' });
             }
 
+            if (user.isDeleted) {
+                return res.status(403).json({ message: 'Account has been deleted.' });
+            }
+
             const passwordIsValid = await bcrypt.compare(password, user.password);
             if (!passwordIsValid) return res.status(401).json({ auth: false, token: null, message: 'Invalid password' });
 
@@ -341,7 +352,7 @@ router.post('/create-admin', verifyToken, async (req, res) => {
 // DELETE /api/auth/delete-me
 router.delete('/delete-me', verifyToken, async (req, res) => {
     try {
-        await User.findByIdAndDelete(req.userId);
+        await User.findByIdAndUpdate(req.userId, { isDeleted: true });
         res.json({ message: "Account deleted successfully" });
     } catch (error) {
         res.status(500).json({ message: "Failed to delete account", error: error.message });
