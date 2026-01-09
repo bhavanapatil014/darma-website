@@ -148,18 +148,38 @@ export default function CartPage() {
                         }
 
                         return (
-                            <div key={item.id} className="flex gap-6 p-6 bg-white rounded-lg border shadow-sm">
-                                <div className="h-24 w-24 bg-gray-100 rounded-md overflow-hidden flex-shrink-0">
-                                    {item.image ? (
-                                        <img src={item.image} alt={item.name} className="w-full h-full object-cover" />
-                                    ) : (
-                                        <div className="w-full h-full flex items-center justify-center text-gray-400">No Img</div>
-                                    )}
+                            <div key={item.id} className="flex flex-col sm:flex-row gap-4 p-4 bg-white rounded-lg border shadow-sm relative">
+                                {/* Delete Button (Absolute for Mobile) */}
+                                <button
+                                    onClick={() => removeItem(item.id)}
+                                    className="absolute top-2 right-2 text-gray-400 hover:text-red-500 sm:hidden"
+                                >
+                                    <Trash2 className="w-5 h-5" />
+                                </button>
+
+                                <div className="flex gap-4">
+                                    <div className="h-24 w-24 bg-gray-100 rounded-md overflow-hidden flex-shrink-0 border">
+                                        {item.image ? (
+                                            <img src={item.image} alt={item.name} className="w-full h-full object-cover" />
+                                        ) : (
+                                            <div className="w-full h-full flex items-center justify-center text-gray-400">No Img</div>
+                                        )}
+                                    </div>
+
+                                    <div className="flex-1 sm:hidden">
+                                        {/* Mobile Title View */}
+                                        <h3 className="font-semibold text-sm line-clamp-2 mb-1">
+                                            <Link href={`/product/${item.id}`}>{item.name}</Link>
+                                        </h3>
+                                        <p className="text-xs text-gray-500 capitalize mb-2">{item.category}</p>
+                                        <div className="font-bold text-lg">₹{((displayPrice || 0) * (item.quantity || 1)).toFixed(2)}</div>
+                                    </div>
                                 </div>
-                                <div className="flex-1 flex flex-col justify-between">
-                                    <div className="flex justify-between">
+
+                                <div className="flex-1 flex flex-col justify-between sm:ml-0">
+                                    <div className="hidden sm:flex justify-between">
                                         <div>
-                                            <h3 className="font-semibold text-lg hover:underline">
+                                            <h3 className="font-semibold text-lg hover:underline line-clamp-2">
                                                 <Link href={`/product/${item.id}`}>{item.name}</Link>
                                             </h3>
                                             <p className="text-sm text-gray-500 capitalize">{item.category}</p>
@@ -169,8 +189,8 @@ export default function CartPage() {
                                                 </span>
                                             )}
                                         </div>
-                                        <div className="text-right">
-                                            {/* Reference Price (MRP or Pre-Coupon) */}
+                                        <div className="text-right min-w-[100px]">
+                                            {/* Reference Price */}
                                             {((item.mrp || originalPrice || 0)) > (displayPrice || 0) && (
                                                 <div className="text-sm text-gray-400 line-through">
                                                     ₹{((item.mrp || originalPrice || 0) * (item.quantity || 1)).toFixed(2)}
@@ -180,22 +200,37 @@ export default function CartPage() {
                                             {/* Final Price */}
                                             <div className="font-bold text-lg">₹{((displayPrice || 0) * (item.quantity || 1)).toFixed(2)}</div>
 
-                                            {/* Unit Price */}
-                                            {item.quantity > 1 && (
-                                                <div className="text-xs text-gray-500">
-                                                    (₹{(displayPrice || 0).toFixed(2)} each)
-                                                </div>
-                                            )}
+                                            {/* Unit */}
+                                            <div className="text-xs text-gray-500">
+                                                (₹{(displayPrice || 0).toFixed(2)} /unit)
+                                            </div>
 
-                                            {/* Total Savings */}
+                                            {/* Savings */}
                                             {((item.mrp || originalPrice || 0) > (displayPrice || 0)) && (
-                                                <div className="text-xs text-green-600 font-medium">
-                                                    Total Savings: ₹{(((item.mrp || originalPrice || item.price || 0) - (displayPrice || 0)) * (item.quantity || 1)).toFixed(2)}
+                                                <div className="text-xs text-green-600 font-bold mt-1">
+                                                    Save ₹{(((item.mrp || originalPrice || item.price || 0) - (displayPrice || 0)) * (item.quantity || 1)).toFixed(2)}
+                                                    <span className="block text-[10px] font-normal">(MRP+Coupon)</span>
                                                 </div>
                                             )}
                                         </div>
                                     </div>
-                                    <div className="flex justify-between items-center mt-4">
+
+                                    {/* Mobile Coupon Badge */}
+                                    <div className="sm:hidden mb-2">
+                                        {isEligible && (
+                                            <span className="inline-block text-[10px] px-2 py-0.5 bg-green-100 text-green-700 rounded-full font-medium">
+                                                Coupon Applied
+                                            </span>
+                                        )}
+                                        {/* Mobile Savings */}
+                                        {((item.mrp || originalPrice || 0) > (displayPrice || 0)) && (
+                                            <div className="text-xs text-green-600 font-bold mt-1">
+                                                Save ₹{(((item.mrp || originalPrice || item.price || 0) - (displayPrice || 0)) * (item.quantity || 1)).toFixed(2)} (Total)
+                                            </div>
+                                        )}
+                                    </div>
+
+                                    <div className="flex justify-between items-center mt-2 sm:mt-4">
                                         <div className="flex flex-col items-start gap-1">
                                             <div className="flex items-center border rounded-md">
                                                 <button
