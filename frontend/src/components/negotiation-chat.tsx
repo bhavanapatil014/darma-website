@@ -89,11 +89,13 @@ export default function NegotiationChat({ product }: { product: any }) {
             </Button>
 
             {isOpen && (
-                <div className="fixed bottom-4 left-4 right-4 md:right-auto md:w-96 md:left-4 bg-white rounded-lg shadow-2xl border z-[200] flex flex-col max-h-[600px] overflow-hidden">
+                <div className="fixed bottom-4 left-4 right-4 md:right-auto md:w-96 md:left-4 bg-white rounded-lg shadow-2xl border z-[200] flex flex-col max-h-[80vh] overflow-hidden">
                     {/* Header */}
                     <div className="bg-teal-700 text-white p-3 flex justify-between items-center">
-                        <h3 className="font-bold text-sm">Negotiation: {product.name}</h3>
-                        <button onClick={() => setIsOpen(false)}><X className="w-4 h-4" /></button>
+                        <h3 className="font-bold text-sm truncate pr-4">Negotiation: {product.name}</h3>
+                        <button onClick={() => setIsOpen(false)} className="p-1 hover:bg-teal-600 rounded-full transition-colors">
+                            <X className="w-5 h-5" />
+                        </button>
                     </div>
 
                     {/* Messages */}
