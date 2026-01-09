@@ -125,6 +125,12 @@ export default function AccountPage() {
                         <div className="max-h-[700px] overflow-y-auto pr-2 custom-scrollbar">
                             <OrderList />
                         </div>
+                        <div className="bg-white z-10 pb-4 mb-2 mt-8 sticky top-0">
+                            <h2 className="text-xl font-bold">My Negotiations</h2>
+                        </div>
+                        <div className="max-h-[400px] overflow-y-auto pr-2 custom-scrollbar">
+                            <NegotiationList />
+                        </div>
                     </div>
                 </div>
             </div>
