@@ -23,7 +23,7 @@ export const metadata: Metadata = {
   title: "Venkata Derma - Premium Skincare & Dermatology",
   description: "Experience the science of beautiful skin with Venkata Derma's premium dermatology products.",
   other: {
-    "version": "3.55.10", // Trigger Deploy 18:16
+    "version": "3.55.11", // Trigger Deploy 18:22
     "Cache-Control": "no-cache, no-store, must-revalidate"
   }
 };

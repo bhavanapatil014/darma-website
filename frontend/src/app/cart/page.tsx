@@ -427,28 +427,10 @@ export default function CartPage() {
                                 availableCoupons
                                     .filter(c => !c.expirationDate || new Date(c.expirationDate) > new Date())
                                     .map(c => {
-                                        // 1. Check Min Order
                                         const minAmount = c.minOrderAmount || c.minPurchaseAmount || 0;
                                         const currentSubtotal = subtotal || 0;
-                                        const meetsMinOrder = currentSubtotal >= minAmount;
+                                        const isEligible = currentSubtotal >= minAmount;
                                         const amountNeeded = Math.max(0, minAmount - currentSubtotal);
-
-                                        // 2. Check Product/Category Constraints
-                                        const appProds = (c.applicableProducts || []).map((id: any) => String(id).trim());
-                                        const appCats = (c.applicableCategories || []).map((cat: any) => String(cat).trim().toLowerCase());
-                                        const hasConstraints = appProds.length > 0 || appCats.length > 0;
-
-                                        let meetsConstraints = true;
-                                        if (hasConstraints) {
-                                            meetsConstraints = items.some(item => {
-                                                const iId = String(item.id).trim();
-                                                const iMongo = String((item as any)._id || "").trim();
-                                                const iCat = String(item.category || "").trim().toLowerCase();
-                                                return appProds.includes(iId) || appProds.includes(iMongo) || appCats.includes(iCat);
-                                            });
-                                        }
-
-                                        const isEligible = meetsMinOrder && meetsConstraints;
 
                                         const savings = c.discountType === 'percentage'
                                             ? (currentSubtotal * (c.value || 0) / 100)
@@ -465,7 +447,7 @@ export default function CartPage() {
                                                             <span className="font-bold text-gray-800 border border-gray-300 border-dashed px-2 py-0.5 rounded bg-gray-50 text-sm tracking-wide">{c.code}</span>
                                                         </div>
                                                         <p className="font-bold text-green-600 text-sm">Save ₹{(savings || 0).toFixed(0)}</p>
-                                                        <p className="text-xs text-gray-500 mt-1 line-clamp-2">{c.description || (hasConstraints ? "Specific items only" : "Applicable on all items.")}</p>
+                                                        <p className="text-xs text-gray-500 mt-1 line-clamp-2">{c.description || "Applicable on all items in cart."}</p>
                                                         <p className="text-[10px] text-gray-400 mt-2">
                                                             Min. purchase: ₹{c.minPurchaseAmount} • {c.expirationDate ? `Expires: ${new Date(c.expirationDate).toLocaleDateString()}` : 'No expiry'}
                                                         </p>
@@ -517,11 +499,7 @@ export default function CartPage() {
                                                     <div className="absolute inset-0 flex items-center justify-center bg-white/50 backdrop-blur-[1px]">
                                                         <div className="bg-white px-4 py-2 rounded-full shadow-md border border-orange-100 flex items-center gap-2">
                                                             <span className="w-2 h-2 rounded-full bg-orange-500"></span>
-                                                            <span className="text-xs font-bold text-gray-700">
-                                                                {!meetsMinOrder
-                                                                    ? `Add items worth ₹${amountNeeded.toFixed(0)} more`
-                                                                    : `Not applicable to items in cart`}
-                                                            </span>
+                                                            <span className="text-xs font-bold text-gray-700">Add items worth ₹{amountNeeded.toFixed(0)} more</span>
                                                         </div>
                                                     </div>
                                                 )}

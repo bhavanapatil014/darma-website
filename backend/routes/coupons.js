@@ -108,8 +108,10 @@ router.post('/verify', async (req, res) => {
         let isSpecific = false;
         let eligibleItems = [];
 
-        // Safely check array length
-        const prodConstraints = coupon.applicableProducts || [];
+        // Safely check array length - Support Backward Compatibility for 'eligibleItemIds'
+        const prodConstraints = (coupon.applicableProducts && coupon.applicableProducts.length > 0)
+            ? coupon.applicableProducts
+            : (coupon.eligibleItemIds || []);
         const catConstraints = coupon.applicableCategories || [];
         const brandConstraints = coupon.applicableBrands || [];
 
