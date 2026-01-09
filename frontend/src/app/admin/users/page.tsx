@@ -63,6 +63,24 @@ export default function UsersPage() {
         }
     }
 
+    async function deleteUser(userId: string) {
+        if (!confirm("Are you sure you want to delete this user? This will soft-delete their account.")) return;
+        try {
+            const token = localStorage.getItem('token')
+            const res = await fetch(`https://darma-website.onrender.com/api/auth/users/${userId}`, {
+                method: 'DELETE',
+                headers: { 'Authorization': `Bearer ${token}` }
+            })
+            if (res.ok) {
+                fetchUsers()
+            } else {
+                alert("Failed to delete user")
+            }
+        } catch (error) {
+            alert("Error deleting user")
+        }
+    }
+
     const admins = users.filter(u => u.role === 'admin' || u.role === 'superadmin')
     const customers = users.filter(u => u.role === 'user')
 
@@ -118,7 +136,9 @@ export default function UsersPage() {
                                 <th className="p-4 font-semibold">Name</th>
                                 <th className="p-4 font-semibold">Email</th>
                                 <th className="p-4 font-semibold">Role</th>
+                                <th className="p-4 font-semibold">Role</th>
                                 <th className="p-4 font-semibold">Joined Date</th>
+                                <th className="p-4 font-semibold text-right">Actions</th>
                             </tr>
                         </thead>
                         <tbody className="divide-y">
@@ -145,14 +165,26 @@ export default function UsersPage() {
                                         </span>
                                     </td>
                                     <td className="p-4 text-gray-500">{new Date(u.createdAt).toLocaleDateString()}</td>
+                                    <td className="p-4 text-right">
+                                        {!u.isDeleted && u._id !== user?.id && (
+                                            <button
+                                                onClick={() => deleteUser(u._id)}
+                                                className="p-2 text-red-500 hover:bg-red-50 rounded-full transition-colors"
+                                                title="Delete User"
+                                            >
+                                                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 6h18" /><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6" /><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2" /><line x1="10" y1="11" x2="10" y2="17" /><line x1="14" y1="11" x2="14" y2="17" /></svg>
+                                            </button>
+                                        )}
+                                    </td>
                                 </tr>
                             ))}
                             {(activeTab === 'admins' ? admins : customers).length === 0 && (
                                 <tr>
-                                    <td colSpan={4} className="p-8 text-center text-muted-foreground">No users found in this category.</td>
-                                </tr>
+                                    <tr>
+                                        <td colSpan={5} className="p-8 text-center text-muted-foreground">No users found in this category.</td>
+                                    </tr>
                             )}
-                        </tbody>
+                                </tbody>
                     </table>
                 </div>
             </div>
