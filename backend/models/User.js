@@ -13,7 +13,8 @@ const userSchema = new mongoose.Schema({
     },
     otp: { type: String },
     otpExpires: { type: Date },
-    isDeleted: { type: Boolean, default: false }
+    isDeleted: { type: Boolean, default: false },
+    deletedAt: { type: Date }
 }, { timestamps: true });
 
 module.exports = mongoose.model('User', userSchema);
