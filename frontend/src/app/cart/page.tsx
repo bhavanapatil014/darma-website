@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button"
 import Link from "next/link"
 import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
-import { Trash2, Heart } from "lucide-react"
+import { Trash2, Heart, ChevronRight } from "lucide-react"
 
 import { useAuth } from "@/lib/auth-context"
 
@@ -326,12 +326,15 @@ export default function CartPage() {
                                             <p className="text-xs text-green-600">-₹{(coupon?.discountAmount || 0).toFixed(2)} savings</p>
                                         </div>
                                     </div>
-                                    <button
-                                        onClick={(e) => { e.stopPropagation(); removeCoupon(); }}
-                                        className="text-xs font-bold text-red-500 uppercase hover:underline p-2"
-                                    >
-                                        Remove
-                                    </button>
+                                    <div className="flex items-center gap-1">
+                                        <button
+                                            onClick={(e) => { e.stopPropagation(); removeCoupon(); }}
+                                            className="text-xs font-bold text-red-500 uppercase hover:underline p-2"
+                                        >
+                                            Remove
+                                        </button>
+                                        <ChevronRight className="w-4 h-4 text-green-700 opacity-50 group-hover:opacity-100" />
+                                    </div>
                                 </div>
                             ) : (
                                 <button
