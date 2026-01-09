@@ -11,6 +11,7 @@ import { RecentlyViewed } from "@/components/recently-viewed";
 import { UseViewTracker } from "@/components/view-tracker";
 import { ProductGallery } from "@/components/product-gallery";
 import { Breadcrumb } from "@/components/ui/breadcrumb";
+import NegotiationChat from "@/components/negotiation-chat";
 
 type Params = Promise<{ id: string }>
 
@@ -104,6 +105,7 @@ export default async function ProductPage(props: {
                             {/* Actions */}
                             <div className="space-y-6 pt-4">
                                 <AddToCartButton product={product} />
+                                <NegotiationChat product={product} />
 
                                 <div className="flex items-center justify-center gap-8 text-sm text-gray-500 pt-4">
                                     <WishlistButton product={product} />
