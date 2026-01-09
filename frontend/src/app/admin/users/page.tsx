@@ -146,7 +146,7 @@ export default function UsersPage() {
                                 <tr key={u._id} className={`hover:bg-gray-50 transition-colors ${u.isDeleted ? 'bg-red-50/50 opacity-75' : ''}`}>
                                     <td className="p-4 font-medium">{u.name}</td>
                                     <td className="p-4 text-gray-600 space-y-1">
-                                        <div>{u.email}</div>
+                                        <div>{u.originalEmail || u.email}</div>
                                         {u.phoneNumber && <div className="text-xs text-gray-400">{u.phoneNumber}</div>}
                                     </td>
                                     <td className="p-4">
