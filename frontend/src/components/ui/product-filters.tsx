@@ -323,12 +323,7 @@ export function ProductFilters() {
         </>
     )
 }
-const router = useRouter()
-const searchParams = useSearchParams()
 
-// Derived State from URL (Truth)
-const category = searchParams.get("category") || "all"
-const sort = searchParams.get("sort") || "newest"
 
 // Price State needs local state for slider interaction
 const initialMinPrice = Number(searchParams.get("minPrice")) || 0
