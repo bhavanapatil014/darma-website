@@ -123,10 +123,17 @@ export default function UsersPage() {
                         </thead>
                         <tbody className="divide-y">
                             {(activeTab === 'admins' ? admins : customers).map(u => (
-                                <tr key={u._id} className="hover:bg-gray-50">
+                                <tr key={u._id} className={`hover:bg-gray-50 transition-colors ${u.isDeleted ? 'bg-red-50/50 opacity-75' : ''}`}>
                                     <td className="p-4 font-medium">
-                                        {u.name}
-                                        {u.isDeleted && <span className="ml-2 text-xs text-red-600 bg-red-100 px-2 py-0.5 rounded font-bold">DELETED</span>}
+                                        <div className="flex flex-col">
+                                            <span>{u.name}</span>
+                                            {u.isDeleted && (
+                                                <span className="mt-1 text-xs text-red-600 font-bold flex items-center gap-1">
+                                                    DELETED
+                                                    {u.deletedAt && <span className="font-normal opacity-75">on {new Date(u.deletedAt).toLocaleDateString()}</span>}
+                                                </span>
+                                            )}
+                                        </div>
                                     </td>
                                     <td className="p-4 text-gray-600 space-y-1">
                                         <div>{u.email}</div>
