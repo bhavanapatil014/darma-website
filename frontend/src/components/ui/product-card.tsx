@@ -1,5 +1,6 @@
 "use client"
-import Link from "next/link";
+import Link from "next/link"
+import NegotiationBtn from "./negotiation-btn";
 import { useRouter } from "next/navigation";
 import { Button } from "./button";
 import { Product } from "@/lib/data";
