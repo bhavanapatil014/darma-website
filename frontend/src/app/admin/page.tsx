@@ -1,8 +1,7 @@
 "use client"
 import { useEffect, useState } from "react"
 import { Users, ShoppingBag, Truck, CheckCircle, AlertCircle, DollarSign } from "lucide-react"
-import SettingsPage from "./settings/page"
-import AdminNegotiations from "@/components/admin/admin-negotiations"
+
 
 export default function AdminDashboard() {
     const [stats, setStats] = useState({
@@ -115,9 +114,7 @@ export default function AdminDashboard() {
                             <AlertCircle className="h-5 w-5" />
                             Low Stock Alerts
                         </h3>
-                        <TabsTrigger value="coupons" className="justify-start px-4 py-3 h-auto data-[state=active]:bg-teal-600 data-[state=active]:text-white rounded-none w-full">Coupons</TabsTrigger>
-                        <TabsTrigger value="negotiations" className="justify-start px-4 py-3 h-auto data-[state=active]:bg-teal-600 data-[state=active]:text-white rounded-none w-full">Negotiations</TabsTrigger>
-                        <TabsTrigger value="settings" className="justify-start px-4 py-3 h-auto data-[state=active]:bg-teal-600 data-[state=active]:text-white rounded-none w-full">Settings</TabsTrigger>
+
                     </div>
                     <div className="divide-y">
                         {lowStockItems.map((item) => (
