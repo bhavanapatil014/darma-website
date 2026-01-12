@@ -205,4 +205,32 @@ router.post('/upload-multiple', upload.array('images', 5), (req, res) => {
     res.json({ imageUrls });
 });
 
+// POST Search by Image (Mock Logic using Filename)
+router.post('/search-by-image', upload.single('image'), async (req, res) => {
+    try {
+        if (!req.file) return res.status(400).json({ message: 'No image provided' });
+
+        // Logic: Extract clean name from filename to simulate AI object detection
+        // e.g., "cerave-cleanser.jpg" -> "cerave cleanser"
+        const filename = req.file.originalname;
+        let query = filename.replace(/\.[^/.]+$/, ""); // Remove extension
+        query = query.replace(/[-_]/g, " ").replace(/IMG|DSC/gi, "").trim(); // Clean junk
+
+        // Remove numeric sequences if they look like IDs (optional, simple regex)
+        query = query.replace(/\s\d+\s/g, " ");
+
+        console.log(`Image Search Analysis: '${filename}' -> inferred query '${query}'`);
+
+        // Fallback if filename is too generic
+        if (!query || query.length < 2) {
+            query = "all";
+        }
+
+        res.json({ query });
+    } catch (error) {
+        console.error("Search by image error:", error);
+        res.status(500).json({ message: error.message });
+    }
+});
+
 module.exports = router;

@@ -132,6 +132,8 @@ export function Navbar() {
                                         recognition.onresult = (event: any) => {
                                             const transcript = event.results[0][0].transcript;
                                             setSearchQuery(transcript);
+                                            setIsSearchOpen(false);
+                                            router.push(`/shop?search=${encodeURIComponent(transcript)}`);
                                         };
                                     } else {
                                         alert("Voice search involves browser permissions and might not be supported.");
@@ -157,14 +159,37 @@ export function Navbar() {
                                 type="file"
                                 className="hidden"
                                 accept="image/*"
-                                onChange={(e) => {
+                                onChange={async (e) => {
                                     const file = e.target.files?.[0];
                                     if (file) {
-                                        // Placeholder for image search logic
-                                        // For now, we can just use the filename as a search term or inform the user
-                                        alert(`Image selected: ${file.name}. \n(Visual Search integration would process this image on the backend.)`);
-                                        // Optional: set search query to filename (processed)
-                                        // setSearchQuery(file.name.replace(/\.[^/.]+$/, "").replace(/[-_]/g, " "));
+                                        try {
+                                            // Show generic loading or just wait
+                                            // Ideally we'd have a UI state for 'isUploading', but for now we'll do:
+                                            const formData = new FormData();
+                                            formData.append('image', file);
+
+                                            // Optional: Show visual feedback
+                                            setSearchQuery("Scanning image...");
+
+                                            const res = await fetch('https://darma-website.onrender.com/api/products/search-by-image', {
+                                                method: 'POST',
+                                                body: formData
+                                            });
+
+                                            if (!res.ok) throw new Error('Image analysis failed');
+
+                                            const data = await res.json();
+
+                                            if (data.query) {
+                                                setIsSearchOpen(false);
+                                                router.push(`/shop?search=${encodeURIComponent(data.query)}`);
+                                                setSearchQuery(''); // Reset
+                                            }
+                                        } catch (err) {
+                                            console.error(err);
+                                            alert("Failed to search by image. Please try again.");
+                                            setSearchQuery('');
+                                        }
                                     }
                                 }}
                             />
