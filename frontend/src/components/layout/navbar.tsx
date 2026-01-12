@@ -144,12 +144,22 @@ export function Navbar() {
                                         };
 
                                         recognition.onerror = (event: any) => {
+                                            // Handle 'no-speech' (user stayed silent) gracefully
+                                            if (event.error === 'no-speech') {
+                                                setSearchQuery("");
+                                                return;
+                                            }
+
                                             console.error("Voice error:", event.error);
+
                                             if (event.error === 'not-allowed') {
                                                 alert("Voice search permission denied. Please allow microphone access.");
                                             } else {
                                                 setSearchQuery(""); // Reset
-                                                alert("Voice search error. Please try again.");
+                                                // Only alert for actual errors, not expected timeouts
+                                                if (event.error !== 'aborted') {
+                                                    alert("Voice search error. Please try again.");
+                                                }
                                             }
                                         };
 
