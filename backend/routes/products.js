@@ -234,14 +234,28 @@ router.post('/search-by-image', upload.single('image'), async (req, res) => {
             .replace(/\s+/g, " ");
 
         const ignoredWords = new Set(['the', 'and', 'for', 'with', 'net', 'vol', 'ml', 'oz', 'ingredients', 'directions', 'use', 'external', 'only', 'made', 'in', 'india', 'usa', 'exp', 'mfg', 'date', 'batch', 'no', 'mr', 'mrp', 'rs', 'free', 'paraben', 'sulfate']);
+        const knownBrands = new Set(['cerave', 'cetaphil', 'bioderma', 'neutrogena', 'minimalist', 'derma', 'co']);
 
         const words = cleanText.split(" ")
             .map(w => w.trim())
-            .filter(w => w.length > 3 && !ignoredWords.has(w.toLowerCase()));
+            .filter(w => w.length > 2 && !ignoredWords.has(w.toLowerCase()));
 
-        // Simple Heuristic: Take top 3 unique words, prioritizing Title Case
-        const uniqueWords = [...new Set(words)];
-        let query = uniqueWords.slice(0, 3).join(" "); // Take first 3 significant words
+        // Brand Detection Strategy
+        const foundBrands = words.filter(w => knownBrands.has(w.toLowerCase()));
+        const uniqueWords = [...new Set(words)]; // Deduplicate
+
+        let query = "";
+
+        if (foundBrands.length > 0) {
+            // If brand found, prioritize it: Brand + Type (e.g., CeraVe Cleanser)
+            const mainBrand = foundBrands[0];
+            // Find one or two other significant words that are NOT the brand
+            const otherWords = uniqueWords.filter(w => w.toLowerCase() !== mainBrand.toLowerCase()).slice(0, 2);
+            query = `${mainBrand} ${otherWords.join(" ")}`;
+        } else {
+            // No brand, just take top 3 distinct words
+            query = uniqueWords.slice(0, 3).join(" ");
+        }
 
         console.log(`OCR Derived Query: '${query}'`);
 
