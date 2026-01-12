@@ -208,12 +208,17 @@ export function Navbar() {
                                             if (!res.ok) throw new Error('Failed to analyze image');
 
                                             const data = await res.json();
-                                            if (data.query) {
-                                                setIsSearchOpen(false);
-                                                // Force navigation on mobile
-                                                window.location.href = `/shop?search=${encodeURIComponent(data.query)}`;
-                                                setSearchQuery('');
+                                            setIsSearchOpen(false);
+
+                                            if (data.isGeneric) {
+                                                alert("Could not identify specific product features. Showing all products.");
+                                                window.location.href = '/shop';
+                                            } else if (data.query) {
+                                                const transcript = data.query;
+                                                alert(`Found product matching: "${transcript}"`); // Optional helpful feedback
+                                                window.location.href = `/shop?search=${encodeURIComponent(transcript)}`;
                                             }
+                                            setSearchQuery('');
                                         } catch (err) {
                                             console.error(err);
                                             alert("Image search failed. Please try again or check your internet.");

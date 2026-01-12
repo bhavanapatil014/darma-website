@@ -230,12 +230,14 @@ router.post('/search-by-image', upload.single('image'), async (req, res) => {
         console.log(`Image Search Analysis: '${filename}' -> inferred query '${query}'`);
 
         // Fallback if filename is too generic, empty, or just numbers
+        let isGeneric = false;
         if (!query || query.length < 3 || /^\d+$/.test(query)) {
             query = "all";
+            isGeneric = true;
             console.log("Query too generic/numeric, defaulting to 'all'");
         }
 
-        res.json({ query });
+        res.json({ query, isGeneric });
     } catch (error) {
         console.error("Search by image error:", error);
         res.status(500).json({ message: error.message });
