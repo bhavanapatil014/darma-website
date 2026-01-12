@@ -193,37 +193,65 @@ export function Navbar() {
                                     const file = e.target.files?.[0];
                                     if (file) {
                                         try {
-                                            // Feedback for user
-                                            setSearchQuery("Uploading & analyzing...");
-                                            // alert("Image selected. Starting analysis..."); // Optional debug, trying visible feedback first
+                                            setSearchQuery("Scanning image...");
 
-                                            const formData = new FormData();
-                                            formData.append('image', file);
+                                            // Client-side OCR to avoid backend Server Overload (502 Error)
+                                            const { createWorker } = await import('tesseract.js');
+                                            const worker = await createWorker('eng');
 
-                                            const res = await fetch('https://darma-website.onrender.com/api/products/search-by-image', {
-                                                method: 'POST',
-                                                body: formData
-                                            });
+                                            const { data: { text } } = await worker.recognize(file);
+                                            await worker.terminate();
 
-                                            if (!res.ok) throw new Error('Failed to analyze image');
+                                            console.log("OCR Text:", text);
 
-                                            if (!res.ok) throw new Error('Failed to analyze image');
+                                            // Process Text
+                                            const cleanText = text.replace(/[^a-zA-Z0-9\s]/g, " ").replace(/\s+/g, " ");
+                                            const knownBrands = ['cerave', 'cetaphil', 'bioderma', 'neutrogena', 'minimalist', 'derma', 'co'];
+                                            const words = cleanText.split(" ").map(w => w.trim()).filter(w => w.length > 2);
 
-                                            const data = await res.json();
-                                            setIsSearchOpen(false);
+                                            // 1. Check for Brands
+                                            const foundBrand = knownBrands.find(brand =>
+                                                words.some(w => w.toLowerCase().includes(brand))
+                                            );
 
-                                            if (data.query) {
-                                                const transcript = data.query;
-                                                // alert(`Found product matching: "${transcript}"`); // Keep debug if needed, or remove for cleaner UX
-                                                window.location.href = `/shop?search=${encodeURIComponent(transcript)}`;
+                                            let finalQuery = "";
+
+                                            if (foundBrand) {
+                                                finalQuery = foundBrand;
+                                                // Try to add one more relevant word (e.g. Cleanser)
+                                                const productType = words.find(w =>
+                                                    !w.toLowerCase().includes(foundBrand) &&
+                                                    w.length > 3 &&
+                                                    !['ingredients', 'directions', 'net', 'vol', 'use', 'with', 'for'].includes(w.toLowerCase())
+                                                );
+                                                if (productType) finalQuery += " " + productType;
                                             } else {
-                                                alert("Could not identify product from this image. Please ensure identifying text is visible.");
+                                                // 2. Fallback to Filename if text is weak or empty
+                                                if (words.length < 2) {
+                                                    let filename = file.name.replace(/\.[^/.]+$/, "");
+                                                    filename = filename.replace(/IMG|DSC|Screenshot|PXL|WA/gi, "").replace(/[-_@.]/g, " ").replace(/\b\d+\b/g, "").trim();
+                                                    if (filename.length > 2) {
+                                                        finalQuery = filename;
+                                                    }
+                                                } else {
+                                                    // 3. Use top text words
+                                                    finalQuery = words.slice(0, 2).join(" ");
+                                                }
                                             }
 
-                                            setSearchQuery('');
+                                            setIsSearchOpen(false);
+                                            setSearchQuery("");
+
+                                            if (finalQuery && finalQuery.length > 1) {
+                                                // alert(`Found: ${finalQuery}`); // Optional debug
+                                                window.location.href = `/shop?search=${encodeURIComponent(finalQuery)}`;
+                                            } else {
+                                                alert("Could not identify product from this image. Please ensure identifying text or a descriptive filename is present.");
+                                            }
+
                                         } catch (err) {
                                             console.error(err);
-                                            alert("Image search failed. Please try again or check your internet.");
+                                            alert("Image analysis failed. Please try a clearer image.");
                                             setSearchQuery('');
                                         }
                                     }
