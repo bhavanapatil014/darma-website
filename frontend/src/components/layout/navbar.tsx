@@ -120,22 +120,25 @@ export function Navbar() {
                                 className="flex-1 py-2 text-base bg-transparent focus:outline-none placeholder:text-gray-400 min-w-0"
                                 value={searchQuery}
                                 onChange={(e) => setSearchQuery(e.target.value)}
-                                ref={(input) => { if (input && isSearchOpen) input.focus(); }}
+                                id="navbar-search-input"
                             />
 
                             {/* Voice Search */}
                             <button
                                 type="button"
                                 onClick={() => {
-                                    if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
+                                    if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
+                                        alert("Voice search is not supported in this browser.");
+                                        return;
+                                    }
+
+                                    try {
                                         // @ts-ignore
                                         const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
                                         const recognition = new SpeechRecognition();
                                         recognition.lang = 'en-US';
 
-                                        recognition.onstart = () => {
-                                            setSearchQuery("Listening...");
-                                        };
+                                        recognition.onstart = () => setSearchQuery("Listening...");
 
                                         recognition.onresult = (event: any) => {
                                             const transcript = event.results[0][0].transcript;
@@ -146,21 +149,20 @@ export function Navbar() {
 
                                         recognition.onerror = (event: any) => {
                                             if (event.error === 'no-speech') {
-                                                setSearchQuery("");
+                                                setSearchQuery(""); // Just reset silently
                                                 return;
                                             }
-                                            console.error("Voice error:", event.error);
+                                            console.error("Voice Error:", event.error);
                                             if (event.error === 'not-allowed') {
-                                                alert("Microphone access denied. Check your browser settings.");
-                                            } else if (event.error !== 'aborted') {
-                                                alert("Voice search failed. Please try again.");
-                                                setSearchQuery("");
+                                                alert("Please allow microphone access to use voice search.");
                                             }
+                                            setSearchQuery("");
                                         };
 
                                         recognition.start();
-                                    } else {
-                                        alert("Voice search involves technologies not supported by this specific browser. Please use Chrome.");
+                                    } catch (e) {
+                                        console.error("Voice start error:", e);
+                                        alert("Failed to start voice search.");
                                     }
                                 }}
                                 className="p-2 text-gray-500 hover:text-teal-600 transition-colors"
@@ -172,14 +174,14 @@ export function Navbar() {
                             {/* Image Search */}
                             <button
                                 type="button"
-                                onClick={() => fileInputRef.current?.click()}
+                                onClick={() => document.getElementById('image-search-input')?.click()}
                                 className="p-2 text-gray-500 hover:text-teal-600 transition-colors"
                                 title="Search by Image"
                             >
                                 <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z" /><circle cx="12" cy="13" r="4" /></svg>
                             </button>
                             <input
-                                ref={fileInputRef}
+                                id="image-search-input"
                                 type="file"
                                 className="hidden"
                                 accept="image/*"
@@ -189,16 +191,16 @@ export function Navbar() {
                                         try {
                                             const formData = new FormData();
                                             formData.append('image', file);
-                                            setSearchQuery("Scanning...");
+                                            setSearchQuery("Scanning image...");
 
                                             const res = await fetch('https://darma-website.onrender.com/api/products/search-by-image', {
                                                 method: 'POST',
                                                 body: formData
                                             });
 
-                                            if (!res.ok) throw new Error('Image analysis failed');
-                                            const data = await res.json();
+                                            if (!res.ok) throw new Error('Failed');
 
+                                            const data = await res.json();
                                             if (data.query) {
                                                 setIsSearchOpen(false);
                                                 router.push(`/shop?search=${encodeURIComponent(data.query)}`);
@@ -206,7 +208,7 @@ export function Navbar() {
                                             }
                                         } catch (err) {
                                             console.error(err);
-                                            alert("Failed to search by image.");
+                                            alert("Image search failed.");
                                             setSearchQuery('');
                                         }
                                     }
