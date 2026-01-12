@@ -195,17 +195,18 @@ export function Navbar() {
                                         try {
                                             setSearchQuery("Scanning image...");
 
-                                            // Client-side OCR to avoid backend Server Overload (502 Error)
-                                            const { createWorker } = await import('tesseract.js');
-                                            const worker = await createWorker('eng');
+                                            // Dynamic import to load library only when needed
+                                            const Tesseract = await import('tesseract.js');
 
-                                            const { data: { text } } = await worker.recognize(file);
-                                            await worker.terminate();
+                                            // Using the static recognize method which is simpler and handles worker lifecycle
+                                            const { data: { text } } = await Tesseract.default.recognize(file, 'eng', {
+                                                logger: m => console.log(m)
+                                            });
 
-                                            console.log("OCR Text:", text);
+                                            console.log("OCR Raw Text:", text);
 
                                             // Process Text
-                                            const cleanText = text.replace(/[^a-zA-Z0-9\s]/g, " ").replace(/\s+/g, " ");
+                                            const cleanText = (text || "").replace(/[^a-zA-Z0-9\s]/g, " ").replace(/\s+/g, " ");
                                             const knownBrands = ['cerave', 'cetaphil', 'bioderma', 'neutrogena', 'minimalist', 'derma', 'co'];
                                             const words = cleanText.split(" ").map(w => w.trim()).filter(w => w.length > 2);
 
@@ -219,6 +220,7 @@ export function Navbar() {
                                             if (foundBrand) {
                                                 finalQuery = foundBrand;
                                                 // Try to add one more relevant word (e.g. Cleanser)
+                                                // Filter out the brand itself and common stop words
                                                 const productType = words.find(w =>
                                                     !w.toLowerCase().includes(foundBrand) &&
                                                     w.length > 3 &&
@@ -226,15 +228,16 @@ export function Navbar() {
                                                 );
                                                 if (productType) finalQuery += " " + productType;
                                             } else {
-                                                // 2. Fallback to Filename if text is weak or empty
+                                                // 2. Fallback to Filename logic if no useful text found
                                                 if (words.length < 2) {
+                                                    console.log("Low text confidence, using filename fallback.");
                                                     let filename = file.name.replace(/\.[^/.]+$/, "");
                                                     filename = filename.replace(/IMG|DSC|Screenshot|PXL|WA/gi, "").replace(/[-_@.]/g, " ").replace(/\b\d+\b/g, "").trim();
                                                     if (filename.length > 2) {
                                                         finalQuery = filename;
                                                     }
                                                 } else {
-                                                    // 3. Use top text words
+                                                    // 3. Use top text words found in image
                                                     finalQuery = words.slice(0, 2).join(" ");
                                                 }
                                             }
@@ -243,15 +246,15 @@ export function Navbar() {
                                             setSearchQuery("");
 
                                             if (finalQuery && finalQuery.length > 1) {
-                                                // alert(`Found: ${finalQuery}`); // Optional debug
+                                                // alert(`Found: ${finalQuery}`); 
                                                 window.location.href = `/shop?search=${encodeURIComponent(finalQuery)}`;
                                             } else {
-                                                alert("Could not identify product from this image. Please ensure identifying text or a descriptive filename is present.");
+                                                alert("Could not identify product from this image. Please ensure identifying text is visible.");
                                             }
 
                                         } catch (err) {
-                                            console.error(err);
-                                            alert("Image analysis failed. Please try a clearer image.");
+                                            console.error("OCR Error:", err);
+                                            alert("Image analysis encountered an error. Please try a different image.");
                                             setSearchQuery('');
                                         }
                                     }
