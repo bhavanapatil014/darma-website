@@ -55,11 +55,11 @@ export function RecentlyViewed({ currentProductId }: { currentProductId: string 
 
                 <div
                     ref={scrollRef}
-                    className="flex gap-6 overflow-x-auto pb-4 scrollbar-hide scroll-smooth snap-x px-1"
+                    className="flex gap-4 md:gap-6 overflow-x-auto pb-8 scrollbar-hide scroll-smooth snap-x px-4"
                     style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
                 >
                     {recentProducts.map(product => (
-                        <div key={product.id} className="min-w-[260px] md:min-w-[280px] snap-start">
+                        <div key={product.id} className="min-w-[160px] md:min-w-[220px] lg:min-w-[260px] snap-start h-full flex-shrink-0">
                             <ProductCard product={product} />
                         </div>
                     ))}
