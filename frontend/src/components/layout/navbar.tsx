@@ -139,11 +139,15 @@ export function Navbar() {
 
                                         recognition.onstart = () => setSearchQuery("Listening...");
 
+                                        recognition.onspeechend = () => {
+                                            recognition.stop();
+                                        };
+
                                         recognition.onresult = (event: any) => {
                                             const transcript = event.results[0][0].transcript;
-                                            setSearchQuery(transcript);
-                                            setIsSearchOpen(false);
-                                            router.push(`/shop?search=${encodeURIComponent(transcript)}`);
+                                            alert("Recognized: " + transcript); // Debug
+                                            // Force navigation to ensure it happens on mobile
+                                            window.location.href = `/shop?search=${encodeURIComponent(transcript)}`;
                                         };
 
                                         recognition.onerror = (event: any) => {
