@@ -150,9 +150,6 @@ export function Navbar() {
                                         recognition.onresult = (event: any) => {
                                             const transcript = event.results[0][0].transcript;
 
-                                            // Debug for mobile validation
-                                            alert(`Recognized: ${transcript}`);
-
                                             setSearchQuery(transcript);
                                             setIsSearchOpen(false);
                                             window.location.href = `/shop?search=${encodeURIComponent(transcript)}`;
@@ -201,37 +198,63 @@ export function Navbar() {
                                     const file = e.target.files?.[0];
                                     if (file) {
                                         try {
-                                            // Feedback for user
-                                            setSearchQuery("Uploading & analyzing...");
+                                            setSearchQuery("Analyzing image...");
 
-                                            // server-side analysis (More robust than mobile browser OCR)
-                                            const formData = new FormData();
-                                            formData.append('image', file);
-
-                                            // Using the deployed backend URL
-                                            const res = await fetch('https://darma-website.onrender.com/api/products/search-by-image', {
-                                                method: 'POST',
-                                                body: formData
-                                            });
-
-                                            if (!res.ok) {
-                                                throw new Error(`Server responded with ${res.status}`);
+                                            // 1. Attempt Client-Side OCR (Backend crashes on free tier)
+                                            let text = "";
+                                            try {
+                                                const Tesseract = await import('tesseract.js');
+                                                const result = await Tesseract.default.recognize(file, 'eng', {
+                                                    logger: m => console.log(m)
+                                                });
+                                                text = result.data.text;
+                                                console.log("OCR Result:", text);
+                                            } catch (ocrErr) {
+                                                console.error("Client OCR Failed:", ocrErr);
+                                                // Continue to filename fallback
                                             }
 
-                                            const data = await res.json();
-                                            setIsSearchOpen(false);
+                                            // 2. Process Results
+                                            const cleanText = (text || "").replace(/[^a-zA-Z0-9\s]/g, " ").replace(/\s+/g, " ").trim();
+                                            const words = cleanText.split(" ").filter(w => w.length > 2);
 
-                                            if (data.query) {
-                                                const transcript = data.query;
-                                                window.location.href = `/shop?search=${encodeURIComponent(transcript)}`;
+                                            const knownBrands = ['cerave', 'cetaphil', 'bioderma', 'neutrogena', 'minimalist', 'derma', 'co'];
+                                            const foundBrand = knownBrands.find(brand => words.some(w => w.toLowerCase().includes(brand)));
+
+                                            let query = "";
+
+                                            if (foundBrand) {
+                                                query = foundBrand;
+                                                // Add one non-brand keyword if available
+                                                const type = words.find(w => !w.toLowerCase().includes(foundBrand) && w.length > 3 && !['ingredients', 'directions', 'contains'].includes(w.toLowerCase()));
+                                                if (type) query += " " + type;
                                             } else {
-                                                alert("Could not identify product from this image. Please ensure identifying text is visible.");
+                                                // Fallback to filename if OCR failed or found nothing
+                                                if (words.length < 2) {
+                                                    let filename = file.name.replace(/\.[^/.]+$/, ""); // remove extension
+                                                    // Clean common junk from filenames
+                                                    filename = filename.replace(/IMG|DSC|Screenshot|PXL|WA/gi, "")
+                                                        .replace(/[-_@.]/g, " ")
+                                                        .replace(/\b\d+\b/g, "")
+                                                        .trim();
+                                                    if (filename.length > 2) query = filename;
+                                                } else {
+                                                    // Use top 2 words from text
+                                                    query = words.slice(0, 2).join(" ");
+                                                }
                                             }
 
-                                            setSearchQuery('');
+                                            setIsSearchOpen(false);
+                                            setSearchQuery("");
+
+                                            if (query && query.length > 1) {
+                                                window.location.href = `/shop?search=${encodeURIComponent(query)}`;
+                                            } else {
+                                                alert("Could not identify product. Please ensure the image has readable text or a descriptive filename.");
+                                            }
                                         } catch (err) {
-                                            console.error("Image Search Error:", err);
-                                            alert("Image search failed. Please try again or check your internet.");
+                                            console.error("Image Analysis Error:", err);
+                                            alert("Image analysis failed. Please try again.");
                                             setSearchQuery('');
                                         }
                                     }
