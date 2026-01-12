@@ -214,16 +214,25 @@ router.post('/search-by-image', upload.single('image'), async (req, res) => {
         // e.g., "cerave-cleanser.jpg" -> "cerave cleanser"
         const filename = req.file.originalname;
         let query = filename.replace(/\.[^/.]+$/, ""); // Remove extension
-        query = query.replace(/[-_]/g, " ").replace(/IMG|DSC/gi, "").trim(); // Clean junk
 
-        // Remove numeric sequences if they look like IDs (optional, simple regex)
-        query = query.replace(/\s\d+\s/g, " ");
+        // Remove common camera prefixes and file artifacts
+        query = query.replace(/IMG|DSC|Screenshot|PXL|WA/gi, "");
+
+        // Replace separators with spaces
+        query = query.replace(/[-_@.]/g, " ");
+
+        // Remove numeric sequences that stand alone (dates, counts, indexes)
+        query = query.replace(/\b\d+\b/g, "");
+
+        // Clean up double spaces and trimming
+        query = query.replace(/\s+/g, " ").trim();
 
         console.log(`Image Search Analysis: '${filename}' -> inferred query '${query}'`);
 
-        // Fallback if filename is too generic
-        if (!query || query.length < 2) {
+        // Fallback if filename is too generic, empty, or just numbers
+        if (!query || query.length < 3 || /^\d+$/.test(query)) {
             query = "all";
+            console.log("Query too generic/numeric, defaulting to 'all'");
         }
 
         res.json({ query });
