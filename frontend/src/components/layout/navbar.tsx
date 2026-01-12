@@ -145,8 +145,8 @@ export function Navbar() {
 
                                         recognition.onresult = (event: any) => {
                                             const transcript = event.results[0][0].transcript;
-                                            alert("Recognized: " + transcript); // Debug
-                                            // Force navigation to ensure it happens on mobile
+                                            setSearchQuery(transcript);
+                                            setIsSearchOpen(false);
                                             window.location.href = `/shop?search=${encodeURIComponent(transcript)}`;
                                         };
 
@@ -193,26 +193,30 @@ export function Navbar() {
                                     const file = e.target.files?.[0];
                                     if (file) {
                                         try {
+                                            // Feedback for user
+                                            setSearchQuery("Uploading & analyzing...");
+                                            // alert("Image selected. Starting analysis..."); // Optional debug, trying visible feedback first
+
                                             const formData = new FormData();
                                             formData.append('image', file);
-                                            setSearchQuery("Scanning image...");
 
                                             const res = await fetch('https://darma-website.onrender.com/api/products/search-by-image', {
                                                 method: 'POST',
                                                 body: formData
                                             });
 
-                                            if (!res.ok) throw new Error('Failed');
+                                            if (!res.ok) throw new Error('Failed to analyze image');
 
                                             const data = await res.json();
                                             if (data.query) {
                                                 setIsSearchOpen(false);
-                                                router.push(`/shop?search=${encodeURIComponent(data.query)}`);
+                                                // Force navigation on mobile
+                                                window.location.href = `/shop?search=${encodeURIComponent(data.query)}`;
                                                 setSearchQuery('');
                                             }
                                         } catch (err) {
                                             console.error(err);
-                                            alert("Image search failed.");
+                                            alert("Image search failed. Please try again or check your internet.");
                                             setSearchQuery('');
                                         }
                                     }
