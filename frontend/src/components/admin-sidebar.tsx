@@ -74,7 +74,7 @@ export function AdminSidebar() {
                         </button>
                     </div>
 
-                    <nav className="flex-1 space-y-1">
+                    <nav className="flex-1 space-y-1 overflow-y-auto min-h-0 custom-scrollbar">
                         {links.map((link) => (
                             <Link
                                 key={link.href}
