@@ -149,6 +149,10 @@ export function Navbar() {
 
                                         recognition.onresult = (event: any) => {
                                             const transcript = event.results[0][0].transcript;
+
+                                            // Debug for mobile validation
+                                            alert(`Recognized: ${transcript}`);
+
                                             setSearchQuery(transcript);
                                             setIsSearchOpen(false);
                                             window.location.href = `/shop?search=${encodeURIComponent(transcript)}`;
