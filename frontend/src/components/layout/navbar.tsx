@@ -218,7 +218,7 @@ export function Navbar() {
                                             const cleanText = (text || "").replace(/[^a-zA-Z0-9\s]/g, " ").replace(/\s+/g, " ").trim();
                                             const words = cleanText.split(" ").filter(w => w.length > 2);
 
-                                            const knownBrands = ['cerave', 'cetaphil', 'bioderma', 'neutrogena', 'minimalist', 'derma', 'co'];
+                                            const knownBrands = ['cerave', 'cetaphil', 'bioderma', 'neutrogena', 'minimalist', 'the derma co'];
                                             const foundBrand = knownBrands.find(brand => words.some(w => w.toLowerCase().includes(brand)));
 
                                             let targetUrl = "";
