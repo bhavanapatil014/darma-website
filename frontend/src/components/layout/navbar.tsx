@@ -131,15 +131,31 @@ export function Navbar() {
                                         const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
                                         const recognition = new SpeechRecognition();
                                         recognition.lang = 'en-US';
-                                        recognition.start();
+
+                                        recognition.onstart = () => {
+                                            setSearchQuery("Listening...");
+                                        };
+
                                         recognition.onresult = (event: any) => {
                                             const transcript = event.results[0][0].transcript;
                                             setSearchQuery(transcript);
                                             setIsSearchOpen(false);
                                             router.push(`/shop?search=${encodeURIComponent(transcript)}`);
                                         };
+
+                                        recognition.onerror = (event: any) => {
+                                            console.error("Voice error:", event.error);
+                                            if (event.error === 'not-allowed') {
+                                                alert("Voice search permission denied. Please allow microphone access.");
+                                            } else {
+                                                setSearchQuery(""); // Reset
+                                                alert("Voice search error. Please try again.");
+                                            }
+                                        };
+
+                                        recognition.start();
                                     } else {
-                                        alert("Voice search involves browser permissions and might not be supported.");
+                                        alert("Voice search is not supported in this browser. Try Chrome or Edge.");
                                     }
                                 }}
                                 className="p-2 text-gray-500 hover:text-teal-600 transition-colors"
