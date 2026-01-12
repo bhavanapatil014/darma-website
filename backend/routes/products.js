@@ -222,8 +222,7 @@ router.post('/search-by-image', upload.single('image'), async (req, res) => {
         console.log("Skipping OCR to preserve server stability. Using filename strategies.");
 
         // 2. (Skipped regex on empty text)
-        const uniqueWords = [];
-        const foundBrands = [];
+
 
         // 3. Primary Strategy: Filename Analysis
 
