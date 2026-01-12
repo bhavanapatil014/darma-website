@@ -59,7 +59,7 @@ export function RecentlyViewed({ currentProductId }: { currentProductId: string 
                     style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
                 >
                     {recentProducts.map(product => (
-                        <div key={product.id} className="min-w-[160px] md:min-w-[220px] lg:min-w-[260px] snap-start h-full flex-shrink-0">
+                        <div key={product.id} className="min-w-[140px] md:min-w-[180px] lg:min-w-[220px] snap-start h-full flex-shrink-0">
                             <ProductCard product={product} />
                         </div>
                     ))}
