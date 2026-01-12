@@ -23,7 +23,7 @@ export const metadata: Metadata = {
   title: "Venkata Derma - Premium Skincare & Dermatology",
   description: "Experience the science of beautiful skin with Venkata Derma's premium dermatology products.",
   other: {
-    "version": "3.56.0-Search-Debug", // Trigger Deploy
+    "version": "3.56.2-HydrationFix", // Trigger Deploy
     "Cache-Control": "no-cache, no-store, must-revalidate"
   }
 };
@@ -34,7 +34,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className="scroll-smooth" data-scroll-behavior="smooth">
+    <html lang="en" className="scroll-smooth" data-scroll-behavior="smooth" suppressHydrationWarning={true}>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased flex flex-col min-h-screen`}
       >
