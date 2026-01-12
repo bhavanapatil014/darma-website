@@ -39,6 +39,7 @@ export function Navbar() {
     const [isSearchOpen, setIsSearchOpen] = React.useState(false);
     const [isMobileMenuOpen, setIsMobileMenuOpen] = React.useState(false);
     const [searchQuery, setSearchQuery] = React.useState('');
+    const fileInputRef = React.useRef<HTMLInputElement>(null);
     const router = useRouter();
 
     const handleSearch = (e: React.FormEvent) => {
@@ -109,14 +110,14 @@ export function Navbar() {
                     {/* Search Overlay - Full Cover on Mobile */}
                     <div
                         suppressHydrationWarning={true}
-                        className={`absolute inset-0 bg-white z-50 flex items-center px-4 transition-all duration-300 ${isSearchOpen ? 'opacity-100 visible' : 'opacity-0 invisible pointer-events-none'}`}
+                        className={`absolute inset-0 bg-white z-[60] flex items-center px-4 transition-all duration-300 ${isSearchOpen ? 'opacity-100 visible' : 'opacity-0 invisible pointer-events-none'}`}
                     >
-                        <form onSubmit={handleSearch} className="flex-1 flex items-center gap-2">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-gray-400"><circle cx="11" cy="11" r="8" /><path d="m21 21-4.3-4.3" /></svg>
+                        <form onSubmit={handleSearch} className="flex-1 flex items-center gap-2 max-w-3xl mx-auto">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-gray-400 shrink-0"><circle cx="11" cy="11" r="8" /><path d="m21 21-4.3-4.3" /></svg>
                             <input
                                 type="text"
                                 placeholder="Search products..."
-                                className="flex-1 py-2 text-base bg-transparent focus:outline-none placeholder:text-gray-400"
+                                className="flex-1 py-2 text-base bg-transparent focus:outline-none placeholder:text-gray-400 min-w-0"
                                 value={searchQuery}
                                 onChange={(e) => setSearchQuery(e.target.value)}
                                 ref={(input) => { if (input && isSearchOpen) input.focus(); }}
@@ -144,28 +145,22 @@ export function Navbar() {
                                         };
 
                                         recognition.onerror = (event: any) => {
-                                            // Handle 'no-speech' (user stayed silent) gracefully
                                             if (event.error === 'no-speech') {
                                                 setSearchQuery("");
                                                 return;
                                             }
-
                                             console.error("Voice error:", event.error);
-
                                             if (event.error === 'not-allowed') {
-                                                alert("Voice search permission denied. Please allow microphone access.");
-                                            } else {
-                                                setSearchQuery(""); // Reset
-                                                // Only alert for actual errors, not expected timeouts
-                                                if (event.error !== 'aborted') {
-                                                    alert("Voice search error. Please try again.");
-                                                }
+                                                alert("Microphone access denied. Check your browser settings.");
+                                            } else if (event.error !== 'aborted') {
+                                                alert("Voice search failed. Please try again.");
+                                                setSearchQuery("");
                                             }
                                         };
 
                                         recognition.start();
                                     } else {
-                                        alert("Voice search is not supported in this browser. Try Chrome or Edge.");
+                                        alert("Voice search involves technologies not supported by this specific browser. Please use Chrome.");
                                     }
                                 }}
                                 className="p-2 text-gray-500 hover:text-teal-600 transition-colors"
@@ -177,14 +172,14 @@ export function Navbar() {
                             {/* Image Search */}
                             <button
                                 type="button"
-                                onClick={() => document.getElementById('image-search-input')?.click()}
+                                onClick={() => fileInputRef.current?.click()}
                                 className="p-2 text-gray-500 hover:text-teal-600 transition-colors"
                                 title="Search by Image"
                             >
                                 <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z" /><circle cx="12" cy="13" r="4" /></svg>
                             </button>
                             <input
-                                id="image-search-input"
+                                ref={fileInputRef}
                                 type="file"
                                 className="hidden"
                                 accept="image/*"
@@ -192,13 +187,9 @@ export function Navbar() {
                                     const file = e.target.files?.[0];
                                     if (file) {
                                         try {
-                                            // Show generic loading or just wait
-                                            // Ideally we'd have a UI state for 'isUploading', but for now we'll do:
                                             const formData = new FormData();
                                             formData.append('image', file);
-
-                                            // Optional: Show visual feedback
-                                            setSearchQuery("Scanning image...");
+                                            setSearchQuery("Scanning...");
 
                                             const res = await fetch('https://darma-website.onrender.com/api/products/search-by-image', {
                                                 method: 'POST',
@@ -206,17 +197,16 @@ export function Navbar() {
                                             });
 
                                             if (!res.ok) throw new Error('Image analysis failed');
-
                                             const data = await res.json();
 
                                             if (data.query) {
                                                 setIsSearchOpen(false);
                                                 router.push(`/shop?search=${encodeURIComponent(data.query)}`);
-                                                setSearchQuery(''); // Reset
+                                                setSearchQuery('');
                                             }
                                         } catch (err) {
                                             console.error(err);
-                                            alert("Failed to search by image. Please try again.");
+                                            alert("Failed to search by image.");
                                             setSearchQuery('');
                                         }
                                     }
@@ -226,7 +216,7 @@ export function Navbar() {
                             <button
                                 type="button"
                                 onClick={() => setIsSearchOpen(false)}
-                                className="p-2 text-gray-500 hover:text-black"
+                                className="p-2 text-gray-500 hover:text-black shrink-0"
                             >
                                 <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" /></svg>
                             </button>
