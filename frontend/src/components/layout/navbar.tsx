@@ -134,6 +134,10 @@ export function Navbar() {
                                     try {
                                         // @ts-ignore
                                         const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+                                        if (!SpeechRecognition) {
+                                            alert("Voice search API not available.");
+                                            return;
+                                        }
                                         const recognition = new SpeechRecognition();
                                         recognition.lang = 'en-US';
 
@@ -167,7 +171,7 @@ export function Navbar() {
                                         recognition.start();
                                     } catch (e) {
                                         console.error("Voice start error:", e);
-                                        alert("Failed to start voice search service.");
+                                        alert("Failed to start voice search service. Please reload the page.");
                                     }
                                 }}
                                 className="p-2 text-gray-500 hover:text-teal-600 transition-colors"
