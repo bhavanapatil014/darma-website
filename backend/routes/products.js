@@ -214,46 +214,18 @@ router.post('/search-by-image', upload.single('image'), async (req, res) => {
 
         console.log(`Starting OCR analysis for ${req.file.originalname}...`);
 
-        // 1. Try OCR (Read text from image)
-        // Warning: Tesseract is heavy. On low-memory servers, this might fail (OOM).
-        // We wrap it strictly to fallback to filename if it crashes/fails.
+        // OCR analysis skipped to prevent Server Crashes (Memory Limit on Free Tier). Using Smart Filename Analysis.
+        // Tesseract.js requires ~200MB+ RAM, which crashes the free Render instance (512MB limit) causing 502 Errors.
+        // We will rely on "Smart Filename Matching" which is instant and reliable.
         let ocrText = "";
-        try {
-            console.log("Initializing OCR Worker...");
-            const { createWorker } = require('tesseract.js');
-            const os = require('os');
-            const path = require('path');
 
-            // Use /tmp to avoid Read-Only file system errors on Render
-            const cachePath = path.join(os.tmpdir(), 'ocr-cache');
+        console.log("Skipping OCR to preserve server stability. Using filename strategies.");
 
-            // v5/v6 signature: langs, oem, options
-            const worker = await createWorker('eng', 1, {
-                cachePath: cachePath,
-                logger: m => { if (m.status === 'recognizing text') console.log(`OCR Progress: ${m.progress}`) }
-            });
+        // 2. (Skipped regex on empty text)
+        const uniqueWords = [];
+        const foundBrands = [];
 
-            // Add Safety Timeout (7 seconds) so we don't hang the server
-            const TIMEOUT_MS = 7000;
-            const timeoutPromise = new Promise((_, reject) =>
-                setTimeout(() => reject(new Error("OCR Timeout (>7s)")), TIMEOUT_MS)
-            );
-
-            const recognitionPromise = worker.recognize(req.file.buffer);
-
-            const { data: { text } } = await Promise.race([recognitionPromise, timeoutPromise]);
-
-            await worker.terminate();
-            ocrText = text;
-            console.log("OCR Raw Text:", text.substring(0, 100).replace(/\n/g, " ") + "...");
-        } catch (ocrErr) {
-            console.error("OCR Failed/Skipped:", ocrErr.message);
-            // Try to cleanup worker if it exists (although we can't easily access the var here due to block scope unless we lift it)
-            // Ideally we lift 'worker' decl, but for now relying on process cleanup or standard GC is acceptable-ish for minimal edit.
-            // Actually, let's just proceed. The previous worker might leak for a bit but will likely die with the request context eventually or Tesseract handles it.
-            // Better: just fallback.
-            ocrText = "";
-        }
+        // 3. Primary Strategy: Filename Analysis
 
         // 2. Process OCR Text to find Keywords
         // Filter out junk, keep potential brand/product names
