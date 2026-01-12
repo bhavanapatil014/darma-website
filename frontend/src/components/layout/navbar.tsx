@@ -197,68 +197,37 @@ export function Navbar() {
                                     const file = e.target.files?.[0];
                                     if (file) {
                                         try {
-                                            setSearchQuery("Scanning image...");
+                                            // Feedback for user
+                                            setSearchQuery("Uploading & analyzing...");
 
-                                            // Dynamic import to load library only when needed
-                                            const Tesseract = await import('tesseract.js');
+                                            // server-side analysis (More robust than mobile browser OCR)
+                                            const formData = new FormData();
+                                            formData.append('image', file);
 
-                                            // Using the static recognize method which is simpler and handles worker lifecycle
-                                            const { data: { text } } = await Tesseract.default.recognize(file, 'eng', {
-                                                logger: m => console.log(m)
+                                            // Using the deployed backend URL
+                                            const res = await fetch('https://darma-website.onrender.com/api/products/search-by-image', {
+                                                method: 'POST',
+                                                body: formData
                                             });
 
-                                            console.log("OCR Raw Text:", text);
-
-                                            // Process Text
-                                            const cleanText = (text || "").replace(/[^a-zA-Z0-9\s]/g, " ").replace(/\s+/g, " ");
-                                            const knownBrands = ['cerave', 'cetaphil', 'bioderma', 'neutrogena', 'minimalist', 'derma', 'co'];
-                                            const words = cleanText.split(" ").map(w => w.trim()).filter(w => w.length > 2);
-
-                                            // 1. Check for Brands
-                                            const foundBrand = knownBrands.find(brand =>
-                                                words.some(w => w.toLowerCase().includes(brand))
-                                            );
-
-                                            let finalQuery = "";
-
-                                            if (foundBrand) {
-                                                finalQuery = foundBrand;
-                                                // Try to add one more relevant word (e.g. Cleanser)
-                                                // Filter out the brand itself and common stop words
-                                                const productType = words.find(w =>
-                                                    !w.toLowerCase().includes(foundBrand) &&
-                                                    w.length > 3 &&
-                                                    !['ingredients', 'directions', 'net', 'vol', 'use', 'with', 'for'].includes(w.toLowerCase())
-                                                );
-                                                if (productType) finalQuery += " " + productType;
-                                            } else {
-                                                // 2. Fallback to Filename logic if no useful text found
-                                                if (words.length < 2) {
-                                                    console.log("Low text confidence, using filename fallback.");
-                                                    let filename = file.name.replace(/\.[^/.]+$/, "");
-                                                    filename = filename.replace(/IMG|DSC|Screenshot|PXL|WA/gi, "").replace(/[-_@.]/g, " ").replace(/\b\d+\b/g, "").trim();
-                                                    if (filename.length > 2) {
-                                                        finalQuery = filename;
-                                                    }
-                                                } else {
-                                                    // 3. Use top text words found in image
-                                                    finalQuery = words.slice(0, 2).join(" ");
-                                                }
+                                            if (!res.ok) {
+                                                throw new Error(`Server responded with ${res.status}`);
                                             }
 
+                                            const data = await res.json();
                                             setIsSearchOpen(false);
-                                            setSearchQuery("");
 
-                                            if (finalQuery && finalQuery.length > 1) {
-                                                // alert(`Found: ${finalQuery}`); 
-                                                window.location.href = `/shop?search=${encodeURIComponent(finalQuery)}`;
+                                            if (data.query) {
+                                                const transcript = data.query;
+                                                window.location.href = `/shop?search=${encodeURIComponent(transcript)}`;
                                             } else {
                                                 alert("Could not identify product from this image. Please ensure identifying text is visible.");
                                             }
 
+                                            setSearchQuery('');
                                         } catch (err) {
-                                            console.error("OCR Error:", err);
-                                            alert("Image analysis encountered an error. Please try a different image.");
+                                            console.error("Image Search Error:", err);
+                                            alert("Image search failed. Please try again or check your internet.");
                                             setSearchQuery('');
                                         }
                                     }
