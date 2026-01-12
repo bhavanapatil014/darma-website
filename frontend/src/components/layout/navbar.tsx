@@ -14,7 +14,7 @@ import { usePathname } from "next/navigation";
 export function Navbar() {
     const [isScrolled, setIsScrolled] = React.useState(false);
     const { setIsOpen, items } = useCart();
-    const { user } = useAuth();
+    const { user, logout } = useAuth();
     const pathname = usePathname()
     const { wishlistCount } = useWishlist();
     const cartCount = items.reduce((acc, item) => acc + item.quantity, 0);
@@ -243,10 +243,37 @@ export function Navbar() {
 
                         {user ? (
                             <div className="flex items-center gap-4">
-                                <Link href="/account" className="hidden md:flex items-center gap-2 text-gray-700 hover:text-teal-600 font-medium">
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2" /><circle cx="12" cy="7" r="4" /></svg>
-                                    <span className="hidden lg:inline text-sm">Account</span>
-                                </Link>
+                                <div className="relative group h-full flex items-center">
+                                    <Link href="/account" className="hidden md:flex items-center gap-2 text-gray-700 hover:text-teal-600 font-medium py-3">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2" /><circle cx="12" cy="7" r="4" /></svg>
+                                        <span className="hidden lg:inline text-sm">Account</span>
+                                    </Link>
+
+                                    {/* Account Dropdown */}
+                                    <div className="absolute top-full right-0 w-48 bg-white border border-gray-100 shadow-xl rounded-b-lg py-1 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50 transform origin-top-right">
+                                        <div className="px-4 py-2 border-b bg-gray-50/50">
+                                            <p className="text-xs text-gray-500">Signed in as</p>
+                                            <p className="text-sm font-semibold truncate text-gray-900">{user.name}</p>
+                                        </div>
+                                        <Link href="/account" className="block px-4 py-2 text-sm text-gray-700 hover:bg-teal-50 hover:text-teal-700">
+                                            My Dashboard
+                                        </Link>
+                                        <Link href="/account" className="block px-4 py-2 text-sm text-gray-700 hover:bg-teal-50 hover:text-teal-700">
+                                            My Orders
+                                        </Link>
+                                        <div className="border-t my-1"></div>
+                                        <button
+                                            onClick={() => {
+                                                logout();
+                                                // Optional: Close menu logic implied by hover removal
+                                            }}
+                                            className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50 hover:text-red-700 font-medium flex items-center gap-2"
+                                        >
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" /><polyline points="16 17 21 12 16 7" /><line x1="21" x2="9" y1="12" y2="12" /></svg>
+                                            Logout
+                                        </button>
+                                    </div>
+                                </div>
                                 <Link href="/cart" className="relative text-black hover:text-teal-600 transition-colors">
                                     <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="8" cy="21" r="1" /><circle cx="19" cy="21" r="1" /><path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12" /></svg>
                                     {cartCount > 0 && (
@@ -307,6 +334,37 @@ export function Navbar() {
                             <div className="border-t pt-2">
                                 <Link href="/shop?category=baby-care" className="block py-2 font-medium" onClick={() => setIsMobileMenuOpen(false)}>Baby Care</Link>
                                 <Link href="/shop" className="block py-2 font-medium" onClick={() => setIsMobileMenuOpen(false)}>Shop All Products</Link>
+                            </div>
+
+                            {/* Mobile User Actions */}
+                            <div className="border-t pt-4">
+                                {user ? (
+                                    <>
+                                        <div className="flex items-center gap-3 mb-3">
+                                            <div className="w-8 h-8 rounded-full bg-teal-100 flex items-center justify-center text-teal-700 font-bold text-xs">
+                                                {user.name?.charAt(0).toUpperCase()}
+                                            </div>
+                                            <div>
+                                                <p className="text-sm font-medium text-gray-900">{user.name}</p>
+                                                <p className="text-xs text-gray-500">{user.email}</p>
+                                            </div>
+                                        </div>
+                                        <Link href="/account" className="block py-2 text-sm text-gray-700 font-medium" onClick={() => setIsMobileMenuOpen(false)}>My Account</Link>
+                                        <button
+                                            onClick={() => {
+                                                logout();
+                                                setIsMobileMenuOpen(false);
+                                            }}
+                                            className="block w-full text-left py-2 text-sm text-red-600 font-medium"
+                                        >
+                                            Sign Out
+                                        </button>
+                                    </>
+                                ) : (
+                                    <Link href="/login" className="block py-2 text-sm font-bold text-teal-600" onClick={() => setIsMobileMenuOpen(false)}>
+                                        Login / Register
+                                    </Link>
+                                )}
                             </div>
                         </div>
                     </div>
