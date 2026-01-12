@@ -258,15 +258,15 @@ router.post('/search-by-image', upload.single('image'), async (req, res) => {
 
         console.log(`Final Search Query: '${query}'`);
 
-        let isGeneric = false;
-        // 4. Final Validation
-        if (!query || query.length < 3 || /^\d+$/.test(query)) {
-            query = "all";
-            isGeneric = true;
-            console.log("Query still too generic/numeric, defaulting to 'all'");
+        console.log(`Final Search Query: '${query}'`);
+
+        // 4. Final Validation: If no query derived, return null (Client will handle)
+        if (!query || query.length < 2 || /^\d+$/.test(query)) {
+            console.log("Query is just numbers or empty. Returning no match.");
+            return res.json({ query: null, message: "No identifying features found." });
         }
 
-        res.json({ query, isGeneric });
+        res.json({ query });
     } catch (error) {
         console.error("Search by image error:", error);
         res.status(500).json({ message: error.message });

@@ -207,17 +207,19 @@ export function Navbar() {
 
                                             if (!res.ok) throw new Error('Failed to analyze image');
 
+                                            if (!res.ok) throw new Error('Failed to analyze image');
+
                                             const data = await res.json();
                                             setIsSearchOpen(false);
 
-                                            if (data.isGeneric) {
-                                                alert("Could not identify specific product features. Showing all products.");
-                                                window.location.href = '/shop';
-                                            } else if (data.query) {
+                                            if (data.query) {
                                                 const transcript = data.query;
-                                                alert(`Found product matching: "${transcript}"`); // Optional helpful feedback
+                                                // alert(`Found product matching: "${transcript}"`); // Keep debug if needed, or remove for cleaner UX
                                                 window.location.href = `/shop?search=${encodeURIComponent(transcript)}`;
+                                            } else {
+                                                alert("Could not identify product from this image. Please ensure identifying text is visible.");
                                             }
+
                                             setSearchQuery('');
                                         } catch (err) {
                                             console.error(err);
