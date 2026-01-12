@@ -215,16 +215,32 @@ router.post('/search-by-image', upload.single('image'), async (req, res) => {
         console.log(`Starting OCR analysis for ${req.file.originalname}...`);
 
         // 1. Try OCR (Read text from image)
+        // Warning: Tesseract is heavy. On low-memory servers, this might fail (OOM).
+        // We wrap it strictly to fallback to filename if it crashes/fails.
         let ocrText = "";
         try {
+            console.log("Initializing OCR Worker...");
             const { createWorker } = require('tesseract.js');
-            const worker = await createWorker('eng');
+            const os = require('os');
+            const path = require('path');
+
+            // Use /tmp to avoid Read-Only file system errors on Render
+            const cachePath = path.join(os.tmpdir(), 'ocr-cache');
+
+            // v5/v6 signature: langs, oem, options
+            const worker = await createWorker('eng', 1, {
+                cachePath: cachePath,
+                logger: m => { if (m.status === 'recognizing text') console.log(`OCR Progress: ${m.progress}`) }
+            });
+
             const { data: { text } } = await worker.recognize(req.file.buffer);
             await worker.terminate();
             ocrText = text;
             console.log("OCR Raw Text:", text.substring(0, 100).replace(/\n/g, " ") + "...");
         } catch (ocrErr) {
-            console.error("OCR Failed:", ocrErr);
+            console.error("OCR Failed (likely memory/storage limit):", ocrErr.message);
+            // Do not crash the response, just continue with empty text
+            ocrText = "";
         }
 
         // 2. Process OCR Text to find Keywords
