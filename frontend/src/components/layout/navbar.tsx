@@ -221,36 +221,48 @@ export function Navbar() {
                                             const knownBrands = ['cerave', 'cetaphil', 'bioderma', 'neutrogena', 'minimalist', 'derma', 'co'];
                                             const foundBrand = knownBrands.find(brand => words.some(w => w.toLowerCase().includes(brand)));
 
-                                            let query = "";
+                                            let targetUrl = "";
+                                            let resultingQuery = "";
 
                                             if (foundBrand) {
-                                                query = foundBrand;
-                                                // Add one non-brand keyword if available
-                                                const type = words.find(w => !w.toLowerCase().includes(foundBrand) && w.length > 3 && !['ingredients', 'directions', 'contains'].includes(w.toLowerCase()));
-                                                if (type) query += " " + type;
+                                                // High-confidence Brand detected -> Use Brand Filter
+                                                targetUrl = `/shop?brand=${encodeURIComponent(foundBrand)}`;
+                                                resultingQuery = foundBrand;
+
+                                                // Try to refine with known product types (Whitelist approach to avoid junk)
+                                                const productTypes = ['cleanser', 'moisturizer', 'cream', 'lotion', 'sunscreen', 'serum', 'wash', 'gel', 'shampoo', 'conditioner', 'soap', 'oil', 'mist'];
+                                                const foundType = words.find(w => productTypes.includes(w.toLowerCase()));
+
+                                                if (foundType) {
+                                                    targetUrl += `&search=${encodeURIComponent(foundType)}`;
+                                                    resultingQuery += " " + foundType;
+                                                }
                                             } else {
-                                                // Fallback to filename if OCR failed or found nothing
+                                                // No brand? Fallback to filename or general search
+                                                let query = "";
                                                 if (words.length < 2) {
-                                                    let filename = file.name.replace(/\.[^/.]+$/, ""); // remove extension
-                                                    // Clean common junk from filenames
-                                                    filename = filename.replace(/IMG|DSC|Screenshot|PXL|WA/gi, "")
-                                                        .replace(/[-_@.]/g, " ")
-                                                        .replace(/\b\d+\b/g, "")
-                                                        .trim();
+                                                    // Weak OCR -> Use filename
+                                                    let filename = file.name.replace(/\.[^/.]+$/, "");
+                                                    filename = filename.replace(/IMG|DSC|Screenshot|PXL|WA/gi, "").replace(/[-_@.]/g, " ").replace(/\b\d+\b/g, "").trim();
                                                     if (filename.length > 2) query = filename;
                                                 } else {
                                                     // Use top 2 words from text
                                                     query = words.slice(0, 2).join(" ");
                                                 }
+
+                                                if (query && query.length > 1) {
+                                                    targetUrl = `/shop?search=${encodeURIComponent(query)}`;
+                                                    resultingQuery = query;
+                                                }
                                             }
 
-                                            setIsSearchOpen(false);
-                                            setSearchQuery("");
-
-                                            if (query && query.length > 1) {
-                                                window.location.href = `/shop?search=${encodeURIComponent(query)}`;
+                                            if (resultingQuery) {
+                                                setSearchQuery(resultingQuery); // Show text in bar
+                                                setIsSearchOpen(false);
+                                                window.location.href = targetUrl; // Navigate
                                             } else {
                                                 alert("Could not identify product. Please ensure the image has readable text or a descriptive filename.");
+                                                setSearchQuery("");
                                             }
                                         } catch (err) {
                                             console.error("Image Analysis Error:", err);
