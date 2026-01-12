@@ -118,6 +118,57 @@ export function Navbar() {
                                 onChange={(e) => setSearchQuery(e.target.value)}
                                 ref={(input) => { if (input && isSearchOpen) input.focus(); }}
                             />
+
+                            {/* Voice Search */}
+                            <button
+                                type="button"
+                                onClick={() => {
+                                    if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
+                                        // @ts-ignore
+                                        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+                                        const recognition = new SpeechRecognition();
+                                        recognition.lang = 'en-US';
+                                        recognition.start();
+                                        recognition.onresult = (event: any) => {
+                                            const transcript = event.results[0][0].transcript;
+                                            setSearchQuery(transcript);
+                                        };
+                                    } else {
+                                        alert("Voice search involves browser permissions and might not be supported.");
+                                    }
+                                }}
+                                className="p-2 text-gray-500 hover:text-teal-600 transition-colors"
+                                title="Voice Search"
+                            >
+                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z" /><path d="M19 10v2a7 7 0 0 1-14 0v-2" /><line x1="12" y1="19" x2="12" y2="23" /><line x1="8" y1="23" x2="16" y2="23" /></svg>
+                            </button>
+
+                            {/* Image Search */}
+                            <button
+                                type="button"
+                                onClick={() => document.getElementById('image-search-input')?.click()}
+                                className="p-2 text-gray-500 hover:text-teal-600 transition-colors"
+                                title="Search by Image"
+                            >
+                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z" /><circle cx="12" cy="13" r="4" /></svg>
+                            </button>
+                            <input
+                                id="image-search-input"
+                                type="file"
+                                className="hidden"
+                                accept="image/*"
+                                onChange={(e) => {
+                                    const file = e.target.files?.[0];
+                                    if (file) {
+                                        // Placeholder for image search logic
+                                        // For now, we can just use the filename as a search term or inform the user
+                                        alert(`Image selected: ${file.name}. \n(Visual Search integration would process this image on the backend.)`);
+                                        // Optional: set search query to filename (processed)
+                                        // setSearchQuery(file.name.replace(/\.[^/.]+$/, "").replace(/[-_]/g, " "));
+                                    }
+                                }}
+                            />
+
                             <button
                                 type="button"
                                 onClick={() => setIsSearchOpen(false)}
