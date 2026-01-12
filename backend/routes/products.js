@@ -207,36 +207,63 @@ router.post('/upload-multiple', upload.array('images', 5), (req, res) => {
     res.json({ imageUrls });
 });
 
-// POST Search by Image (Mock Logic using Filename)
+// POST Search by Image (OCR + Filename Fallback)
 router.post('/search-by-image', upload.single('image'), async (req, res) => {
     try {
         if (!req.file) return res.status(400).json({ message: 'No image provided' });
 
-        // Logic: Extract clean name from filename to simulate AI object detection
-        // e.g., "cerave-cleanser.jpg" -> "cerave cleanser"
-        const filename = req.file.originalname;
-        let query = filename.replace(/\.[^/.]+$/, ""); // Remove extension
+        console.log(`Starting OCR analysis for ${req.file.originalname}...`);
 
-        // Remove common camera prefixes and file artifacts
-        query = query.replace(/IMG|DSC|Screenshot|PXL|WA/gi, "");
+        // 1. Try OCR (Read text from image)
+        let ocrText = "";
+        try {
+            const { createWorker } = require('tesseract.js');
+            const worker = await createWorker('eng');
+            const { data: { text } } = await worker.recognize(req.file.buffer);
+            await worker.terminate();
+            ocrText = text;
+            console.log("OCR Raw Text:", text.substring(0, 100).replace(/\n/g, " ") + "...");
+        } catch (ocrErr) {
+            console.error("OCR Failed:", ocrErr);
+        }
 
-        // Replace separators with spaces
-        query = query.replace(/[-_@.]/g, " ");
+        // 2. Process OCR Text to find Keywords
+        // Filter out junk, keep potential brand/product names
+        const cleanText = ocrText
+            .replace(/[^a-zA-Z0-9\s]/g, " ") // Remove special chars
+            .replace(/\s+/g, " ");
 
-        // Remove numeric sequences that stand alone (dates, counts, indexes)
-        query = query.replace(/\b\d+\b/g, "");
+        const ignoredWords = new Set(['the', 'and', 'for', 'with', 'net', 'vol', 'ml', 'oz', 'ingredients', 'directions', 'use', 'external', 'only', 'made', 'in', 'india', 'usa', 'exp', 'mfg', 'date', 'batch', 'no', 'mr', 'mrp', 'rs', 'free', 'paraben', 'sulfate']);
 
-        // Clean up double spaces and trimming
-        query = query.replace(/\s+/g, " ").trim();
+        const words = cleanText.split(" ")
+            .map(w => w.trim())
+            .filter(w => w.length > 3 && !ignoredWords.has(w.toLowerCase()));
 
-        console.log(`Image Search Analysis: '${filename}' -> inferred query '${query}'`);
+        // Simple Heuristic: Take top 3 unique words, prioritizing Title Case
+        const uniqueWords = [...new Set(words)];
+        let query = uniqueWords.slice(0, 3).join(" "); // Take first 3 significant words
 
-        // Fallback if filename is too generic, empty, or just numbers
+        console.log(`OCR Derived Query: '${query}'`);
+
+        // 3. Fallback to Filename if OCR gave nothing useful
+        if (!query || query.length < 3) {
+            console.log("OCR yielded no useful text. Falling back to filename.");
+            const filename = req.file.originalname;
+            query = filename.replace(/\.[^/.]+$/, "");
+            query = query.replace(/IMG|DSC|Screenshot|PXL|WA/gi, "");
+            query = query.replace(/[-_@.]/g, " ");
+            query = query.replace(/\b\d+\b/g, ""); // Remove standalone numbers
+            query = query.replace(/\s+/g, " ").trim();
+        }
+
+        console.log(`Final Search Query: '${query}'`);
+
         let isGeneric = false;
+        // 4. Final Validation
         if (!query || query.length < 3 || /^\d+$/.test(query)) {
             query = "all";
             isGeneric = true;
-            console.log("Query too generic/numeric, defaulting to 'all'");
+            console.log("Query still too generic/numeric, defaulting to 'all'");
         }
 
         res.json({ query, isGeneric });
