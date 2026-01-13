@@ -9,7 +9,20 @@ import { motion, AnimatePresence } from "framer-motion"
 export default function AccountPage() {
     const { user, logout } = useAuth()
     const router = useRouter()
-    // ... (Top of file stays same)
+    useEffect(() => {
+        if (!user) {
+            router.push("/login")
+        }
+    }, [user, router])
+
+    if (!user) {
+        return (
+            <div className="container mx-auto px-4 py-24 text-center">
+                <p className="mb-4">Please log in to view your account.</p>
+                <Button onClick={() => router.push('/login')}>Log In</Button>
+            </div>
+        )
+    }
 
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false)
     const [isEditModalOpen, setIsEditModalOpen] = useState(false) // NEW State
@@ -251,122 +264,122 @@ function EditProfileModal({ user, onClose }: { user: any, onClose: () => void })
     );
 }
 
-// ... (OrderList function, existing)
-const [orders, setOrders] = useState<any[]>([])
-const [loading, setLoading] = useState(true)
+function OrderList() {
+    const [orders, setOrders] = useState<any[]>([])
+    const [loading, setLoading] = useState(true)
 
-useEffect(() => {
-    const token = localStorage.getItem('token')
-    if (!token) return
+    useEffect(() => {
+        const token = localStorage.getItem('token')
+        if (!token) return
 
-    fetch('https://darma-website.onrender.com/api/orders/my-orders', {
-        headers: { 'Authorization': `Bearer ${token}` }
-    })
-        .then(res => res.json())
-        .then(data => {
-            if (Array.isArray(data)) setOrders(data)
-            setLoading(false)
+        fetch('https://darma-website.onrender.com/api/orders/my-orders', {
+            headers: { 'Authorization': `Bearer ${token}` }
         })
-        .catch(err => setLoading(false))
-}, [])
+            .then(res => res.json())
+            .then(data => {
+                if (Array.isArray(data)) setOrders(data)
+                setLoading(false)
+            })
+            .catch(err => setLoading(false))
+    }, [])
 
-if (loading) return <div className="space-y-4">{[1, 2, 3].map(i => <div key={i} className="h-32 bg-gray-100 rounded-lg animate-pulse" />)}</div>
-if (orders.length === 0) return <div className="text-center py-12 bg-gray-50 rounded-lg border text-gray-500">No orders found. Start shopping!</div>
+    if (loading) return <div className="space-y-4">{[1, 2, 3].map(i => <div key={i} className="h-32 bg-gray-100 rounded-lg animate-pulse" />)}</div>
+    if (orders.length === 0) return <div className="text-center py-12 bg-gray-50 rounded-lg border text-gray-500">No orders found. Start shopping!</div>
 
-return (
-    <div className="space-y-6">
-        {orders.map((order) => (
-            <div key={order._id} className="group bg-white rounded-xl border shadow-sm hover:shadow-md transition-all overflow-hidden">
-                {/* Header */}
-                <div className="bg-gray-50/50 p-4 border-b flex flex-wrap gap-4 justify-between items-center">
-                    <div className="flex gap-4 text-sm">
-                        <div>
-                            <span className="text-gray-500 block text-xs uppercase tracking-wider">Order Placed</span>
-                            <span className="font-medium text-gray-900">{new Date(order.createdAt).toLocaleDateString()}</span>
-                        </div>
-                        <div>
-                            <span className="text-gray-500 block text-xs uppercase tracking-wider">Total</span>
-                            <span className="font-medium text-gray-900">₹{parseFloat(order.totalAmount).toFixed(2)}</span>
-                        </div>
-                    </div>
-                    <div className="text-sm font-mono text-gray-500">ID: #{order._id.slice(-6).toUpperCase()}</div>
-                </div>
-
-                {/* Body */}
-                <div className="p-6">
-                    <div className="mb-6">
-                        <OrderStepper status={order.status} />
-                    </div>
-
-                    {/* Delivery Info Block */}
-                    {(order.status === 'shipped' || order.status === 'delivered') && (
-                        <div className="bg-blue-50/50 rounded-lg p-4 mb-6 border border-blue-100 flex flex-col sm:flex-row gap-6">
-                            {order.trackingNumber && (
-                                <div>
-                                    <span className="text-xs text-blue-600 font-semibold uppercase tracking-wider">Tracking Number</span>
-                                    <p className="font-mono text-gray-900 mt-1">{order.trackingNumber}</p>
-                                </div>
-                            )}
-                            {order.courierName && (
-                                <div>
-                                    <span className="text-xs text-blue-600 font-semibold uppercase tracking-wider">Courier</span>
-                                    <p className="font-medium text-gray-900 mt-1">{order.courierName}</p>
-                                </div>
-                            )}
-                            {order.shippedAt && (
-                                <div>
-                                    <span className="text-xs text-blue-600 font-semibold uppercase tracking-wider">Shipped Date</span>
-                                    <p className="text-gray-900 mt-1">{new Date(order.shippedAt).toLocaleDateString()}</p>
-                                </div>
-                            )}
-                        </div>
-                    )}
-
-                    <div className="space-y-3">
-                        {order.products.map((item: any, idx: number) => (
-                            <div key={idx} className="flex items-center justify-between text-sm">
-                                <div className="flex items-center gap-3">
-                                    {item.image ? (
-                                        <img src={item.image} alt={item.name} className="w-10 h-10 object-cover rounded bg-gray-100" />
-                                    ) : (
-                                        <div className="w-10 h-10 rounded bg-gray-200 flex items-center justify-center text-xs text-gray-500">Img</div>
-                                    )}
-                                    <div>
-                                        <span className="font-medium text-gray-900 block">{item.name || `Product #${item.product.slice(-4)}`}</span>
-                                        <span className="text-gray-500 text-xs">Qty: {item.quantity}</span>
-                                    </div>
-                                </div>
-                                <span className="font-medium">₹{item.priceAtPurchase}</span>
+    return (
+        <div className="space-y-6">
+            {orders.map((order) => (
+                <div key={order._id} className="group bg-white rounded-xl border shadow-sm hover:shadow-md transition-all overflow-hidden">
+                    {/* Header */}
+                    <div className="bg-gray-50/50 p-4 border-b flex flex-wrap gap-4 justify-between items-center">
+                        <div className="flex gap-4 text-sm">
+                            <div>
+                                <span className="text-gray-500 block text-xs uppercase tracking-wider">Order Placed</span>
+                                <span className="font-medium text-gray-900">{new Date(order.createdAt).toLocaleDateString()}</span>
                             </div>
-                        ))}
+                            <div>
+                                <span className="text-gray-500 block text-xs uppercase tracking-wider">Total</span>
+                                <span className="font-medium text-gray-900">₹{parseFloat(order.totalAmount).toFixed(2)}</span>
+                            </div>
+                        </div>
+                        <div className="text-sm font-mono text-gray-500">ID: #{order._id.slice(-6).toUpperCase()}</div>
+                    </div>
+
+                    {/* Body */}
+                    <div className="p-6">
+                        <div className="mb-6">
+                            <OrderStepper status={order.status} />
+                        </div>
+
+                        {/* Delivery Info Block */}
+                        {(order.status === 'shipped' || order.status === 'delivered') && (
+                            <div className="bg-blue-50/50 rounded-lg p-4 mb-6 border border-blue-100 flex flex-col sm:flex-row gap-6">
+                                {order.trackingNumber && (
+                                    <div>
+                                        <span className="text-xs text-blue-600 font-semibold uppercase tracking-wider">Tracking Number</span>
+                                        <p className="font-mono text-gray-900 mt-1">{order.trackingNumber}</p>
+                                    </div>
+                                )}
+                                {order.courierName && (
+                                    <div>
+                                        <span className="text-xs text-blue-600 font-semibold uppercase tracking-wider">Courier</span>
+                                        <p className="font-medium text-gray-900 mt-1">{order.courierName}</p>
+                                    </div>
+                                )}
+                                {order.shippedAt && (
+                                    <div>
+                                        <span className="text-xs text-blue-600 font-semibold uppercase tracking-wider">Shipped Date</span>
+                                        <p className="text-gray-900 mt-1">{new Date(order.shippedAt).toLocaleDateString()}</p>
+                                    </div>
+                                )}
+                            </div>
+                        )}
+
+                        <div className="space-y-3">
+                            {order.products.map((item: any, idx: number) => (
+                                <div key={idx} className="flex items-center justify-between text-sm">
+                                    <div className="flex items-center gap-3">
+                                        {item.image ? (
+                                            <img src={item.image} alt={item.name} className="w-10 h-10 object-cover rounded bg-gray-100" />
+                                        ) : (
+                                            <div className="w-10 h-10 rounded bg-gray-200 flex items-center justify-center text-xs text-gray-500">Img</div>
+                                        )}
+                                        <div>
+                                            <span className="font-medium text-gray-900 block">{item.name || `Product #${item.product.slice(-4)}`}</span>
+                                            <span className="text-gray-500 text-xs">Qty: {item.quantity}</span>
+                                        </div>
+                                    </div>
+                                    <span className="font-medium">₹{item.priceAtPurchase}</span>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+
+                    {/* Footer */}
+                    <div className="bg-gray-50 px-6 py-3 flex justify-between items-center text-sm">
+                        <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium capitalize ${order.status === 'delivered' ? 'bg-green-100 text-green-700' :
+                            order.status === 'cancelled' ? 'bg-red-100 text-red-700' :
+                                order.status === 'shipped' ? 'bg-blue-100 text-blue-700' :
+                                    'bg-yellow-100 text-yellow-700'
+                            }`}>
+                            <span className={`w-1.5 h-1.5 rounded-full ${order.status === 'delivered' ? 'bg-green-500' :
+                                order.status === 'cancelled' ? 'bg-red-500' :
+                                    order.status === 'shipped' ? 'bg-blue-500' :
+                                        'bg-yellow-500'
+                                }`}></span>
+                            {order.status}
+                        </span>
+
+                        {order.status === 'pending' && (
+                            <button className="text-red-600 hover:text-red-700 font-medium hover:underline text-xs">
+                                Cancel Order
+                            </button>
+                        )}
                     </div>
                 </div>
-
-                {/* Footer */}
-                <div className="bg-gray-50 px-6 py-3 flex justify-between items-center text-sm">
-                    <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium capitalize ${order.status === 'delivered' ? 'bg-green-100 text-green-700' :
-                        order.status === 'cancelled' ? 'bg-red-100 text-red-700' :
-                            order.status === 'shipped' ? 'bg-blue-100 text-blue-700' :
-                                'bg-yellow-100 text-yellow-700'
-                        }`}>
-                        <span className={`w-1.5 h-1.5 rounded-full ${order.status === 'delivered' ? 'bg-green-500' :
-                            order.status === 'cancelled' ? 'bg-red-500' :
-                                order.status === 'shipped' ? 'bg-blue-500' :
-                                    'bg-yellow-500'
-                            }`}></span>
-                        {order.status}
-                    </span>
-
-                    {order.status === 'pending' && (
-                        <button className="text-red-600 hover:text-red-700 font-medium hover:underline text-xs">
-                            Cancel Order
-                        </button>
-                    )}
-                </div>
-            </div>
-        ))}
-    </div>
-)
+            ))}
+        </div>
+    )
 }
 
 function OrderStepper({ status }: { status: string }) {
