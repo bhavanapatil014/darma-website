@@ -404,37 +404,44 @@ router.delete('/delete-me', verifyToken, async (req, res) => {
 router.put('/update-profile', verifyToken, async (req, res) => {
     try {
         const { name, email, password, currentPassword, phoneNumber } = req.body;
-        const user = await User.findById(req.userId);
+        console.log(`Update Profile Request for ${req.userId}:`, { name, email, hasPassword: !!password });
 
+        const user = await User.findById(req.userId);
         if (!user) return res.status(404).json({ message: "User not found" });
 
         // Update Name
         if (name) user.name = name;
-        if (phoneNumber) user.phoneNumber = phoneNumber;
+
+        // Update Phone (Allow clearing it)
+        if (phoneNumber !== undefined) user.phoneNumber = phoneNumber;
 
         // Update Email (Check for uniqueness)
         if (email && email !== user.email) {
             const existing = await User.findOne({ email });
-            if (existing) return res.status(400).json({ message: "Email already in use" });
+            if (existing) {
+                console.warn(`Update Failed: Email ${email} already in use.`);
+                return res.status(400).json({ message: "Email already in use" });
+            }
             user.email = email;
         }
 
         // Update Password
-        if (password) {
+        if (password && password.trim() !== "") {
             if (!currentPassword) {
+                console.warn("Update Failed: Missing current password.");
                 return res.status(400).json({ message: "Current password is required to set a new password." });
             }
             const isMatch = await bcrypt.compare(currentPassword, user.password);
             if (!isMatch) {
+                console.warn("Update Failed: Incorrect current password.");
                 return res.status(400).json({ message: "Incorrect current password" });
             }
             user.password = await bcrypt.hash(password, 10);
+            console.log("Password updated successfully.");
         }
 
         await user.save();
 
-        // Optionally generate a new token if critical info changed, but usually existing token (ID-based) works.
-        // We return the updated user info.
         res.json({
             message: "Profile updated successfully",
             user: { id: user._id, name: user.name, email: user.email, role: user.role }
