@@ -4,10 +4,15 @@ const nodemailer = require('nodemailer');
 const getTransporter = async () => {
     // 1. Try Configured SMTP
     if (process.env.SMTP_USER && !process.env.SMTP_USER.includes('put-your') && process.env.SMTP_PASS && !process.env.SMTP_PASS.includes('put-your')) {
+        const port = process.env.SMTP_PORT || 587; // Default to 587 (TLS) instead of 465 (SSL)
+        const isSecure = port == 465; // Only use secure:true for port 465
+
+        console.log(`📧 Initializing SMTP Transporter (Host: ${process.env.SMTP_HOST || 'gmail'}, Port: ${port}, Secure: ${isSecure})`);
+
         return nodemailer.createTransport({
             host: process.env.SMTP_HOST || 'smtp.gmail.com',
-            port: process.env.SMTP_PORT || 465,
-            secure: true, // 465 requires secure: true
+            port: port,
+            secure: isSecure,
             auth: {
                 user: process.env.SMTP_USER,
                 pass: process.env.SMTP_PASS,
