@@ -20,7 +20,8 @@ function LoginContent() {
     const [email, setEmail] = useState("")
     const [password, setPassword] = useState("")
 
-
+    // Firebase State
+    const [confirmationResult, setConfirmationResult] = useState<any>(null)
 
     // Handlers
     const handlePhoneSubmit = async (e: React.FormEvent) => {
@@ -29,13 +30,72 @@ function LoginContent() {
             toast.error("Please enter a valid 10-digit phone number")
             return
         }
-        await sendOtp(phoneNumber)
-        setView('otp-verify')
+
+        try {
+            // Dynamic Import to avoid SSR issues
+            const { auth } = await import('@/lib/firebase');
+            const { RecaptchaVerifier, signInWithPhoneNumber } = await import('firebase/auth');
+
+            if (!window.recaptchaVerifier) {
+                window.recaptchaVerifier = new RecaptchaVerifier(auth, 'recaptcha-container', {
+                    'size': 'invisible',
+                    'callback': (response: any) => {
+                        // reCAPTCHA solved
+                    }
+                });
+            }
+
+            const appVerifier = window.recaptchaVerifier;
+            const formattedPhone = `+91${phoneNumber}`; // Hardcoded India for now
+
+            toast.info("Sending OTP via SMS...");
+            const confirmation = await signInWithPhoneNumber(auth, formattedPhone, appVerifier);
+            setConfirmationResult(confirmation);
+            toast.dismiss();
+            toast.success("OTP sent to your phone!");
+            setView('otp-verify');
+        } catch (error: any) {
+            console.error(error);
+            toast.error(error.message || "Failed to send SMS");
+            // Reset recaptcha
+            if (window.recaptchaVerifier) window.recaptchaVerifier.clear();
+        }
     }
 
     const handleVerifyOtp = async (e: React.FormEvent) => {
         e.preventDefault()
-        await verifyOtp(phoneNumber, otp, redirectPath)
+        if (!confirmationResult) return;
+
+        try {
+            // 1. Verify with Firebase
+            const result = await confirmationResult.confirm(otp);
+            const firebaseUser = result.user;
+            toast.success("Phone Verified!");
+
+            // 2. Sync with Backend
+            const res = await fetch('https://darma-website.onrender.com/api/auth/login-with-phone', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    phoneNumber: phoneNumber, // or firebaseUser.phoneNumber
+                    uid: firebaseUser.uid
+                })
+            });
+
+            const data = await res.json();
+            if (data.token) {
+                // Manually login via Context (hacky but works)
+                localStorage.setItem('token', data.token);
+                localStorage.setItem('user', JSON.stringify(data.user));
+                window.location.href = redirectPath || '/';
+            } else {
+                toast.error("Backend Sync Failed");
+            }
+
+        } catch (error: any) {
+            console.error(error);
+            toast.error("Invalid OTP");
+        }
     }
 
     const handleEmailLogin = async (e: React.FormEvent) => {
@@ -45,8 +105,10 @@ function LoginContent() {
 
     return (
         <div className="min-h-screen bg-white flex flex-col items-center justify-center px-4 py-12">
-            <div className="w-full max-w-md space-y-8">
+            {/* Invisible Recaptcha Container */}
+            <div id="recaptcha-container"></div>
 
+            <div className="w-full max-w-md space-y-8">
                 {/* Logo & Header */}
                 <div className="text-center space-y-2">
                     <div className="flex items-center justify-center gap-2 mb-6">
@@ -68,8 +130,8 @@ function LoginContent() {
                         </>
                     ) : (
                         <>
-                            <h1 className="text-2xl font-bold text-gray-900">Login with OTP</h1>
-                            <p className="text-gray-500 text-sm">Enter your log in details</p>
+                            <h1 className="text-2xl font-bold text-gray-900">Login with SMS OTP</h1>
+                            <p className="text-gray-500 text-sm">Enter your phone number</p>
                         </>
                     )}
                 </div>
@@ -99,10 +161,6 @@ function LoginContent() {
                                         const val = e.target.value.replace(/\D/g, '');
                                         if (val.length <= 10) setPhoneNumber(val);
                                     }}
-                                    onFocus={() => {
-                                        // Attempt to wake up backend if sleeping
-                                        fetch('https://darma-website.onrender.com/api/settings').catch(() => { });
-                                    }}
                                 />
                             </div>
 
@@ -113,7 +171,7 @@ function LoginContent() {
                                 disabled={isLoading || phoneNumber.length < 10}
                             >
                                 {isLoading ? "Sending..." : (
-                                    <>Request OTP <ArrowRight className="w-4 h-4" /></>
+                                    <>Send SMS <ArrowRight className="w-4 h-4" /></>
                                 )}
                             </button>
                         </form>
@@ -137,7 +195,7 @@ function LoginContent() {
                                 type="submit"
                                 style={{ backgroundColor: '#2563eb', color: '#ffffff' }}
                                 className="w-full hover:opacity-90 font-semibold py-3 rounded-lg h-12 transition-all disabled:opacity-50"
-                                disabled={isLoading || otp.length < 4}
+                                disabled={isLoading || otp.length < 6}
                             >
                                 {isLoading ? "Verifying..." : "Verify & Login"}
                             </button>
@@ -244,6 +302,12 @@ function LoginContent() {
             </div>
         </div>
     )
+}
+
+declare global {
+    interface Window {
+        recaptchaVerifier: any;
+    }
 }
 
 import { Suspense } from "react"

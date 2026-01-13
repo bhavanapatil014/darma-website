@@ -251,14 +251,55 @@ router.post('/verify-otp', async (req, res) => {
 
         const token = jwt.sign({ id: user._id, role: user.role }, process.env.JWT_SECRET || 'secretkey', { expiresIn: '24h' });
 
-        // Send Login Notification
-        // Send Login Notification (REMOVED as per user request)
-        // await sendLoginNotification(user, "OTP");
-
         res.json({ auth: true, token, user: { id: user._id, name: user.name, email: user.email, role: user.role } });
 
     } catch (error) {
         res.status(500).json({ message: "Verification failed", error: error.message });
+    }
+});
+
+// POST /api/auth/login-with-phone (Firebase Auth Sync)
+router.post('/login-with-phone', async (req, res) => {
+    try {
+        let { phoneNumber, uid } = req.body;
+        console.log(`Firebase Login Attempt: ${phoneNumber} (UID: ${uid})`);
+
+        if (!phoneNumber) return res.status(400).json({ message: "Phone Number required" });
+
+        // Normalize Phone: Remove +91 if database stores only 10 digits, or keep it.
+        // We will check both formats to be friendly.
+        const cleanPhone = phoneNumber.replace(/^\+91/, '').replace(/\D/g, ''); // 10 digits
+
+        let user = await User.findOne({
+            $or: [{ phoneNumber: phoneNumber }, { phoneNumber: cleanPhone }]
+        });
+
+        if (!user) {
+            console.log("Creating new user from Firebase Phone Login...");
+            user = new User({
+                name: "New Member",
+                email: `${cleanPhone}@dermakart.local`, // Dummy unique email
+                phoneNumber: cleanPhone, // Store 10 digit standard
+                password: await bcrypt.hash(Math.random().toString(36), 10),
+                role: 'user'
+            });
+            await user.save();
+            // welcome email might fail for dummy email, that's fine
+        }
+
+        if (user.isDeleted) return res.status(403).json({ message: "Account deleted." });
+
+        const token = jwt.sign({ id: user._id, role: user.role }, process.env.JWT_SECRET || 'secretkey', { expiresIn: '7d' });
+
+        res.json({
+            auth: true,
+            token,
+            user: { id: user._id, name: user.name, email: user.email, role: user.role }
+        });
+
+    } catch (error) {
+        console.error("Firebase Login Error:", error);
+        res.status(500).json({ message: "Login failed", error: error.message });
     }
 });
 
