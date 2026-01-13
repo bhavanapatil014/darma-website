@@ -9,27 +9,18 @@ import { motion, AnimatePresence } from "framer-motion"
 export default function AccountPage() {
     const { user, logout } = useAuth()
     const router = useRouter()
+    // ... (Top of file stays same)
+
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false)
+    const [isEditModalOpen, setIsEditModalOpen] = useState(false) // NEW State
 
-    useEffect(() => {
-        if (!user) {
-            // router.push("/login") 
-        }
-    }, [user, router])
-
-    if (!user) {
-        return (
-            <div className="container mx-auto px-4 py-24 text-center">
-                <p className="mb-4">Please log in to view your account.</p>
-                <Button onClick={() => router.push('/login')}>Log In</Button>
-            </div>
-        )
-    }
+    // ...
 
     return (
         <div className="container mx-auto px-4 py-6">
             <AnimatePresence>
                 {isDeleteModalOpen && (
+                    // ... (Delete Modal existing code)
                     <motion.div
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
@@ -37,10 +28,9 @@ export default function AccountPage() {
                         className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4"
                         onClick={() => setIsDeleteModalOpen(false)}
                     >
+                        {/* ... Delete Modal Content ... */}
                         <motion.div
-                            initial={{ scale: 0.95, opacity: 0 }}
-                            animate={{ scale: 1, opacity: 1 }}
-                            exit={{ scale: 0.95, opacity: 0 }}
+                            // ...
                             className="bg-white rounded-lg p-6 max-w-sm w-full shadow-xl"
                             onClick={e => e.stopPropagation()}
                         >
@@ -72,8 +62,15 @@ export default function AccountPage() {
                         </motion.div>
                     </motion.div>
                 )}
+
+                {/* EDIT PROFILE MODAL */}
+                {isEditModalOpen && (
+                    <EditProfileModal user={user} onClose={() => setIsEditModalOpen(false)} />
+                )}
             </AnimatePresence>
+
             <div className="max-w-4xl mx-auto space-y-6">
+                {/* ... Header ... */}
                 <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center">
                     <div>
                         <h1 className="text-3xl font-bold">My Account</h1>
@@ -100,7 +97,17 @@ export default function AccountPage() {
                                     {user.email}
                                 </div>
                             </div>
+
+                            <Button
+                                variant="outline"
+                                onClick={() => setIsEditModalOpen(true)}
+                                className="w-full mt-6 mb-2 justify-center gap-2 border-primary text-primary hover:bg-primary/5"
+                            >
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"></path></svg>
+                                Edit Profile
+                            </Button>
                         </div>
+
 
                         <Button variant="outline" onClick={logout} className="w-full justify-start gap-2 text-red-600 hover:text-red-700 hover:bg-red-50 border-red-200">
                             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path></svg>
@@ -108,6 +115,7 @@ export default function AccountPage() {
                         </Button>
 
                         <div className="mt-4 pt-4 border-t">
+                            {/* ... Delete button ... */}
                             <button
                                 onClick={() => setIsDeleteModalOpen(true)}
                                 className="w-full text-xs text-gray-400 hover:text-red-600 transition-colors flex items-center gap-2"
@@ -118,8 +126,9 @@ export default function AccountPage() {
                         </div>
                     </div>
 
-                    {/* Orders Section */}
+                    {/* Orders Section ... (Rest of file) */}
                     <div className="md:col-span-2">
+                        {/* ... */}
                         <div className="bg-white z-10 pb-4 mb-2 sticky top-0">
                             <h2 className="text-xl font-bold">Order History</h2>
                         </div>
@@ -139,122 +148,225 @@ export default function AccountPage() {
     )
 }
 
-function OrderList() {
-    const [orders, setOrders] = useState<any[]>([])
-    const [loading, setLoading] = useState(true)
+function EditProfileModal({ user, onClose }: { user: any, onClose: () => void }) {
+    const [isLoading, setIsLoading] = useState(false);
+    const [formData, setFormData] = useState({
+        name: user.name,
+        email: user.email,
+        password: '',
+        currentPassword: '',
+        phoneNumber: user.phoneNumber || ''
+    });
+    const router = useRouter();
 
-    useEffect(() => {
-        const token = localStorage.getItem('token')
-        if (!token) return
+    const handleChange = (e: any) => {
+        setFormData({ ...formData, [e.target.name]: e.target.value });
+    };
 
-        fetch('https://darma-website.onrender.com/api/orders/my-orders', {
-            headers: { 'Authorization': `Bearer ${token}` }
-        })
-            .then(res => res.json())
-            .then(data => {
-                if (Array.isArray(data)) setOrders(data)
-                setLoading(false)
-            })
-            .catch(err => setLoading(false))
-    }, [])
+    const handleSubmit = async (e: React.FormEvent) => {
+        e.preventDefault();
+        setIsLoading(true);
 
-    if (loading) return <div className="space-y-4">{[1, 2, 3].map(i => <div key={i} className="h-32 bg-gray-100 rounded-lg animate-pulse" />)}</div>
-    if (orders.length === 0) return <div className="text-center py-12 bg-gray-50 rounded-lg border text-gray-500">No orders found. Start shopping!</div>
+        try {
+            const token = localStorage.getItem('token');
+            const res = await fetch('https://darma-website.onrender.com/api/auth/update-profile', {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify(formData)
+            });
+
+            const data = await res.json();
+            if (!res.ok) throw new Error(data.message);
+
+            alert("Profile Updated Successfully!");
+            window.location.reload(); // Refresh to update context
+            onClose();
+        } catch (error: any) {
+            alert(error.message);
+        } finally {
+            setIsLoading(false);
+        }
+    };
 
     return (
-        <div className="space-y-6">
-            {orders.map((order) => (
-                <div key={order._id} className="group bg-white rounded-xl border shadow-sm hover:shadow-md transition-all overflow-hidden">
-                    {/* Header */}
-                    <div className="bg-gray-50/50 p-4 border-b flex flex-wrap gap-4 justify-between items-center">
-                        <div className="flex gap-4 text-sm">
-                            <div>
-                                <span className="text-gray-500 block text-xs uppercase tracking-wider">Order Placed</span>
-                                <span className="font-medium text-gray-900">{new Date(order.createdAt).toLocaleDateString()}</span>
-                            </div>
-                            <div>
-                                <span className="text-gray-500 block text-xs uppercase tracking-wider">Total</span>
-                                <span className="font-medium text-gray-900">₹{parseFloat(order.totalAmount).toFixed(2)}</span>
-                            </div>
-                        </div>
-                        <div className="text-sm font-mono text-gray-500">ID: #{order._id.slice(-6).toUpperCase()}</div>
+        <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4"
+            onClick={onClose}
+        >
+            <motion.div
+                initial={{ scale: 0.95, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                exit={{ scale: 0.95, opacity: 0 }}
+                className="bg-white rounded-lg p-6 max-w-md w-full shadow-xl max-h-[90vh] overflow-y-auto"
+                onClick={e => e.stopPropagation()}
+            >
+                <div className="flex justify-between items-center mb-4">
+                    <h3 className="text-xl font-bold">Edit Profile</h3>
+                    <button onClick={onClose} className="text-gray-400 hover:text-gray-600">✕</button>
+                </div>
+
+                <form onSubmit={handleSubmit} className="space-y-4">
+                    <div>
+                        <label className="block text-sm font-medium mb-1">Name</label>
+                        <input name="name" value={formData.name} onChange={handleChange} className="w-full border rounded p-2" required />
+                    </div>
+                    <div>
+                        <label className="block text-sm font-medium mb-1">Email</label>
+                        <input name="email" type="email" value={formData.email} onChange={handleChange} className="w-full border rounded p-2" required />
+                    </div>
+                    <div>
+                        <label className="block text-sm font-medium mb-1">Phone (Optional)</label>
+                        <input name="phoneNumber" value={formData.phoneNumber} onChange={handleChange} className="w-full border rounded p-2" placeholder="+91..." />
                     </div>
 
-                    {/* Body */}
-                    <div className="p-6">
-                        <div className="mb-6">
-                            <OrderStepper status={order.status} />
-                        </div>
-
-                        {/* Delivery Info Block */}
-                        {(order.status === 'shipped' || order.status === 'delivered') && (
-                            <div className="bg-blue-50/50 rounded-lg p-4 mb-6 border border-blue-100 flex flex-col sm:flex-row gap-6">
-                                {order.trackingNumber && (
-                                    <div>
-                                        <span className="text-xs text-blue-600 font-semibold uppercase tracking-wider">Tracking Number</span>
-                                        <p className="font-mono text-gray-900 mt-1">{order.trackingNumber}</p>
-                                    </div>
-                                )}
-                                {order.courierName && (
-                                    <div>
-                                        <span className="text-xs text-blue-600 font-semibold uppercase tracking-wider">Courier</span>
-                                        <p className="font-medium text-gray-900 mt-1">{order.courierName}</p>
-                                    </div>
-                                )}
-                                {order.shippedAt && (
-                                    <div>
-                                        <span className="text-xs text-blue-600 font-semibold uppercase tracking-wider">Shipped Date</span>
-                                        <p className="text-gray-900 mt-1">{new Date(order.shippedAt).toLocaleDateString()}</p>
-                                    </div>
-                                )}
-                            </div>
-                        )}
-
+                    <div className="border-t pt-4 mt-4">
+                        <h4 className="text-sm font-semibold mb-3 text-gray-500 uppercase tracking-wider">Change Password</h4>
                         <div className="space-y-3">
-                            {order.products.map((item: any, idx: number) => (
-                                <div key={idx} className="flex items-center justify-between text-sm">
-                                    <div className="flex items-center gap-3">
-                                        {item.image ? (
-                                            <img src={item.image} alt={item.name} className="w-10 h-10 object-cover rounded bg-gray-100" />
-                                        ) : (
-                                            <div className="w-10 h-10 rounded bg-gray-200 flex items-center justify-center text-xs text-gray-500">Img</div>
-                                        )}
-                                        <div>
-                                            <span className="font-medium text-gray-900 block">{item.name || `Product #${item.product.slice(-4)}`}</span>
-                                            <span className="text-gray-500 text-xs">Qty: {item.quantity}</span>
-                                        </div>
-                                    </div>
-                                    <span className="font-medium">₹{item.priceAtPurchase}</span>
+                            <div>
+                                <label className="block text-sm font-medium mb-1">New Password (Optional)</label>
+                                <input name="password" type="password" value={formData.password} onChange={handleChange} className="w-full border rounded p-2" placeholder="Leave blank to keep current" />
+                            </div>
+                            {formData.password && (
+                                <div>
+                                    <label className="block text-sm font-medium mb-1 text-red-600">Current Password (Required to change)</label>
+                                    <input name="currentPassword" type="password" value={formData.currentPassword} onChange={handleChange} className="w-full border rounded p-2 border-red-200 bg-red-50" required={!!formData.password} />
                                 </div>
-                            ))}
+                            )}
                         </div>
                     </div>
 
-                    {/* Footer */}
-                    <div className="bg-gray-50 px-6 py-3 flex justify-between items-center text-sm">
-                        <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium capitalize ${order.status === 'delivered' ? 'bg-green-100 text-green-700' :
-                            order.status === 'cancelled' ? 'bg-red-100 text-red-700' :
-                                order.status === 'shipped' ? 'bg-blue-100 text-blue-700' :
-                                    'bg-yellow-100 text-yellow-700'
-                            }`}>
-                            <span className={`w-1.5 h-1.5 rounded-full ${order.status === 'delivered' ? 'bg-green-500' :
-                                order.status === 'cancelled' ? 'bg-red-500' :
-                                    order.status === 'shipped' ? 'bg-blue-500' :
-                                        'bg-yellow-500'
-                                }`}></span>
-                            {order.status}
-                        </span>
+                    <div className="flex justify-end gap-3 mt-6">
+                        <Button type="button" variant="outline" onClick={onClose}>Cancel</Button>
+                        <Button type="submit" disabled={isLoading}>{isLoading ? "Saving..." : "Save Changes"}</Button>
+                    </div>
+                </form>
+            </motion.div>
+        </motion.div>
+    );
+}
 
-                        {order.status === 'pending' && (
-                            <button className="text-red-600 hover:text-red-700 font-medium hover:underline text-xs">
-                                Cancel Order
-                            </button>
-                        )}
+// ... (OrderList function, existing)
+const [orders, setOrders] = useState<any[]>([])
+const [loading, setLoading] = useState(true)
+
+useEffect(() => {
+    const token = localStorage.getItem('token')
+    if (!token) return
+
+    fetch('https://darma-website.onrender.com/api/orders/my-orders', {
+        headers: { 'Authorization': `Bearer ${token}` }
+    })
+        .then(res => res.json())
+        .then(data => {
+            if (Array.isArray(data)) setOrders(data)
+            setLoading(false)
+        })
+        .catch(err => setLoading(false))
+}, [])
+
+if (loading) return <div className="space-y-4">{[1, 2, 3].map(i => <div key={i} className="h-32 bg-gray-100 rounded-lg animate-pulse" />)}</div>
+if (orders.length === 0) return <div className="text-center py-12 bg-gray-50 rounded-lg border text-gray-500">No orders found. Start shopping!</div>
+
+return (
+    <div className="space-y-6">
+        {orders.map((order) => (
+            <div key={order._id} className="group bg-white rounded-xl border shadow-sm hover:shadow-md transition-all overflow-hidden">
+                {/* Header */}
+                <div className="bg-gray-50/50 p-4 border-b flex flex-wrap gap-4 justify-between items-center">
+                    <div className="flex gap-4 text-sm">
+                        <div>
+                            <span className="text-gray-500 block text-xs uppercase tracking-wider">Order Placed</span>
+                            <span className="font-medium text-gray-900">{new Date(order.createdAt).toLocaleDateString()}</span>
+                        </div>
+                        <div>
+                            <span className="text-gray-500 block text-xs uppercase tracking-wider">Total</span>
+                            <span className="font-medium text-gray-900">₹{parseFloat(order.totalAmount).toFixed(2)}</span>
+                        </div>
+                    </div>
+                    <div className="text-sm font-mono text-gray-500">ID: #{order._id.slice(-6).toUpperCase()}</div>
+                </div>
+
+                {/* Body */}
+                <div className="p-6">
+                    <div className="mb-6">
+                        <OrderStepper status={order.status} />
+                    </div>
+
+                    {/* Delivery Info Block */}
+                    {(order.status === 'shipped' || order.status === 'delivered') && (
+                        <div className="bg-blue-50/50 rounded-lg p-4 mb-6 border border-blue-100 flex flex-col sm:flex-row gap-6">
+                            {order.trackingNumber && (
+                                <div>
+                                    <span className="text-xs text-blue-600 font-semibold uppercase tracking-wider">Tracking Number</span>
+                                    <p className="font-mono text-gray-900 mt-1">{order.trackingNumber}</p>
+                                </div>
+                            )}
+                            {order.courierName && (
+                                <div>
+                                    <span className="text-xs text-blue-600 font-semibold uppercase tracking-wider">Courier</span>
+                                    <p className="font-medium text-gray-900 mt-1">{order.courierName}</p>
+                                </div>
+                            )}
+                            {order.shippedAt && (
+                                <div>
+                                    <span className="text-xs text-blue-600 font-semibold uppercase tracking-wider">Shipped Date</span>
+                                    <p className="text-gray-900 mt-1">{new Date(order.shippedAt).toLocaleDateString()}</p>
+                                </div>
+                            )}
+                        </div>
+                    )}
+
+                    <div className="space-y-3">
+                        {order.products.map((item: any, idx: number) => (
+                            <div key={idx} className="flex items-center justify-between text-sm">
+                                <div className="flex items-center gap-3">
+                                    {item.image ? (
+                                        <img src={item.image} alt={item.name} className="w-10 h-10 object-cover rounded bg-gray-100" />
+                                    ) : (
+                                        <div className="w-10 h-10 rounded bg-gray-200 flex items-center justify-center text-xs text-gray-500">Img</div>
+                                    )}
+                                    <div>
+                                        <span className="font-medium text-gray-900 block">{item.name || `Product #${item.product.slice(-4)}`}</span>
+                                        <span className="text-gray-500 text-xs">Qty: {item.quantity}</span>
+                                    </div>
+                                </div>
+                                <span className="font-medium">₹{item.priceAtPurchase}</span>
+                            </div>
+                        ))}
                     </div>
                 </div>
-            ))}
-        </div>
-    )
+
+                {/* Footer */}
+                <div className="bg-gray-50 px-6 py-3 flex justify-between items-center text-sm">
+                    <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium capitalize ${order.status === 'delivered' ? 'bg-green-100 text-green-700' :
+                        order.status === 'cancelled' ? 'bg-red-100 text-red-700' :
+                            order.status === 'shipped' ? 'bg-blue-100 text-blue-700' :
+                                'bg-yellow-100 text-yellow-700'
+                        }`}>
+                        <span className={`w-1.5 h-1.5 rounded-full ${order.status === 'delivered' ? 'bg-green-500' :
+                            order.status === 'cancelled' ? 'bg-red-500' :
+                                order.status === 'shipped' ? 'bg-blue-500' :
+                                    'bg-yellow-500'
+                            }`}></span>
+                        {order.status}
+                    </span>
+
+                    {order.status === 'pending' && (
+                        <button className="text-red-600 hover:text-red-700 font-medium hover:underline text-xs">
+                            Cancel Order
+                        </button>
+                    )}
+                </div>
+            </div>
+        ))}
+    </div>
+)
 }
 
 function OrderStepper({ status }: { status: string }) {
@@ -343,8 +455,8 @@ function NegotiationList() {
                             </div>
                             <div>
                                 <span className={`px-2 py-1 rounded text-[10px] uppercase font-bold ${offer.status === 'deal_reached' ? 'bg-green-100 text-green-700' :
-                                        offer.status === 'closed' ? 'bg-gray-100 text-gray-600' :
-                                            'bg-blue-100 text-blue-700'
+                                    offer.status === 'closed' ? 'bg-gray-100 text-gray-600' :
+                                        'bg-blue-100 text-blue-700'
                                     }`}>
                                     {offer.status?.replace('_', ' ')}
                                 </span>

@@ -400,4 +400,50 @@ router.delete('/delete-me', verifyToken, async (req, res) => {
     }
 });
 
+// PUT /api/auth/update-profile
+router.put('/update-profile', verifyToken, async (req, res) => {
+    try {
+        const { name, email, password, currentPassword, phoneNumber } = req.body;
+        const user = await User.findById(req.userId);
+
+        if (!user) return res.status(404).json({ message: "User not found" });
+
+        // Update Name
+        if (name) user.name = name;
+        if (phoneNumber) user.phoneNumber = phoneNumber;
+
+        // Update Email (Check for uniqueness)
+        if (email && email !== user.email) {
+            const existing = await User.findOne({ email });
+            if (existing) return res.status(400).json({ message: "Email already in use" });
+            user.email = email;
+        }
+
+        // Update Password
+        if (password) {
+            if (!currentPassword) {
+                return res.status(400).json({ message: "Current password is required to set a new password." });
+            }
+            const isMatch = await bcrypt.compare(currentPassword, user.password);
+            if (!isMatch) {
+                return res.status(400).json({ message: "Incorrect current password" });
+            }
+            user.password = await bcrypt.hash(password, 10);
+        }
+
+        await user.save();
+
+        // Optionally generate a new token if critical info changed, but usually existing token (ID-based) works.
+        // We return the updated user info.
+        res.json({
+            message: "Profile updated successfully",
+            user: { id: user._id, name: user.name, email: user.email, role: user.role }
+        });
+
+    } catch (error) {
+        console.error("Update Profile Error:", error);
+        res.status(500).json({ message: "Failed to update profile", error: error.message });
+    }
+});
+
 module.exports = router;
