@@ -139,7 +139,7 @@ export default function CouponsPage() {
     function resetForm() {
         setFormData({
             code: "", type: "percentage", value: 0, minOrderAmount: 0, maxDiscountAmount: 0,
-            isActive: true, applicableProducts: [], applicableCategories: [], applicableBrands: []
+            expirationDate: "", isActive: true, applicableProducts: [], applicableCategories: [], applicableBrands: []
         });
         setIsEditing(false);
         setEditId(null);
@@ -163,6 +163,7 @@ export default function CouponsPage() {
             value: coupon.value,
             minOrderAmount: coupon.minOrderAmount,
             maxDiscountAmount: coupon.maxDiscountAmount,
+            expirationDate: coupon.expirationDate,
             isActive: coupon.isActive,
             applicableProducts: safeProducts,
             applicableCategories: safeCategories,
@@ -267,6 +268,22 @@ export default function CouponsPage() {
                                 max={formData.type === 'percentage' ? 100 : undefined}
                             />
                         </div>
+                        {formData.type === 'percentage' ? (
+                            <div>
+                                <label className="block text-sm font-medium mb-1">Max Discount Limit (Optional)</label>
+                                <input
+                                    type="number" className="w-full p-2 border rounded"
+                                    placeholder="e.g. Max ₹500 off"
+                                    value={formData.maxDiscountAmount || ''}
+                                    onChange={e => setFormData({ ...formData, maxDiscountAmount: Number(e.target.value) })}
+                                />
+                            </div>
+                        ) : (
+                            <div className="hidden"></div> // Spacer to keep grid alignment if needed, or just let it wrap
+                        )}
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-4">
                         <div>
                             <label className="block text-sm font-medium mb-1">Min Order Amount</label>
                             <input
@@ -275,19 +292,25 @@ export default function CouponsPage() {
                                 onChange={e => setFormData({ ...formData, minOrderAmount: Number(e.target.value) })}
                             />
                         </div>
-                    </div>
-
-                    {formData.type === 'percentage' && (
                         <div>
-                            <label className="block text-sm font-medium mb-1">Max Discount Limit (Optional)</label>
+                            <label className="block text-sm font-medium mb-1">Expiration Date (Optional)</label>
                             <input
-                                type="number" className="w-full p-2 border rounded"
-                                placeholder="e.g. Max ₹500 off"
-                                value={formData.maxDiscountAmount || ''}
-                                onChange={e => setFormData({ ...formData, maxDiscountAmount: Number(e.target.value) })}
+                                type="date"
+                                className="w-full p-2 border rounded"
+                                value={formData.expirationDate ? new Date(formData.expirationDate).toISOString().split('T')[0] : ''}
+                                onChange={e => {
+                                    // Set to End of Day (23:59:59) so the coupon is valid FOR that entire day
+                                    if (e.target.value) {
+                                        const date = new Date(e.target.value);
+                                        date.setHours(23, 59, 59, 999);
+                                        setFormData({ ...formData, expirationDate: date.toISOString() })
+                                    } else {
+                                        setFormData({ ...formData, expirationDate: undefined })
+                                    }
+                                }}
                             />
                         </div>
-                    )}
+                    </div>
 
                     {/* Applicability Selectors */}
                     <div className="grid grid-cols-3 gap-4">
@@ -374,6 +397,7 @@ export default function CouponsPage() {
                             <th className="pb-2">Discount</th>
                             <th className="pb-2">Applicability</th>
                             <th className="pb-2">Min Order</th>
+                            <th className="pb-2">Expiry</th>
                             <th className="pb-2">Action</th>
                         </tr>
                     </thead>
@@ -391,6 +415,9 @@ export default function CouponsPage() {
                                     {(!coupon.applicableProducts?.length && !coupon.applicableCategories?.length && !coupon.applicableBrands?.length) && 'Storewide'}
                                 </td>
                                 <td className="py-3">₹{coupon.minOrderAmount}</td>
+                                <td className="py-3 text-sm text-gray-500">
+                                    {coupon.expirationDate ? new Date(coupon.expirationDate).toLocaleDateString() : '-'}
+                                </td>
                                 <td className="py-3 flex gap-2">
                                     { /* @ts-ignore */}
                                     <Button variant="outline" size="sm" onClick={() => handleEdit(coupon)}>Edit</Button>
