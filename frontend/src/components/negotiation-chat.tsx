@@ -1,7 +1,7 @@
-"use client"
 import { useState, useEffect, useRef } from "react"
 import { Button } from "@/components/ui/button"
 import { useAuth } from "@/lib/auth-context"
+import { useRouter } from "next/navigation"
 import { MessageSquare, Paperclip, X, Send } from "lucide-react"
 
 export default function NegotiationChat({ product }: { product: any }) {
@@ -12,6 +12,7 @@ export default function NegotiationChat({ product }: { product: any }) {
     const [image, setImage] = useState('')
     const [loading, setLoading] = useState(false)
     const scrollRef = useRef<HTMLDivElement>(null)
+    const router = useRouter()
 
     // Load Chat
     useEffect(() => {
@@ -28,6 +29,7 @@ export default function NegotiationChat({ product }: { product: any }) {
     }, [messages, isOpen])
 
     const fetchChat = async () => {
+        if (!user) return;
         try {
             const token = localStorage.getItem('token')
             const res = await fetch(`https://darma-website.onrender.com/api/negotiate/product/${product.id || product._id}`, {
@@ -79,16 +81,25 @@ export default function NegotiationChat({ product }: { product: any }) {
         reader.readAsDataURL(file)
     }
 
-    if (!user) return null
+    const handleOpen = () => {
+        if (!user) {
+            router.push('/login?redirect=' + encodeURIComponent(window.location.pathname));
+            return;
+        }
+        setIsOpen(true);
+    }
+
+    // Always show button, but redirect if not logged in
+    // if (!user) return null // REMOVED to allow guests to see the option
 
     return (
         <div className="relative w-full">
-            <Button onClick={() => setIsOpen(true)} className="w-full mt-4 bg-teal-600 hover:bg-teal-700 text-white flex items-center justify-center gap-2">
+            <Button onClick={handleOpen} className="w-full mt-4 bg-teal-600 hover:bg-teal-700 text-white flex items-center justify-center gap-2">
                 <MessageSquare className="w-4 h-4" />
                 Negotiate / Chat with Dealer
             </Button>
 
-            {isOpen && (
+            {isOpen && user && (
                 <div className="absolute top-full left-0 right-0 mt-2 bg-white rounded-lg shadow-xl border z-50 flex flex-col h-[500px] overflow-hidden animate-in fade-in zoom-in-95 duration-200">
                     {/* Header */}
                     <div className="bg-teal-700 text-white p-3 flex justify-between items-center shrink-0">
