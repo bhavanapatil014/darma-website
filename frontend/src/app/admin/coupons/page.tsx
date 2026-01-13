@@ -293,17 +293,15 @@ export default function CouponsPage() {
                             />
                         </div>
                         <div>
-                            <label className="block text-sm font-medium mb-1">Expiration Date (Optional)</label>
+                            <label className="block text-sm font-medium mb-1">Expiration Date & Time (Optional)</label>
                             <input
-                                type="date"
+                                type="datetime-local"
                                 className="w-full p-2 border rounded"
-                                value={formData.expirationDate ? new Date(formData.expirationDate).toISOString().split('T')[0] : ''}
+                                value={formData.expirationDate ? new Date(formData.expirationDate).toISOString().slice(0, 16) : ''}
                                 onChange={e => {
-                                    // Set to End of Day (23:59:59) so the coupon is valid FOR that entire day
                                     if (e.target.value) {
-                                        const date = new Date(e.target.value);
-                                        date.setHours(23, 59, 59, 999);
-                                        setFormData({ ...formData, expirationDate: date.toISOString() })
+                                        // Use exact time selected by user
+                                        setFormData({ ...formData, expirationDate: new Date(e.target.value).toISOString() })
                                     } else {
                                         setFormData({ ...formData, expirationDate: undefined })
                                     }
@@ -416,7 +414,7 @@ export default function CouponsPage() {
                                 </td>
                                 <td className="py-3">₹{coupon.minOrderAmount}</td>
                                 <td className="py-3 text-sm text-gray-500">
-                                    {coupon.expirationDate ? new Date(coupon.expirationDate).toLocaleDateString() : '-'}
+                                    {coupon.expirationDate ? new Date(coupon.expirationDate).toLocaleString() : '-'}
                                 </td>
                                 <td className="py-3 flex gap-2">
                                     { /* @ts-ignore */}
