@@ -190,6 +190,14 @@ export default function ProductsPage() {
         }
     }
 
+    // Handle File Selection
+    const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        if (e.target.files) {
+            // Convert FileList to Array
+            setImageFiles(Array.from(e.target.files))
+        }
+    }
+
     if (loading) return <div className="p-8">Loading Products...</div>
 
     return (
