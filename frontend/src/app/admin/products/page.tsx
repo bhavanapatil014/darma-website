@@ -1,5 +1,5 @@
 "use client"
-import { useEffect, useState } from "react"
+import { useEffect, useState, useRef } from "react"
 import { Button } from "@/components/ui/button"
 import { fetchProducts, Product } from "@/lib/data"
 
@@ -123,6 +123,39 @@ export default function ProductsPage() {
         }
     }
 
+
+
+    function resetForm() {
+        setFormData({
+            name: "", category: "skincare", price: 0, description: "",
+            image: "", images: [], stockQuantity: 0, isNewArrival: false,
+            mrp: undefined, netContent: "", brand: ""
+        })
+        setDiscountPercent(0);
+        setImageFiles([])
+        setIsEditing(null)
+    }
+
+    const [selectedProducts, setSelectedProducts] = useState<string[]>([])
+    const nameInputRef = useRef<HTMLInputElement>(null)
+
+    // Bulk Actions
+    async function handleBulkDelete() {
+        if (!confirm(`Delete ${selectedProducts.length} products?`)) return
+        try {
+            await Promise.all(selectedProducts.map(id => fetch(`https://darma-website.onrender.com/api/products/${id}`, { method: 'DELETE' })))
+            setSelectedProducts([])
+            loadData()
+        } catch (error) {
+            console.error(error)
+            alert("Bulk delete failed")
+        }
+    }
+
+    function toggleSelect(id: string) {
+        setSelectedProducts(prev => prev.includes(id) ? prev.filter(p => p !== id) : [...prev, id])
+    }
+
     function handleEdit(product: Product) {
         setFormData({
             name: product.name,
@@ -147,44 +180,13 @@ export default function ProductsPage() {
 
         setImageFiles([]) // Clear file input
         setIsEditing(product.id)
-        window.scrollTo({ top: 0, behavior: 'smooth' })
-    }
 
-    function resetForm() {
-        setFormData({
-            name: "", category: "skincare", price: 0, description: "",
-            image: "", images: [], stockQuantity: 0, isNewArrival: false,
-            mrp: undefined, netContent: "", brand: ""
-        })
-        setDiscountPercent(0);
-        setImageFiles([])
-        setIsEditing(null)
-    }
-
-    const [selectedProducts, setSelectedProducts] = useState<string[]>([])
-
-    // Bulk Actions
-    async function handleBulkDelete() {
-        if (!confirm(`Delete ${selectedProducts.length} products?`)) return
-        try {
-            await Promise.all(selectedProducts.map(id => fetch(`https://darma-website.onrender.com/api/products/${id}`, { method: 'DELETE' })))
-            setSelectedProducts([])
-            loadData()
-        } catch (error) {
-            console.error(error)
-            alert("Bulk delete failed")
-        }
-    }
-
-    function toggleSelect(id: string) {
-        setSelectedProducts(prev => prev.includes(id) ? prev.filter(p => p !== id) : [...prev, id])
-    }
-
-    // Handle File Selection
-    const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        if (e.target.files) {
-            // Convert FileList to Array
-            setImageFiles(Array.from(e.target.files))
+        // Scroll to form and focus
+        if (nameInputRef.current) {
+            nameInputRef.current.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            setTimeout(() => nameInputRef.current?.focus(), 500);
+        } else {
+            window.scrollTo({ top: 0, behavior: 'smooth' })
         }
     }
 
@@ -263,7 +265,7 @@ export default function ProductsPage() {
                     <form onSubmit={handleSubmit} className="space-y-4">
                         <div>
                             <label className="block text-sm font-medium mb-1">Name</label>
-                            <input className="w-full p-2 border rounded" required
+                            <input ref={nameInputRef} className="w-full p-2 border rounded" required
                                 value={formData.name} onChange={e => setFormData({ ...formData, name: e.target.value })} />
                         </div>
                         <div className="grid grid-cols-2 gap-4">
