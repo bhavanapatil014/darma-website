@@ -1,11 +1,47 @@
 const nodemailer = require('nodemailer');
+const sgMail = require('@sendgrid/mail');
 
-// Async Transporter Creator
+// Helper: Send Email via SendGrid (HTTP) or Nodemailer (SMTP)
+const sendEmailWrapper = async ({ to, subject, html }) => {
+    try {
+        // Option A: SendGrid (HTTP API) - Bypasses Render Firewall
+        if (process.env.EMAIL_SERVICE === 'sendgrid') {
+            if (!process.env.SENDGRID_API_KEY) throw new Error("Missing SENDGRID_API_KEY");
+
+            sgMail.setApiKey(process.env.SENDGRID_API_KEY);
+            const msg = {
+                to,
+                from: process.env.SMTP_FROM || 'bhavanapatil014@gmail.com', // MUST be verified in SendGrid
+                subject,
+                html,
+            };
+            await sgMail.send(msg);
+            console.log(`✅ Email sent via SendGrid to: ${Array.isArray(to) ? to.join(', ') : to}`);
+            return;
+        }
+
+        // Option B: Nodemailer (SMTP) - For Localhost or Paid Render
+        const transporter = await getTransporter();
+        await transporter.sendMail({
+            from: process.env.SMTP_FROM || '"DermaKart" <noreply@dermakart.com>',
+            to,
+            subject,
+            html
+        });
+        console.log(`✅ Email sent via SMTP to: ${Array.isArray(to) ? to.join(', ') : to}`);
+
+    } catch (error) {
+        console.error("❌ Email Sending Failed:", error.response ? error.response.body : error.message);
+        // Fallback or re-throw not needed for async notification, just log.
+    }
+};
+
+// Async Transporter Creator (Legacy SMTP)
 const getTransporter = async () => {
     // 1. Try Configured SMTP
     if (process.env.SMTP_USER && !process.env.SMTP_USER.includes('put-your') && process.env.SMTP_PASS && !process.env.SMTP_PASS.includes('put-your')) {
-        const port = process.env.SMTP_PORT || 587; // Default to 587 (TLS) instead of 465 (SSL)
-        const isSecure = port == 465; // Only use secure:true for port 465
+        const port = process.env.SMTP_PORT || 587; // Default to 587 (TLS)
+        const isSecure = port == 465;
 
         console.log(`📧 Initializing SMTP Transporter (Host: ${process.env.SMTP_HOST || 'gmail'}, Port: ${port}, Secure: ${isSecure})`);
 
@@ -22,14 +58,12 @@ const getTransporter = async () => {
             },
             logger: true,
             debug: true,
-            connectionTimeout: 10000, // 10 seconds
-            greetingTimeout: 5000,
-            socketTimeout: 10000,
+            connectionTimeout: 10000,
         });
     }
 
     // 2. Fallback: Ethereal (Dev Mode)
-    console.log("⚠️  SMTP Credentials missing or invalid. Using Ethereal Email for testing...");
+    console.log("⚠️  SMTP Credentials missing. Using Ethereal.");
     const testAccount = await nodemailer.createTestAccount();
     return nodemailer.createTransport({
         host: 'smtp.ethereal.email',
@@ -96,17 +130,13 @@ const isDummyEmail = (email) => {
 
 const sendOrderEmails = async (order, user) => {
     try {
-        const transporter = await getTransporter(); // Get valid transporter
-
         // 1. Send to Customer
         if (!isDummyEmail(order.email)) {
-            await transporter.sendMail({
-                from: process.env.SMTP_FROM || '"DermaKart" <noreply@dermakart.com>',
-                to: order.email, // Use email from order directly
+            await sendEmailWrapper({
+                to: order.email,
                 subject: `Order Confirmation - ${order._id}`,
-                html: formatOrderEmail(order),
+                html: formatOrderEmail(order)
             });
-            console.log(`Email sent to customer: ${order.email}`);
         } else {
             console.log(`Skipped Order Email to dummy address: ${order.email}`);
         }
@@ -118,17 +148,15 @@ const sendOrderEmails = async (order, user) => {
         const recipients = [superAdminEmail, adminEmail].filter(Boolean);
 
         if (recipients.length > 0) {
-            await transporter.sendMail({
-                from: process.env.SMTP_FROM || '"DermaKart System" <system@dermakart.com>',
+            await sendEmailWrapper({
                 to: recipients,
                 subject: `New Order Alert - ${order._id}`,
-                html: formatAdminEmail(order, user),
+                html: formatAdminEmail(order, user)
             });
-            console.log(`Email sent to admins: ${recipients.join(', ')}`);
         }
 
     } catch (error) {
-        console.error("Error sending emails:", error);
+        console.error("Error sending order emails:", error);
     }
 };
 
@@ -163,17 +191,13 @@ const formatAdminNewUserEmail = (user) => {
 
 const sendWelcomeEmails = async (user) => {
     try {
-        const transporter = await getTransporter();
-
         // 1. Send to User
         if (!isDummyEmail(user.email)) {
-            await transporter.sendMail({
-                from: process.env.SMTP_FROM || '"DermaKart" <noreply@dermakart.com>',
+            await sendEmailWrapper({
                 to: user.email,
                 subject: "Registration Successful - Welcome to DermaKart 🌿",
-                html: formatWelcomeEmail(user),
+                html: formatWelcomeEmail(user)
             });
-            console.log(`Registration email sent to user: ${user.email}`);
         } else {
             console.log(`Skipped Welcome Email to dummy address: ${user.email}`);
         }
@@ -184,13 +208,11 @@ const sendWelcomeEmails = async (user) => {
         const recipients = [superAdminEmail, adminEmail].filter(Boolean);
 
         if (recipients.length > 0) {
-            await transporter.sendMail({
-                from: process.env.SMTP_FROM || '"DermaKart System" <system@dermakart.com>',
+            await sendEmailWrapper({
                 to: recipients,
                 subject: `New User Alert: ${user.name}`,
-                html: formatAdminNewUserEmail(user),
+                html: formatAdminNewUserEmail(user)
             });
-            console.log(`New user alert sent to admins: ${recipients.join(', ')}`);
         }
 
     } catch (error) {
@@ -200,18 +222,15 @@ const sendWelcomeEmails = async (user) => {
 
 const sendLoginNotification = async (user, method = "Password") => {
     try {
-        const transporter = await getTransporter();
         const time = new Date().toLocaleString("en-IN", { timeZone: "Asia/Kolkata" });
 
         // 1. Send to User
         if (!isDummyEmail(user.email)) {
-            await transporter.sendMail({
-                from: process.env.SMTP_FROM || '"DermaKart" <noreply@dermakart.com>',
+            await sendEmailWrapper({
                 to: user.email,
                 subject: `Security Alert: Login Detected`,
-                html: formatLoginNotificationEmail(user, time, method),
+                html: formatLoginNotificationEmail(user, time, method)
             });
-            console.log(`Login notification sent to user: ${user.email}`);
         } else {
             console.log(`Skipped Login Notification to dummy address: ${user.email}`);
         }
@@ -222,13 +241,11 @@ const sendLoginNotification = async (user, method = "Password") => {
         const recipients = [superAdminEmail, adminEmail].filter(Boolean);
 
         if (recipients.length > 0) {
-            await transporter.sendMail({
-                from: process.env.SMTP_FROM || '"DermaKart System" <system@dermakart.com>',
+            await sendEmailWrapper({
                 to: recipients,
                 subject: `Admin Alert: User Login - ${user.name}`,
-                html: formatAdminLoginAlert(user, time, method),
+                html: formatAdminLoginAlert(user, time, method)
             });
-            console.log(`Login alert sent to admins: ${recipients.join(', ')}`);
         }
 
     } catch (error) {
@@ -249,14 +266,11 @@ const formatOtpEmail = (otp) => {
 
 const sendOtp = async (email, otp) => {
     try {
-        const transporter = await getTransporter();
-        await transporter.sendMail({
-            from: process.env.SMTP_FROM || '"DermaKart" <noreply@dermakart.com>',
+        await sendEmailWrapper({
             to: email,
             subject: "Your Login OTP - DermaKart",
-            html: formatOtpEmail(otp),
+            html: formatOtpEmail(otp)
         });
-        console.log(`OTP sent to ${email}`);
     } catch (error) {
         console.error("Error sending OTP email:", error);
     }
