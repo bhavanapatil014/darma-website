@@ -143,7 +143,33 @@ export default function AdminNegotiations() {
                     <h3 className="font-bold">{chatData?.product?.name}</h3>
                     <span className="text-xs text-gray-500">with {chatData?.user?.name} (₹{chatData?.product?.price})</span>
                 </div>
-                <Button variant="ghost" size="sm" onClick={() => setSelectedId(null)}>Back to List</Button>
+                <div className="flex items-center gap-3">
+                    <select
+                        className={`text-xs p-1.5 rounded border font-medium outline-none cursor-pointer ${chatData?.status === 'deal_reached' ? 'bg-green-100 text-green-700 border-green-200' :
+                                chatData?.status === 'closed' ? 'bg-gray-100 text-gray-600 border-gray-200' :
+                                    'bg-blue-50 text-blue-600 border-blue-200'
+                            }`}
+                        value={chatData?.status || 'active'}
+                        onChange={async (e) => {
+                            const newStatus = e.target.value;
+                            if (!confirm(`Change status to ${newStatus}?`)) return;
+                            try {
+                                const token = localStorage.getItem('token');
+                                await fetch(`https://darma-website.onrender.com/api/negotiate/${selectedId}/reply`, {
+                                    method: 'POST',
+                                    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                                    body: JSON.stringify({ status: newStatus })
+                                });
+                                fetchOffers();
+                            } catch (e) { console.error(e); }
+                        }}
+                    >
+                        <option value="active">Active</option>
+                        <option value="deal_reached">Deal Reached</option>
+                        <option value="closed">Closed</option>
+                    </select>
+                    <Button variant="ghost" size="sm" onClick={() => setSelectedId(null)}>Back</Button>
+                </div>
             </div>
 
             <div ref={scrollRef} className="flex-1 overflow-y-auto p-4 space-y-4 bg-slate-50">
