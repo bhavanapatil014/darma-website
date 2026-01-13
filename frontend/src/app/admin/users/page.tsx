@@ -74,9 +74,11 @@ export default function UsersPage() {
             if (res.ok) {
                 fetchUsers()
             } else {
-                alert("Failed to delete user")
+                const errData = await res.json().catch(() => ({}));
+                alert(errData.message || "Failed to delete user")
             }
         } catch (error) {
+            console.error(error);
             alert("Error deleting user")
         }
     }

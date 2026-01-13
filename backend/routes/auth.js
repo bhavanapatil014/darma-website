@@ -361,12 +361,18 @@ router.post('/create-admin', verifyToken, async (req, res) => {
 });
 // DELETE /api/auth/users/:id (Super Admin Only)
 router.delete('/users/:id', verifyToken, async (req, res) => {
+    console.log(`DELETE User Request: ID ${req.params.id} by ${req.userId} (Role: ${req.userRole})`);
+
     if (req.userRole !== 'superadmin') {
+        console.warn(`DELETE Refused: User ${req.userId} is not superadmin`);
         return res.status(403).json({ message: 'Require Super Admin Role' });
     }
     try {
         const user = await User.findById(req.params.id);
-        if (!user) return res.status(404).json({ message: "User not found" });
+        if (!user) {
+            console.warn(`DELETE Failed: User ${req.params.id} not found`);
+            return res.status(404).json({ message: "User not found" });
+        }
 
         user.isDeleted = true;
         user.deletedAt = new Date();
@@ -375,8 +381,10 @@ router.delete('/users/:id', verifyToken, async (req, res) => {
         user.email = `deleted_${Date.now()}_${user.email}`;
 
         await user.save();
+        console.log(`DELETE Success: User ${req.params.id} soft deleted.`);
         res.json({ message: "User deleted successfully" });
     } catch (error) {
+        console.error("DELETE User Error:", error);
         res.status(500).json({ message: "Failed to delete user", error: error.message });
     }
 });
