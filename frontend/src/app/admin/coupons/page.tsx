@@ -297,10 +297,10 @@ export default function CouponsPage() {
                             <input
                                 type="datetime-local"
                                 className="w-full p-2 border rounded"
-                                value={formData.expirationDate ? new Date(formData.expirationDate).toISOString().slice(0, 16) : ''}
+                                // Correctly format for local time input by offsetting the timezone
+                                value={formData.expirationDate ? new Date(new Date(formData.expirationDate).getTime() - (new Date().getTimezoneOffset() * 60000)).toISOString().slice(0, 16) : ''}
                                 onChange={e => {
                                     if (e.target.value) {
-                                        // Use exact time selected by user
                                         setFormData({ ...formData, expirationDate: new Date(e.target.value).toISOString() })
                                     } else {
                                         setFormData({ ...formData, expirationDate: undefined })
@@ -400,29 +400,35 @@ export default function CouponsPage() {
                         </tr>
                     </thead>
                     <tbody>
-                        {coupons.map(coupon => (
-                            <tr key={coupon._id} className="border-b last:border-0">
-                                <td className="py-3 font-bold">{coupon.code}</td>
-                                <td className="py-3">
-                                    {coupon.type === 'percentage' ? `${coupon.value}% Off` : `₹${coupon.value} Off`}
-                                </td>
-                                <td className="py-3 text-sm text-gray-600">
-                                    {(coupon.applicableProducts?.length || 0) > 0 && <div>{coupon.applicableProducts.length} Products</div>}
-                                    {(coupon.applicableCategories?.length || 0) > 0 && <div>{coupon.applicableCategories.join(', ')}</div>}
-                                    {(coupon.applicableBrands?.length || 0) > 0 && <div>{coupon.applicableBrands.join(', ')}</div>}
-                                    {(!coupon.applicableProducts?.length && !coupon.applicableCategories?.length && !coupon.applicableBrands?.length) && 'Storewide'}
-                                </td>
-                                <td className="py-3">₹{coupon.minOrderAmount}</td>
-                                <td className="py-3 text-sm text-gray-500">
-                                    {coupon.expirationDate ? new Date(coupon.expirationDate).toLocaleString() : '-'}
-                                </td>
-                                <td className="py-3 flex gap-2">
-                                    { /* @ts-ignore */}
-                                    <Button variant="outline" size="sm" onClick={() => handleEdit(coupon)}>Edit</Button>
-                                    <Button variant="destructive" size="sm" onClick={() => handleDelete(coupon._id)}>Delete</Button>
-                                </td>
-                            </tr>
-                        ))}
+                        {coupons.map(coupon => {
+                            const isExpired = coupon.expirationDate && new Date() > new Date(coupon.expirationDate);
+                            return (
+                                <tr key={coupon._id} className={`border-b last:border-0 ${isExpired ? 'opacity-40 grayscale bg-gray-50' : ''}`}>
+                                    <td className="py-3 font-bold">
+                                        {coupon.code}
+                                        {isExpired && <span className="ml-2 text-[10px] bg-red-100 text-red-600 px-1 py-0.5 rounded uppercase tracking-wider">Expired</span>}
+                                    </td>
+                                    <td className="py-3">
+                                        {coupon.type === 'percentage' ? `${coupon.value}% Off` : `₹${coupon.value} Off`}
+                                    </td>
+                                    <td className="py-3 text-sm text-gray-600">
+                                        {(coupon.applicableProducts?.length || 0) > 0 && <div>{coupon.applicableProducts.length} Products</div>}
+                                        {(coupon.applicableCategories?.length || 0) > 0 && <div>{coupon.applicableCategories.join(', ')}</div>}
+                                        {(coupon.applicableBrands?.length || 0) > 0 && <div>{coupon.applicableBrands.join(', ')}</div>}
+                                        {(!coupon.applicableProducts?.length && !coupon.applicableCategories?.length && !coupon.applicableBrands?.length) && 'Storewide'}
+                                    </td>
+                                    <td className="py-3">₹{coupon.minOrderAmount}</td>
+                                    <td className="py-3 text-sm text-gray-500">
+                                        {coupon.expirationDate ? new Date(coupon.expirationDate).toLocaleString() : '-'}
+                                    </td>
+                                    <td className="py-3 flex gap-2">
+                                        { /* @ts-ignore */}
+                                        <Button variant="outline" size="sm" onClick={() => handleEdit(coupon)}>Edit</Button>
+                                        <Button variant="destructive" size="sm" onClick={() => handleDelete(coupon._id)}>Delete</Button>
+                                    </td>
+                                </tr>
+                            );
+                        })}
                         {coupons.length === 0 && (
                             <tr><td colSpan={4} className="py-4 text-center text-gray-500">No coupons found</td></tr>
                         )}
