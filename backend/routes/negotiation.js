@@ -125,19 +125,37 @@ router.post('/:id/reply', verifyToken, async (req, res) => {
 
                 // Scope Logic
                 const scope = req.body.couponScope || 'specific'; // 'specific' | 'global'
-                const applicableProducts = scope === 'specific' ? [product.id, product._id.toString()] : []; // Empty = Global
+
+                // Safe Product ID Retrieval
+                let applicableProducts = [];
+                if (scope === 'specific') {
+                    // Prefer custom ID if it exists, else DB _id
+                    const pId = product.id || product._id.toString();
+                    applicableProducts = [pId];
+                    // Also add the other ID type to be safe? 
+                    // No, let's just stick to what the frontend likely sends.
+                    // Actually, let's push both just in case the system is mixed.
+                    if (product._id) applicableProducts.push(product._id.toString());
+                    if (product.id && product.id !== product._id.toString()) applicableProducts.push(product.id);
+                }
 
                 // Create Real Coupon in DB
-                const coupon = new Coupon({
-                    code,
-                    type: 'fixed', // Corrected from discountType
-                    value: Number(discountAmount),
-                    minOrderAmount: 0, // Corrected from minPurchaseAmount
-                    applicableProducts: applicableProducts,
-                    usageLimit: 1, // One-time use personal coupon
-                    expirationDate: expireDate ? new Date(expireDate) : new Date(Date.now() + 48 * 60 * 60 * 1000)
-                });
-                await coupon.save();
+                try {
+                    const coupon = new Coupon({
+                        code,
+                        type: 'fixed',
+                        value: Number(discountAmount),
+                        minOrderAmount: 0,
+                        applicableProducts: applicableProducts,
+                        usageLimit: 1,
+                        expirationDate: expireDate ? new Date(expireDate) : new Date(Date.now() + 48 * 60 * 60 * 1000)
+                    });
+                    await coupon.save();
+                    console.log(`Coupon created via Negotiation: ${code}`);
+                } catch (couponError) {
+                    console.error("Coupon Creation Failed in Negotiation:", couponError);
+                    throw couponError; // Re-throw to hit the outer catch and send 500
+                }
 
                 neg.couponCode = code;
                 neg.status = 'deal_reached';
