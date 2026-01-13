@@ -111,7 +111,7 @@ router.post('/:id/reply', verifyToken, async (req, res) => {
     try {
         if (req.userRole !== 'admin' && req.userRole !== 'superadmin') return res.status(403).json({ message: "Access denied" });
 
-        const { text, image, createCoupon, discountAmount, status } = req.body;
+        const { text, image, createCoupon, discountAmount, status, expireDate } = req.body;
         const neg = await Negotiation.findById(req.params.id);
         if (!neg) return res.status(404).json({ message: "Negotiation not found" });
 
@@ -130,13 +130,12 @@ router.post('/:id/reply', verifyToken, async (req, res) => {
                 // Create Real Coupon in DB
                 const coupon = new Coupon({
                     code,
-                    description: `Negotiated deal for ${product.name} (${scope})`,
-                    discountType: 'fixed',
+                    type: 'fixed', // Corrected from discountType
                     value: Number(discountAmount),
-                    minPurchaseAmount: 0,
-                    applicableProducts: applicableProducts, // Fixed field name
-                    usageLimit: 1,
-                    expirationDate: new Date(Date.now() + 48 * 60 * 60 * 1000) // 48 Hours Validity
+                    minOrderAmount: 0, // Corrected from minPurchaseAmount
+                    applicableProducts: applicableProducts,
+                    usageLimit: 1, // One-time use personal coupon
+                    expirationDate: expireDate ? new Date(expireDate) : new Date(Date.now() + 48 * 60 * 60 * 1000)
                 });
                 await coupon.save();
 

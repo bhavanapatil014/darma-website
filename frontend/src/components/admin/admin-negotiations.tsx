@@ -13,6 +13,7 @@ export default function AdminNegotiations() {
     const [couponAmount, setCouponAmount] = useState('')
     const [couponScope, setCouponScope] = useState<'specific' | 'global'>('specific')
     const [showCouponInput, setShowCouponInput] = useState(false)
+    const [expiry, setExpiry] = useState<string | undefined>(undefined)
     const scrollRef = useRef<HTMLDivElement>(null)
 
     const fetchOffers = async () => {
@@ -67,6 +68,7 @@ export default function AdminNegotiations() {
                 body.createCoupon = true
                 body.discountAmount = couponAmount
                 body.couponScope = couponScope
+                body.expireDate = expiry
             }
 
             const res = await fetch(`https://darma-website.onrender.com/api/negotiate/${selectedId}/reply`, {
@@ -79,6 +81,7 @@ export default function AdminNegotiations() {
                 setReply('')
                 setShowCouponInput(false)
                 setCouponAmount('')
+                setExpiry(undefined)
                 fetchOffers()
             }
         } catch (e) { alert("Failed to send") }
@@ -165,36 +168,54 @@ export default function AdminNegotiations() {
                             <div className="font-semibold text-green-800 text-xs uppercase">Issue Discount Coupon</div>
                             <button onClick={() => setShowCouponInput(false)} className="text-gray-400 hover:text-gray-600"><span className="sr-only">Close</span>✕</button>
                         </div>
-                        <div className="flex gap-3 mb-2 px-1">
-                            <label className="flex items-center gap-1.5 cursor-pointer text-xs text-green-900 font-medium">
-                                <input
-                                    type="radio"
-                                    className="accent-green-600"
-                                    checked={couponScope === 'specific'}
-                                    onChange={() => setCouponScope('specific')}
-                                />
-                                Limit to this item
-                            </label>
-                            <label className="flex items-center gap-1.5 cursor-pointer text-xs text-green-900 font-medium">
-                                <input
-                                    type="radio"
-                                    className="accent-green-600"
-                                    checked={couponScope === 'global'}
-                                    onChange={() => setCouponScope('global')}
-                                />
-                                Valid on next order (Any item)
-                            </label>
+                        <div className="space-y-3 mb-2 px-1">
+                            <div className="flex gap-3">
+                                <label className="flex items-center gap-1.5 cursor-pointer text-xs text-green-900 font-medium">
+                                    <input
+                                        type="radio"
+                                        className="accent-green-600"
+                                        checked={couponScope === 'specific'}
+                                        onChange={() => setCouponScope('specific')}
+                                    />
+                                    Limit to this item
+                                </label>
+                                <label className="flex items-center gap-1.5 cursor-pointer text-xs text-green-900 font-medium">
+                                    <input
+                                        type="radio"
+                                        className="accent-green-600"
+                                        checked={couponScope === 'global'}
+                                        onChange={() => setCouponScope('global')}
+                                    />
+                                    Valid on next order (Any item)
+                                </label>
+                            </div>
+
+                            <div className="grid grid-cols-2 gap-2">
+                                <div>
+                                    <label className="text-[10px] text-green-700 font-bold uppercase block mb-1">Discount Amount</label>
+                                    <input
+                                        type="number"
+                                        placeholder="₹"
+                                        className="border p-2 rounded text-sm w-full"
+                                        value={couponAmount}
+                                        onChange={e => setCouponAmount(e.target.value)}
+                                    />
+                                </div>
+                                <div>
+                                    <label className="text-[10px] text-green-700 font-bold uppercase block mb-1">Expires On</label>
+                                    <input
+                                        type="datetime-local"
+                                        className="border p-2 rounded text-sm w-full"
+                                        value={expiry ? new Date(new Date(expiry).getTime() - (new Date().getTimezoneOffset() * 60000)).toISOString().slice(0, 16) : ''}
+                                        onChange={e => {
+                                            if (e.target.value) setExpiry(new Date(e.target.value).toISOString());
+                                            else setExpiry(undefined);
+                                        }}
+                                    />
+                                </div>
+                            </div>
                         </div>
-                        <div className="flex gap-2">
-                            <input
-                                type="number"
-                                placeholder="Discount Amount (₹)"
-                                className="flex-1 border p-2 rounded text-sm"
-                                value={couponAmount}
-                                onChange={e => setCouponAmount(e.target.value)}
-                            />
-                            <Button onClick={handleSend} className="bg-green-600 hover:bg-green-700 text-white">Send Coupon</Button>
-                        </div>
+                        <Button onClick={handleSend} className="w-full bg-green-600 hover:bg-green-700 text-white">Send Coupon Offer</Button>
                     </div>
                 ) : (
                     <div className="flex gap-2">
