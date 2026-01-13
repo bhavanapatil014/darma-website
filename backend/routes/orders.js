@@ -82,22 +82,25 @@ router.post('/', async (req, res) => {
             // Helper to safely check regex on strings only
             const isValidObjectId = (str) => typeof str === 'string' && str.match(/^[0-9a-fA-F]{24}$/);
 
+            // The ID might be passed as 'item.product' (Schema standard) or 'item.id'
+            const itemId = item.product || item.id;
+
             // Try lookup by custom 'id' first, then fallback to '_id', then 'name' if necessary
             let query = {
                 $or: [
-                    { id: item.id },
-                    { _id: isValidObjectId(item.id) ? item.id : null }
+                    { id: itemId },
+                    { _id: isValidObjectId(itemId) ? itemId : null }
                 ]
             };
 
             // If ID is undefined (old cart data), try name
-            if (!item.id && item.name) {
+            if (!itemId && item.name) {
                 query = { name: item.name };
             }
 
             const product = await Product.findOne(query);
 
-            if (!product) throw new Error(`Product not found: ${item.name} (ID: ${item.id})`);
+            if (!product) throw new Error(`Product not found: ${item.name} (ID: ${itemId})`);
             if (product.stockQuantity < item.quantity) {
                 throw new Error(`Insufficient stock for: ${item.name} (Only ${product.stockQuantity} left)`);
             }
@@ -113,14 +116,15 @@ router.post('/', async (req, res) => {
         // 3. Deduct Stock
         for (const item of products) {
             const isValidObjectId = (str) => typeof str === 'string' && str.match(/^[0-9a-fA-F]{24}$/);
+            const itemId = item.product || item.id;
 
             let query = {
                 $or: [
-                    { id: item.id },
-                    { _id: isValidObjectId(item.id) ? item.id : null }
+                    { id: itemId },
+                    { _id: isValidObjectId(itemId) ? itemId : null }
                 ]
             };
-            if (!item.id && item.name) {
+            if (!itemId && item.name) {
                 query = { name: item.name };
             }
 
