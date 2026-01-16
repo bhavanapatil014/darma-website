@@ -32,7 +32,7 @@ export default function ProductsPage() {
         return () => clearTimeout(timer)
     }, [filterSearch])
 
-    const BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'https://darma-website.onrender.com/api';
+    const BASE_URL = 'https://darma-website.onrender.com/api';
 
     async function loadData() {
         setLoading(true)
