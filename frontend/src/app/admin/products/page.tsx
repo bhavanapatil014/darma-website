@@ -6,6 +6,7 @@ import { fetchProducts, Product } from "@/lib/data"
 export default function ProductsPage() {
     const [products, setProducts] = useState<Product[]>([])
     const [categories, setCategories] = useState<any[]>([])
+    const [brands, setBrands] = useState<any[]>([])
     const [loading, setLoading] = useState(true)
     // Removed single imageFile, added imageFiles (FileList usually, but we'll use Array<File>)
     const [imageFiles, setImageFiles] = useState<File[]>([])
@@ -31,9 +32,11 @@ export default function ProductsPage() {
         return () => clearTimeout(timer)
     }, [filterSearch])
 
+    const BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000/api';
+
     async function loadData() {
         setLoading(true)
-        const [productsData, categoriesData] = await Promise.all([
+        const [productsData, categoriesData, brandsData] = await Promise.all([
             // Pass filters: category, brand, search, min, max, sort, page, limit
             fetchProducts(
                 filterCategory || undefined,
@@ -45,10 +48,12 @@ export default function ProductsPage() {
                 1,
                 1000
             ),
-            fetch(`https://darma-website.onrender.com/api/categories`).then(res => res.json()).catch(() => [])
+            fetch(`${BASE_URL}/categories`).then(res => res.json()).catch(() => []),
+            fetch(`${BASE_URL}/brands`).then(res => res.json()).catch(() => [])
         ])
         setProducts(productsData.products)
         setCategories(categoriesData)
+        setBrands(brandsData)
         setLoading(false)
     }
 
@@ -65,7 +70,7 @@ export default function ProductsPage() {
                 })
 
                 console.log("Uploading multiple to /api/products/upload-multiple...");
-                const res = await fetch(`https://darma-website.onrender.com/api/products/upload-multiple`, {
+                const res = await fetch(`${BASE_URL}/products/upload-multiple`, {
                     method: 'POST',
                     body: uploadData
                 })
@@ -91,8 +96,8 @@ export default function ProductsPage() {
             console.log("Submitting Product Data:", productData);
 
             const url = isEditing
-                ? `https://darma-website.onrender.com/api/products/${isEditing}`
-                : `https://darma-website.onrender.com/api/products`
+                ? `${BASE_URL}/products/${isEditing}`
+                : `${BASE_URL}/products`
 
             const method = isEditing ? 'PUT' : 'POST'
 
@@ -116,7 +121,7 @@ export default function ProductsPage() {
     async function handleDelete(id: string) {
         if (!confirm("Are you sure?")) return
         try {
-            await fetch(`https://darma-website.onrender.com/api/products/${id}`, { method: 'DELETE' })
+            await fetch(`${BASE_URL}/products/${id}`, { method: 'DELETE' })
             loadData()
         } catch (error) {
             console.error(error)
@@ -136,6 +141,63 @@ export default function ProductsPage() {
         setIsEditing(null)
     }
 
+    // Inline Creation State
+    const [isAddingCategory, setIsAddingCategory] = useState(false);
+    const [newCategoryName, setNewCategoryName] = useState("");
+    const [isAddingBrand, setIsAddingBrand] = useState(false);
+    const [newBrandName, setNewBrandName] = useState("");
+
+    // Inline Creation Handlers
+    async function saveNewCategory() {
+        if (!newCategoryName) return;
+        const slug = newCategoryName.toLowerCase().replace(/ /g, '-').replace(/[^\w-]/g, '');
+
+        try {
+            const res = await fetch(`${BASE_URL}/categories`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ name: newCategoryName, slug })
+            });
+            if (res.ok) {
+                const newCat = await res.json();
+                setCategories([...categories, newCat]);
+                setFormData({ ...formData, category: newCat.slug }); // Auto-select
+                setIsAddingCategory(false);
+                setNewCategoryName("");
+                alert("Category added!");
+            } else {
+                alert("Failed to add category");
+            }
+        } catch (error) {
+            console.error(error);
+        }
+    }
+
+    async function saveNewBrand() {
+        if (!newBrandName) return;
+
+        try {
+            const res = await fetch(`${BASE_URL}/brands`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ name: newBrandName })
+            });
+            if (res.ok) {
+                const newBrand = await res.json();
+                setBrands([...brands, newBrand]);
+                setFormData({ ...formData, brand: newBrand.name }); // Auto-fill
+                setIsAddingBrand(false);
+                setNewBrandName("");
+                alert("Brand added!");
+            } else {
+                const err = await res.json();
+                alert("Failed: " + err.message);
+            }
+        } catch (error) {
+            console.error(error);
+        }
+    }
+
     const [selectedProducts, setSelectedProducts] = useState<string[]>([])
     const nameInputRef = useRef<HTMLInputElement>(null)
 
@@ -143,7 +205,7 @@ export default function ProductsPage() {
     async function handleBulkDelete() {
         if (!confirm(`Delete ${selectedProducts.length} products?`)) return
         try {
-            await Promise.all(selectedProducts.map(id => fetch(`https://darma-website.onrender.com/api/products/${id}`, { method: 'DELETE' })))
+            await Promise.all(selectedProducts.map(id => fetch(`${BASE_URL}/products/${id}`, { method: 'DELETE' })))
             setSelectedProducts([])
             loadData()
         } catch (error) {
@@ -253,9 +315,13 @@ export default function ProductsPage() {
                             onChange={(e) => setFilterBrand(e.target.value)}
                         />
                         <datalist id="filter-brands">
-                            {["CeraVe", "Cetaphil", "The Ordinary", "Bioderma", "Neutrogena", "La Roche-Posay"].map((b) => (
-                                <option key={b} value={b} />
+                            {brands.map((b: any) => (
+                                <option key={b._id} value={b.name} />
                             ))}
+                            {["CeraVe", "Cetaphil", "The Ordinary", "Bioderma", "Neutrogena", "La Roche-Posay"]
+                                .filter(n => !brands.find((b: any) => b.name === n))
+                                .map(n => <option key={n} value={n} />)
+                            }
                         </datalist>
                     </div>
                     <Button variant="outline" onClick={() => {
@@ -334,42 +400,82 @@ export default function ProductsPage() {
                         </div>
                         <div>
                             <label className="block text-sm font-medium mb-1">Category</label>
-                            <select className="w-full p-2 border rounded" required
-                                value={formData.category} onChange={e => setFormData({ ...formData, category: e.target.value })}>
-                                <option value="">Select Category</option>
-                                <optgroup label="Standard">
-                                    <option value="skincare">Skincare</option>
-                                    <option value="hair-care">Hair Care</option>
-                                    <option value="baby-care">Baby Care</option>
-                                    <option value="treatments">Treatments</option>
-                                    <option value="bundles">Bundles</option>
-                                </optgroup>
-                                <optgroup label="Custom">
-                                    {categories.map((cat: any) => (
-                                        <option key={cat._id} value={cat.slug}>{cat.name}</option>
-                                    ))}
-                                </optgroup>
-                            </select>
+                            <div className="flex gap-2">
+                                {isAddingCategory ? (
+                                    <>
+                                        <input
+                                            className="w-full p-2 border rounded"
+                                            placeholder="New Category Name"
+                                            value={newCategoryName}
+                                            onChange={e => setNewCategoryName(e.target.value)}
+                                            autoFocus
+                                        />
+                                        <Button type="button" onClick={saveNewCategory} className="px-3" title="Save Category">✓</Button>
+                                        <Button type="button" variant="outline" onClick={() => setIsAddingCategory(false)} className="px-3" title="Cancel">✕</Button>
+                                    </>
+                                ) : (
+                                    <>
+                                        <select className="w-full p-2 border rounded" required
+                                            value={formData.category} onChange={e => setFormData({ ...formData, category: e.target.value })}>
+                                            <option value="">Select Category</option>
+                                            <optgroup label="Standard">
+                                                <option value="skincare">Skincare</option>
+                                                <option value="hair-care">Hair Care</option>
+                                                <option value="baby-care">Baby Care</option>
+                                                <option value="treatments">Treatments</option>
+                                                <option value="bundles">Bundles</option>
+                                            </optgroup>
+                                            <optgroup label="Custom">
+                                                {categories.map((cat: any) => (
+                                                    <option key={cat._id || cat.slug} value={cat.slug}>{cat.name}</option>
+                                                ))}
+                                            </optgroup>
+                                        </select>
+                                        <Button type="button" variant="secondary" onClick={() => setIsAddingCategory(true)} className="px-3" title="Add New Category">
+                                            +
+                                        </Button>
+                                    </>
+                                )}
+                            </div>
                         </div>
                         <div>
                             <label className="block text-sm font-medium mb-1">Brand</label>
-                            <input
-                                list="brand-suggestions"
-                                className="w-full p-2 border rounded"
-                                placeholder="Select or Type Brand"
-                                value={formData.brand || ''}
-                                onChange={e => setFormData({ ...formData, brand: e.target.value })}
-                            />
+                            <div className="flex gap-2">
+                                {isAddingBrand ? (
+                                    <>
+                                        <input
+                                            className="w-full p-2 border rounded"
+                                            placeholder="New Brand Name"
+                                            value={newBrandName}
+                                            onChange={e => setNewBrandName(e.target.value)}
+                                            autoFocus
+                                        />
+                                        <Button type="button" onClick={saveNewBrand} className="px-3" title="Save Brand">✓</Button>
+                                        <Button type="button" variant="outline" onClick={() => setIsAddingBrand(false)} className="px-3" title="Cancel">✕</Button>
+                                    </>
+                                ) : (
+                                    <>
+                                        <input
+                                            list="brand-suggestions"
+                                            className="w-full p-2 border rounded"
+                                            placeholder="Select or Type Brand"
+                                            value={formData.brand || ''}
+                                            onChange={e => setFormData({ ...formData, brand: e.target.value })}
+                                        />
+                                        <Button type="button" variant="secondary" onClick={() => setIsAddingBrand(true)} className="px-3" title="Add New Brand">
+                                            +
+                                        </Button>
+                                    </>
+                                )}
+                            </div>
                             <datalist id="brand-suggestions">
-                                <option value="CeraVe" />
-                                <option value="Cetaphil" />
-                                <option value="Bioderma" />
-                                <option value="Neutrogena" />
-                                <option value="La Roche-Posay" />
-                                <option value="The Ordinary" />
-                                <option value="Aveeno" />
-                                <option value="Minimalist" />
-                                <option value="Sebamed" />
+                                {brands.map((b: any) => (
+                                    <option key={b._id} value={b.name} />
+                                ))}
+                                {["CeraVe", "Cetaphil", "Bioderma", "Neutrogena", "La Roche-Posay", "The Ordinary", "Aveeno", "Minimalist", "Sebamed"]
+                                    .filter(n => !brands.find((b: any) => b.name === n))
+                                    .map(n => <option key={n} value={n} />)
+                                }
                             </datalist>
                         </div>
 

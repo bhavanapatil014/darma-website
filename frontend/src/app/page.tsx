@@ -2,8 +2,9 @@
 
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
-import { ProductCard } from "@/components/ui/product-card";
-import { fetchProducts } from "@/lib/data";
+// import { ProductCard } from "@/components/ui/product-card"; // Moved to client
+// import { fetchProducts } from "@/lib/data"; // Moved to client
+import { FeaturedProducts } from "@/components/home/featured-products";
 
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
@@ -11,6 +12,7 @@ export const revalidate = 0;
 async function getSettings() {
   try {
     const res = await fetch(`https://darma-website.onrender.com/api/settings`, { cache: 'no-store' });
+    if (!res.ok) throw new Error("Failed");
     return res.json();
   } catch (error) {
     return { heroTitle: 'Your Skin, Our Science', heroSubtitle: 'Doctor Recommended Skincare Solutions' };
@@ -19,8 +21,8 @@ async function getSettings() {
 
 export default async function Home() {
   const settings = await getSettings();
-  const { products } = await fetchProducts();
-  const featuredProducts = products.slice(0, 4);
+  // const { products } = await fetchProducts(); // REMOVED to fix timeout
+  // const featuredProducts = products.slice(0, 4);
 
   const concerns = [
     { name: "Acne", icon: "🔴", color: "bg-red-100" },
@@ -105,35 +107,8 @@ export default async function Home() {
         </div>
       </section>
 
-      {/* Best Sellers Grid */}
-      <section className="container mx-auto px-4">
-        <div className="flex justify-between items-end mb-8">
-          <div>
-            <span className="text-teal-600 font-bold tracking-wider text-xs uppercase">Highly Recommended</span>
-            <h2 className="text-2xl md:text-3xl font-bold mt-1 text-gray-900">Best Selling Products</h2>
-          </div>
-          <Button variant="outline" className="hidden md:flex" asChild>
-            <Link href="/shop">View All</Link>
-          </Button>
-        </div>
-
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
-          {featuredProducts.length > 0 ? (
-            featuredProducts.map((product: any) => (
-              <ProductCard key={product.id} product={product} />
-            ))
-          ) : (
-            [1, 2, 3, 4].map((i) => (
-              <div key={i} className="animate-pulse bg-gray-100 h-80 rounded-xl"></div>
-            ))
-          )}
-        </div>
-        <div className="mt-8 text-center md:hidden">
-          <Button variant="outline" className="w-full" asChild>
-            <Link href="/shop">View All Products</Link>
-          </Button>
-        </div>
-      </section>
+      {/* Best Sellers Grid (Client Side to prevent timeout) */}
+      <FeaturedProducts />
 
       {/* Value Props / Trust Indicators */}
       <section className="container mx-auto px-4 my-8">

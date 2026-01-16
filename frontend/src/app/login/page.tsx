@@ -20,9 +20,6 @@ function LoginContent() {
     const [email, setEmail] = useState("")
     const [password, setPassword] = useState("")
 
-    // Firebase State
-    const [confirmationResult, setConfirmationResult] = useState<any>(null)
-
     // Handlers
     const handlePhoneSubmit = async (e: React.FormEvent) => {
         e.preventDefault()
@@ -31,71 +28,15 @@ function LoginContent() {
             return
         }
 
-        try {
-            // Dynamic Import to avoid SSR issues
-            const { auth } = await import('@/lib/firebase');
-            const { RecaptchaVerifier, signInWithPhoneNumber } = await import('firebase/auth');
-
-            if (!window.recaptchaVerifier) {
-                window.recaptchaVerifier = new RecaptchaVerifier(auth, 'recaptcha-container', {
-                    'size': 'invisible',
-                    'callback': (response: any) => {
-                        // reCAPTCHA solved
-                    }
-                });
-            }
-
-            const appVerifier = window.recaptchaVerifier;
-            const formattedPhone = `+91${phoneNumber}`; // Hardcoded India for now
-
-            toast.info("Sending OTP via SMS...");
-            const confirmation = await signInWithPhoneNumber(auth, formattedPhone, appVerifier);
-            setConfirmationResult(confirmation);
-            toast.dismiss();
-            toast.success("OTP sent to your phone!");
-            setView('otp-verify');
-        } catch (error: any) {
-            console.error(error);
-            toast.error(error.message || "Failed to send SMS");
-            // Reset recaptcha
-            if (window.recaptchaVerifier) window.recaptchaVerifier.clear();
-        }
+        // Use Backend Auth (Supports Simulated/Free SMS)
+        await sendOtp(phoneNumber);
+        setView('otp-verify');
     }
 
     const handleVerifyOtp = async (e: React.FormEvent) => {
         e.preventDefault()
-        if (!confirmationResult) return;
-
-        try {
-            // 1. Verify with Firebase
-            const result = await confirmationResult.confirm(otp);
-            const firebaseUser = result.user;
-            toast.success("Phone Verified!");
-
-            // 2. Sync with Backend
-            const res = await fetch('https://darma-website.onrender.com/api/auth/login-with-phone', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    phoneNumber: phoneNumber, // or firebaseUser.phoneNumber
-                    uid: firebaseUser.uid
-                })
-            });
-
-            const data = await res.json();
-            if (data.token) {
-                // Manually login via Context (hacky but works)
-                localStorage.setItem('token', data.token);
-                localStorage.setItem('user', JSON.stringify(data.user));
-                window.location.href = redirectPath || '/';
-            } else {
-                toast.error("Backend Sync Failed");
-            }
-
-        } catch (error: any) {
-            console.error(error);
-            toast.error("Invalid OTP");
-        }
+        // Use Backend Auth
+        await verifyOtp(phoneNumber, otp, redirectPath);
     }
 
     const handleEmailLogin = async (e: React.FormEvent) => {
@@ -105,8 +46,7 @@ function LoginContent() {
 
     return (
         <div className="min-h-screen bg-white flex flex-col items-center justify-center px-4 py-12">
-            {/* Invisible Recaptcha Container */}
-            <div id="recaptcha-container"></div>
+            {/* Invisible Recaptcha Container (Removed) */}
 
             <div className="w-full max-w-md space-y-8">
                 {/* Logo & Header */}
@@ -189,6 +129,10 @@ function LoginContent() {
                                     value={otp}
                                     onChange={(e) => setOtp(e.target.value)}
                                 />
+                                <p className="text-xs text-center text-gray-500 mt-2">
+                                    Did you use a test number? No SMS will be sent.<br />
+                                    Please enter your test code (e.g. 123456).
+                                </p>
                             </div>
 
                             <button
@@ -200,7 +144,14 @@ function LoginContent() {
                                 {isLoading ? "Verifying..." : "Verify & Login"}
                             </button>
 
-                            <div className="text-center">
+                            <div className="flex flex-col gap-2 text-center">
+                                <button
+                                    type="button"
+                                    onClick={handlePhoneSubmit}
+                                    className="text-sm text-gray-600 hover:text-blue-600 transition-colors"
+                                >
+                                    Resend Code
+                                </button>
                                 <button
                                     type="button"
                                     onClick={() => setView('phone-input')}

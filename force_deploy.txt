@@ -1,2 +1,2 @@
-Force Deploy Timestamp: 2026-01-09 18:27
+Force Deploy Timestamp: 2026-01-16 11:55 (Add Categories/Brands Feature)
 This file exists solely to trigger a git commit and vercel build.
