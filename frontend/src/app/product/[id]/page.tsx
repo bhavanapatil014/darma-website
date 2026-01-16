@@ -11,6 +11,7 @@ import { RecentlyViewed } from "@/components/recently-viewed";
 import { UseViewTracker } from "@/components/view-tracker";
 import { ProductGallery } from "@/components/product-gallery";
 import { Breadcrumb } from "@/components/ui/breadcrumb";
+import { TrustBadges } from "@/components/ui/trust-badges";
 import NegotiationChat from "@/components/negotiation-chat";
 
 type Params = Promise<{ id: string }>
@@ -113,33 +114,18 @@ export default async function ProductPage(props: {
                                 </div>
                             </div>
 
-                            {/* Features Accordion Style */}
-                            <div className="border-t border-gray-100 pt-8 space-y-4">
-                                <div className="flex items-center gap-4 text-sm text-gray-600">
-                                    <div className="w-10 h-10 rounded-full bg-gray-50 flex items-center justify-center text-gray-900">
-                                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14" /><path d="m12 5 7 7-7 7" /></svg>
-                                    </div>
-                                    <div>
-                                        <span className="block font-semibold text-gray-900">Free Shipping & Returns</span>
-                                        <span className="text-xs">On all orders over ₹999</span>
-                                    </div>
-                                </div>
-                                <div className="flex items-center gap-4 text-sm text-gray-600">
-                                    <div className="w-10 h-10 rounded-full bg-gray-50 flex items-center justify-center text-gray-900">
-                                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" /></svg>
-                                    </div>
-                                    <div>
-                                        <span className="block font-semibold text-gray-900">100% Authentic</span>
-                                        <span className="text-xs">Guaranteed original products</span>
-                                    </div>
-                                </div>
-                            </div>
+
                         </div>
                     </div>
                 </div>
 
+                {/* Trust Badges Banner */}
+                <div className="mt-12 mb-12">
+                    <TrustBadges />
+                </div>
+
                 {/* Sections */}
-                <div id="reviews" className="mt-24 max-w-5xl mx-auto">
+                <div id="reviews" className="mt-12 max-w-5xl mx-auto">
                     <ProductReviews productId={product.id} />
                 </div>
 

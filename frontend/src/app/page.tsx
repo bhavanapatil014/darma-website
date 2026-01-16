@@ -5,6 +5,7 @@ import Link from "next/link";
 // import { ProductCard } from "@/components/ui/product-card"; // Moved to client
 // import { fetchProducts } from "@/lib/data"; // Moved to client
 import { FeaturedProducts } from "@/components/home/featured-products";
+import { TrustBadges } from "@/components/ui/trust-badges";
 
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
@@ -112,35 +113,7 @@ export default async function Home() {
 
       {/* Value Props / Trust Indicators */}
       <section className="container mx-auto px-4 my-8">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <div className="flex items-center gap-4 p-6 bg-white border border-gray-100 rounded-xl shadow-sm">
-            <div className="w-12 h-12 rounded-full bg-blue-50 flex items-center justify-center text-blue-600">
-              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" /></svg>
-            </div>
-            <div>
-              <h4 className="font-bold text-gray-900">100% Authentic</h4>
-              <p className="text-sm text-gray-500">Sourced directly from brands</p>
-            </div>
-          </div>
-          <div className="flex items-center gap-4 p-6 bg-white border border-gray-100 rounded-xl shadow-sm">
-            <div className="w-12 h-12 rounded-full bg-green-50 flex items-center justify-center text-green-600">
-              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10" /><path d="m9 12 2 2 4-4" /></svg>
-            </div>
-            <div>
-              <h4 className="font-bold text-gray-900">Dermatologist Verified</h4>
-              <p className="text-sm text-gray-500">Approved by skin experts</p>
-            </div>
-          </div>
-          <div className="flex items-center gap-4 p-6 bg-white border border-gray-100 rounded-xl shadow-sm">
-            <div className="w-12 h-12 rounded-full bg-orange-50 flex items-center justify-center text-orange-600">
-              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="5" width="20" height="14" rx="2" /><line x1="2" x2="22" y1="10" y2="10" /></svg>
-            </div>
-            <div>
-              <h4 className="font-bold text-gray-900">Secure Payments</h4>
-              <p className="text-sm text-gray-500">Safe & encrypted transactions</p>
-            </div>
-          </div>
-        </div>
+        <TrustBadges />
       </section>
     </div>
   );
