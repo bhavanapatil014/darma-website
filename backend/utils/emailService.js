@@ -120,7 +120,7 @@ const formatAdminEmail = (order, customer) => {
         <h3>Status:</h3>
         <p>${order.status} (Payment: ${order.paymentStatus})</p>
         
-        <a href="${process.env.FRONTEND_URL || 'http://localhost:5000'}/admin/orders">View in Admin Panel</a>
+        <a href="${process.env.FRONTEND_URL || 'https://venkataderma.com'}/admin/orders">View in Admin Panel</a>
     `;
 };
 
@@ -169,7 +169,7 @@ const formatWelcomeEmail = (user) => {
         <p><strong>Email:</strong> ${user.email}</p>
         <p>We are thrilled to have you on board. Start shopping for the best skincare products now!</p>
         <br>
-        <a href="${process.env.FRONTEND_URL || 'http://localhost:3000'}/login" style="background-color: #4CAF50; color: white; padding: 10px 20px; text-decoration: none;">Login to Your Account</a>
+        <a href="${process.env.FRONTEND_URL || 'https://venkataderma.com'}/login" style="background-color: #4CAF50; color: white; padding: 10px 20px; text-decoration: none;">Login to Your Account</a>
     `;
 };
 
@@ -185,7 +185,7 @@ const formatAdminNewUserEmail = (user) => {
             <li><strong>Time:</strong> ${new Date().toLocaleString()}</li>
         </ul>
         <br>
-        <a href="${process.env.FRONTEND_URL || 'http://localhost:3000'}/admin/users">View User in Admin Panel</a>
+        <a href="${process.env.FRONTEND_URL || 'https://venkataderma.com'}/admin/users">View User in Admin Panel</a>
     `;
 };
 
