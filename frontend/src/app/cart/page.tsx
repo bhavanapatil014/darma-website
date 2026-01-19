@@ -28,13 +28,43 @@ export default function CartPage() {
     useEffect(() => {
         refreshCart();
 
-        // Fetch coupons
-        fetch('https://darma-website.onrender.com/api/coupons')
-            .then(res => res.json())
-            .then(data => {
-                if (Array.isArray(data)) setAvailableCoupons(data);
-            })
-            .catch(err => console.error("Failed to fetch coupons", err));
+        async function loadCoupons() {
+            try {
+                // 1. Fetch General Coupons
+                const resGeneral = await fetch('https://darma-website.onrender.com/api/coupons');
+                const generalCoupons = await resGeneral.json();
+                let allCoupons = Array.isArray(generalCoupons) ? generalCoupons : [];
+
+                // 2. Fetch User Negotiation Coupons (if logged in)
+                const token = localStorage.getItem('token');
+                if (token) {
+                    const resOffers = await fetch('https://darma-website.onrender.com/api/negotiate/my-offers', {
+                        headers: { 'Authorization': `Bearer ${token}` }
+                    });
+                    if (resOffers.ok) {
+                        const offers = await resOffers.json();
+                        // Extract valid coupons from offers
+                        const negotiationCoupons = offers
+                            .filter((o: any) => o.couponCode && o.status === 'deal_reached' && o.couponDetails)
+                            .map((o: any) => ({
+                                ...o.couponDetails,
+                                _id: o.couponDetails._id || o._id, // Ensure ID exists
+                                description: o.product ? `Special deal for ${o.product.name}` : "Negotiation Deal",
+                                isNegotiation: true
+                            }));
+
+                        // Merge (Avoid duplicates if needed, though codes are unique)
+                        allCoupons = [...negotiationCoupons, ...allCoupons];
+                    }
+                }
+
+                setAvailableCoupons(allCoupons);
+            } catch (err) {
+                console.error("Failed to load coupons", err);
+            }
+        }
+
+        loadCoupons();
 
         const onFocus = () => {
             console.log("Window focused, refreshing cart...");
