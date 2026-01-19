@@ -37,6 +37,8 @@ export default function CartPage() {
 
                 // 2. Fetch User Negotiation Coupons (if logged in)
                 const token = localStorage.getItem('token');
+                let negotiationCoupons: any[] = [];
+
                 if (token) {
                     const resOffers = await fetch('https://darma-website.onrender.com/api/negotiate/my-offers', {
                         headers: { 'Authorization': `Bearer ${token}` }
@@ -44,7 +46,7 @@ export default function CartPage() {
                     if (resOffers.ok) {
                         const offers = await resOffers.json();
                         // Extract valid coupons from offers
-                        const negotiationCoupons = offers
+                        negotiationCoupons = offers
                             .filter((o: any) => o.couponCode && o.status === 'deal_reached' && o.couponDetails)
                             .map((o: any) => ({
                                 ...o.couponDetails,
@@ -52,13 +54,15 @@ export default function CartPage() {
                                 description: o.product ? `Special deal for ${o.product.name}` : "Negotiation Deal",
                                 isNegotiation: true
                             }));
-
-                        // Merge (Avoid duplicates if needed, though codes are unique)
-                        allCoupons = [...negotiationCoupons, ...allCoupons];
                     }
                 }
 
-                setAvailableCoupons(allCoupons);
+                // 3. De-duplicate and Merge
+                // Prioritize negotiationCoupons (they have better descriptions)
+                const negotiationCodes = new Set(negotiationCoupons.map(c => c.code));
+                const filteredGeneral = allCoupons.filter((c: any) => !negotiationCodes.has(c.code));
+
+                setAvailableCoupons([...negotiationCoupons, ...filteredGeneral]);
             } catch (err) {
                 console.error("Failed to load coupons", err);
             }
