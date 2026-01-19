@@ -261,6 +261,15 @@ export default function ProductForm({ initialData, categories: initialCategories
                         onChange={e => setFormData({ ...formData, stockQuantity: Number(e.target.value) })}
                     />
                 </div>
+
+                <div>
+                    <label className="block text-sm font-medium mb-1.5 text-gray-700">Net Content / Size</label>
+                    <input className="w-full p-2.5 border border-gray-300 rounded-lg"
+                        placeholder="e.g. 50g, 100ml (Default)"
+                        value={formData.netContent || ''}
+                        onChange={e => setFormData({ ...formData, netContent: e.target.value })}
+                    />
+                </div>
             </div>
 
             {/* Variants Section - Improved UI */}
