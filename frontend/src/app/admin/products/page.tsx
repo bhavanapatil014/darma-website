@@ -273,30 +273,34 @@ export default function ProductsPage() {
                                 </tr>
                             )}
                         </tbody>
-                        {/* Pagination Controls */}
-                        <div className="flex items-center justify-between mt-4 border-t pt-4">
-                            <div className="text-sm text-gray-500">
-                                Showing page {currentPage} of {totalPages}
-                            </div>
-                            <div className="flex gap-2">
-                                <Button
-                                    variant="outline"
-                                    size="sm"
-                                    disabled={currentPage <= 1}
-                                    onClick={() => setCurrentPage(prev => prev - 1)}
-                                >
-                                    Previous
-                                </Button>
-                                <Button
-                                    variant="outline"
-                                    size="sm"
-                                    disabled={currentPage >= totalPages}
-                                    onClick={() => setCurrentPage(prev => prev + 1)}
-                                >
-                                    Next
-                                </Button>
-                            </div>
-                        </div>
+                    </table>
                 </div>
-                )
+
+                {/* Pagination Controls */}
+                <div className="flex items-center justify-between p-4 border-t bg-white">
+                    <div className="text-sm text-gray-500">
+                        Showing page {currentPage} of {totalPages}
+                    </div>
+                    <div className="flex gap-2">
+                        <Button
+                            variant="outline"
+                            size="sm"
+                            disabled={currentPage <= 1}
+                            onClick={() => setCurrentPage(prev => prev - 1)}
+                        >
+                            Previous
+                        </Button>
+                        <Button
+                            variant="outline"
+                            size="sm"
+                            disabled={currentPage >= totalPages}
+                            onClick={() => setCurrentPage(prev => prev + 1)}
+                        >
+                            Next
+                        </Button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    )
 }
