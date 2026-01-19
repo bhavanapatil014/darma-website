@@ -11,18 +11,47 @@ export function ProductDetails({ product }: { product: Product }) {
     const { addItem } = useCart()
     const router = useRouter()
 
-    // Initialize with first variant if exists, else defaults
-    // Initialize with first variant if exists, else defaults
+    // unifiedVariants: Combine explicit variants with the base product (if it has a size)
+    // This ensures "30ml" (Base) shows up alongside "100ml" (Variant)
+    const allVariants = (product.variants && product.variants.length > 0)
+        ? [
+            ...(product.netContent && !product.variants.some(v => v.size === product.netContent)
+                ? [{
+                    size: product.netContent,
+                    price: product.price,
+                    mrp: product.mrp,
+                    stock: product.stockQuantity
+                }]
+                : []),
+            ...product.variants
+        ]
+        : [];
+
+    // Initialize with first available variant from our unified list
     const [selectedVariant, setSelectedVariant] = useState(
-        (product.variants && product.variants.length > 0)
-            ? (product.variants.find(v => (v.stock || 0) > 0) || product.variants[0])
+        (allVariants.length > 0)
+            ? (allVariants.find(v => (v.stock || 0) > 0) || allVariants[0])
             : null
     )
 
-    // Sync state with prop changes (e.g. client-side navigation)
+    // Sync state with prop changes
     useEffect(() => {
-        if (product.variants && product.variants.length > 0) {
-            setSelectedVariant(product.variants.find(v => (v.stock || 0) > 0) || product.variants[0]);
+        const variants = (product.variants && product.variants.length > 0)
+            ? [
+                ...(product.netContent && !product.variants.some(v => v.size === product.netContent)
+                    ? [{
+                        size: product.netContent,
+                        price: product.price,
+                        mrp: product.mrp,
+                        stock: product.stockQuantity
+                    }]
+                    : []),
+                ...product.variants
+            ]
+            : [];
+
+        if (variants.length > 0) {
+            setSelectedVariant(variants.find(v => (v.stock || 0) > 0) || variants[0]);
         } else {
             setSelectedVariant(null);
         }
@@ -31,9 +60,12 @@ export function ProductDetails({ product }: { product: Product }) {
     const [quantity, setQuantity] = useState(1);
 
     // Current Price Logic
+    // If we have a selected variant object (which might be the base 'virtual' variant), use it.
+    // Otherwise fallback to base product.
     const currentPrice = selectedVariant ? selectedVariant.price : product.price
     const currentMrp = selectedVariant ? selectedVariant.mrp : product.mrp
     const currentSize = selectedVariant ? selectedVariant.size : product.netContent
+    const currentStock = selectedVariant ? selectedVariant.stock : product.stockQuantity
 
     return (
         <div className="space-y-8">
@@ -65,9 +97,9 @@ export function ProductDetails({ product }: { product: Product }) {
                     </div>
                     <p className="text-xs text-gray-500">(Inclusive of all taxes)</p>
 
-                    {(currentSize || product.netContent) && (
+                    {(currentSize) && (
                         <p className="text-sm font-medium text-gray-700 mt-2">
-                            Net content: <span className="font-bold">{currentSize || product.netContent}</span>
+                            Net content: <span className="font-bold">{currentSize}</span>
                         </p>
                     )}
                 </div>
@@ -86,11 +118,11 @@ export function ProductDetails({ product }: { product: Product }) {
             </div>
 
             {/* Variant Selector (if variants exist) */}
-            {product.variants && product.variants.length > 0 && (
+            {allVariants.length > 0 && (
                 <div>
                     <h3 className="text-sm font-semibold text-gray-900 mb-3">Pack Size</h3>
                     <div className="flex flex-wrap gap-3">
-                        {product.variants.map((v, idx) => {
+                        {allVariants.map((v, idx) => {
                             const isSelected = selectedVariant && selectedVariant.size === v.size;
                             const isOutOfStock = (v.stock || 0) <= 0;
                             return (
@@ -117,6 +149,7 @@ export function ProductDetails({ product }: { product: Product }) {
                                     <span className={`text-sm font-bold mb-1 ${isSelected ? 'text-blue-900' : 'text-gray-900'}`}>
                                         {v.size}
                                     </span>
+                                    {/* Show count only if actual explicit variants exist, otherwise it's just '1' size */}
                                     <span className="text-xs text-gray-500 mb-2">(Pack of 1)</span>
 
                                     {/* Price Section */}
@@ -127,7 +160,7 @@ export function ProductDetails({ product }: { product: Product }) {
                                             )}
                                             <span className="font-bold text-gray-900">₹{v.price}</span>
                                         </div>
-                                        {/* Unit Price Simulation (If size is like '100ml') */}
+                                        {/* Unit Price Simulation */}
                                         {v.size && v.size.toLowerCase().includes('ml') && (
                                             <span className="text-[10px] text-gray-500 mt-0.5">
                                                 (₹{(v.price / parseInt(v.size)).toFixed(2)} / ml)
@@ -179,10 +212,9 @@ export function ProductDetails({ product }: { product: Product }) {
                         <span className="w-8 text-center font-medium text-gray-900">{quantity}</span>
                         <button
                             onClick={() => {
-                                const limit = selectedVariant ? (selectedVariant.stock || 0) : (product.stockQuantity || 0);
-                                setQuantity(Math.min(limit, quantity + 1));
+                                setQuantity(Math.min((currentStock || 0), quantity + 1));
                             }}
-                            disabled={quantity >= (selectedVariant ? (selectedVariant.stock || 0) : (product.stockQuantity || 0))}
+                            disabled={quantity >= (currentStock || 0)}
                             className="w-12 h-full flex items-center justify-center text-lg hover:bg-gray-50 text-gray-600 disabled:opacity-50 transition-colors"
                         >
                             +
@@ -190,7 +222,7 @@ export function ProductDetails({ product }: { product: Product }) {
                     </div>
 
                     {/* Stock Status */}
-                    {((selectedVariant ? selectedVariant.stock : product.stockQuantity) || 0) > 0 ? (
+                    {(currentStock || 0) > 0 ? (
                         <div className="flex items-center gap-2 text-green-600 font-medium">
                             <span className="w-2 h-2 bg-green-600 rounded-full animate-pulse"></span>
                             In Stock
@@ -208,7 +240,7 @@ export function ProductDetails({ product }: { product: Product }) {
                     <Button
                         size="lg"
                         className="w-full h-12 text-base font-semibold bg-blue-600 hover:bg-blue-700 text-white rounded-full shadow-sm hover:shadow transition-all"
-                        disabled={selectedVariant ? (selectedVariant.stock || 0) <= 0 : (product.stockQuantity || 0) <= 0}
+                        disabled={(currentStock || 0) <= 0}
                         onClick={() => {
                             addItem({
                                 ...product,
@@ -225,7 +257,7 @@ export function ProductDetails({ product }: { product: Product }) {
                         size="lg"
                         variant="outline"
                         className="w-full h-12 text-base font-semibold border-gray-300 text-gray-900 hover:bg-gray-50 hover:text-black rounded-full"
-                        disabled={selectedVariant ? (selectedVariant.stock || 0) <= 0 : (product.stockQuantity || 0) <= 0}
+                        disabled={(currentStock || 0) <= 0}
                         onClick={() => {
                             // Add to cart then redirect
                             addItem({
