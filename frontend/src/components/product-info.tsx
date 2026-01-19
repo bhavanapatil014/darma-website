@@ -65,9 +65,9 @@ export function ProductDetails({ product }: { product: Product }) {
                     </div>
                     <p className="text-xs text-gray-500">(Inclusive of all taxes)</p>
 
-                    {currentSize && (
+                    {(currentSize || product.netContent) && (
                         <p className="text-sm font-medium text-gray-700 mt-2">
-                            Net content: <span className="font-bold">{currentSize}</span>
+                            Net content: <span className="font-bold">{currentSize || product.netContent}</span>
                         </p>
                     )}
                 </div>
