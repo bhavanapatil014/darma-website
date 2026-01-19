@@ -8,6 +8,16 @@ const nextConfig: NextConfig = {
   typescript: {
     ignoreBuildErrors: true,
   },
+  images: {
+    remotePatterns: [
+      {
+        protocol: 'https',
+        hostname: 'darma-website.onrender.com',
+        port: '',
+        pathname: '/uploads/**',
+      },
+    ],
+  },
   // @ts-ignore
   eslint: {
     ignoreDuringBuilds: true,
