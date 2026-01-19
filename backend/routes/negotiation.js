@@ -60,7 +60,23 @@ router.get('/my-offers', verifyToken, async (req, res) => {
     try {
         const offers = await Negotiation.find({ user: req.userId })
             .populate('product')
-            .sort({ updatedAt: -1 });
+            .sort({ updatedAt: -1 })
+            .lean();
+
+        // Enrich with Coupon Details
+        const couponCodes = offers.map(o => o.couponCode).filter(Boolean);
+        if (couponCodes.length > 0) {
+            const coupons = await Coupon.find({ code: { $in: couponCodes } }).lean();
+            const couponMap = {};
+            coupons.forEach(c => { couponMap[c.code] = c; });
+
+            offers.forEach(offer => {
+                if (offer.couponCode && couponMap[offer.couponCode]) {
+                    offer.couponDetails = couponMap[offer.couponCode];
+                }
+            });
+        }
+
         res.json(offers);
     } catch (error) {
         res.status(500).json({ message: "Failed to fetch offers", error: error.message });
