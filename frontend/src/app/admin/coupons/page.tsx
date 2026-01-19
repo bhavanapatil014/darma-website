@@ -40,6 +40,19 @@ export default function CouponsPage() {
         applicableProducts: [], applicableCategories: [], applicableBrands: []
     })
 
+    const [showForm, setShowForm] = useState(false);
+
+    function handleAddNew() {
+        resetForm();
+        setShowForm(true);
+        setIsEditing(false);
+    }
+
+    function handleCancel() {
+        setShowForm(false);
+        resetForm();
+    }
+
     useEffect(() => {
         loadData()
         loadProducts()
@@ -226,23 +239,7 @@ export default function CouponsPage() {
         });
     };
 
-    return (
-    const [showForm, setShowForm] = useState(false);
 
-    // ... existing useState ...
-
-    function handleAddNew() {
-        resetForm();
-        setShowForm(true);
-        setIsEditing(false);
-    }
-
-    function handleCancel() {
-        setShowForm(false);
-        resetForm();
-    }
-
-    // ... inside handleEdit ... calls setShowForm(true)
 
     return (
         <div className="space-y-8 max-w-[1400px] mx-auto p-6">
