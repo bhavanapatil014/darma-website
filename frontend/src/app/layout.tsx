@@ -12,18 +12,15 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
-import { Navbar } from "@/components/layout/navbar";
-import { Footer } from "@/components/layout/footer";
+import { Shell } from "@/components/layout/shell";
 import { Providers } from "@/components/providers";
-import { CartSidebar } from "@/components/ui/cart-sidebar";
-import { ChatWidget } from "@/components/chat-widget";
 import { Toaster } from "sonner";
 
 export const metadata: Metadata = {
   title: "Venkata Derma - Premium Skincare & Dermatology",
   description: "Experience the science of beautiful skin with Venkata Derma's premium dermatology products.",
   other: {
-    "version": "3.56.29", // Trigger Deploy
+    "version": "3.56.30", // Trigger Deploy
     "Cache-Control": "no-cache, no-store, must-revalidate"
   }
 };
@@ -50,13 +47,9 @@ export default function RootLayout({
           }}
         />
         <Providers>
-          <Navbar />
-          <CartSidebar />
-          <main className="flex-1 pt-32">
+          <Shell>
             {children}
-          </main>
-          <Footer />
-          <ChatWidget />
+          </Shell>
           <Toaster position="top-center" richColors />
         </Providers>
         <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
