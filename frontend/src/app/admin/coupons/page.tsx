@@ -43,6 +43,12 @@ export default function CouponsPage() {
     const [showForm, setShowForm] = useState(false);
     const [productSearch, setProductSearch] = useState("")
     const [brandSearch, setBrandSearch] = useState("")
+    const [activeTab, setActiveTab] = useState<'active' | 'expired'>('active')
+
+    // Filter coupons
+    const activeCoupons = coupons.filter(c => !c.expirationDate || new Date() <= new Date(c.expirationDate));
+    const expiredCoupons = coupons.filter(c => c.expirationDate && new Date() > new Date(c.expirationDate));
+    const displayedCoupons = activeTab === 'active' ? activeCoupons : expiredCoupons;
 
     function handleAddNew() {
         resetForm();
