@@ -43,12 +43,20 @@ export default function CouponsPage() {
     const [showForm, setShowForm] = useState(false);
     const [productSearch, setProductSearch] = useState("")
     const [brandSearch, setBrandSearch] = useState("")
-    const [activeTab, setActiveTab] = useState<'active' | 'expired'>('active')
+    const [activeTab, setActiveTab] = useState<'active' | 'expired' | 'negotiation'>('active')
+    const [negotiations, setNegotiations] = useState<any[]>([])
 
     // Filter coupons
-    const activeCoupons = coupons.filter(c => !c.expirationDate || new Date() <= new Date(c.expirationDate));
-    const expiredCoupons = coupons.filter(c => c.expirationDate && new Date() > new Date(c.expirationDate));
-    const displayedCoupons = activeTab === 'active' ? activeCoupons : expiredCoupons;
+    // Negotiation coupons start with 'DEAL-'
+    const negotiationCoupons = coupons.filter(c => c.code.startsWith('DEAL-'));
+
+    // Active coupons are NOT negotiation coupons and are valid
+    const activeCoupons = coupons.filter(c => !c.code.startsWith('DEAL-') && (!c.expirationDate || new Date() <= new Date(c.expirationDate)));
+
+    // Expired coupons are NOT negotiation coupons and are expired
+    const expiredCoupons = coupons.filter(c => !c.code.startsWith('DEAL-') && (c.expirationDate && new Date() > new Date(c.expirationDate)));
+
+    const displayedCoupons = activeTab === 'active' ? activeCoupons : activeTab === 'expired' ? expiredCoupons : negotiationCoupons;
 
     function handleAddNew() {
         resetForm();
@@ -65,6 +73,7 @@ export default function CouponsPage() {
         loadData()
         loadProducts()
         loadCategories()
+        loadNegotiations()
     }, [])
 
     // Helper to get unique brands from products
@@ -464,6 +473,12 @@ export default function CouponsPage() {
                         className={`flex-1 py-4 text-sm font-semibold text-center transition-colors ${activeTab === 'active' ? 'bg-white text-sky-600 border-b-2 border-sky-600' : 'bg-gray-50 text-gray-500 hover:bg-gray-100 hover:text-gray-700'}`}
                     >
                         Active Coupons ({activeCoupons.length})
+                    </button>
+                    <button
+                        onClick={() => setActiveTab('negotiation')}
+                        className={`flex-1 py-4 text-sm font-semibold text-center transition-colors ${activeTab === 'negotiation' ? 'bg-white text-indigo-600 border-b-2 border-indigo-600' : 'bg-gray-50 text-gray-500 hover:bg-gray-100 hover:text-gray-700'}`}
+                    >
+                        Negotiation Deal ({negotiationCoupons.length})
                     </button>
                     <button
                         onClick={() => setActiveTab('expired')}
