@@ -1,207 +1,75 @@
 "use client"
-import { useEffect, useState, useRef } from "react"
+import { useEffect, useState } from "react"
 import { Button } from "@/components/ui/button"
 import { fetchProducts, Product } from "@/lib/data"
+import Link from "next/link"
+import { useRouter } from "next/navigation"
 
 export default function ProductsPage() {
+    const router = useRouter()
     const [products, setProducts] = useState<Product[]>([])
     const [categories, setCategories] = useState<any[]>([])
     const [brands, setBrands] = useState<any[]>([])
     const [loading, setLoading] = useState(true)
-    // Removed single imageFile, added imageFiles (FileList usually, but we'll use Array<File>)
-    const [imageFiles, setImageFiles] = useState<File[]>([])
-    const [formData, setFormData] = useState<Partial<Product>>({
-        name: "", category: "skincare", price: 0, description: "", image: "", images: [], stockQuantity: 0, isNewArrival: false
-    })
-    const [discountPercent, setDiscountPercent] = useState<number>(0); // Local state for calculator
-    const [isEditing, setIsEditing] = useState<string | null>(null)
 
+    // Filters
     const [filterCategory, setFilterCategory] = useState<string>("");
     const [filterBrand, setFilterBrand] = useState<string>("");
     const [filterSearch, setFilterSearch] = useState<string>("");
 
-    useEffect(() => {
-        loadData()
-    }, [filterCategory, filterBrand]) // Reload when dropdowns change
+    const [selectedProducts, setSelectedProducts] = useState<string[]>([])
+
+    const BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000/api';
 
     useEffect(() => {
-        // Debounce search
+        loadData()
+    }, [filterCategory, filterBrand])
+
+    useEffect(() => {
         const timer = setTimeout(() => {
             loadData()
         }, 500)
         return () => clearTimeout(timer)
     }, [filterSearch])
 
-    const BASE_URL = 'https://darma-website.onrender.com/api';
-
     async function loadData() {
         setLoading(true)
-        const [productsData, categoriesData, brandsData] = await Promise.all([
-            // Pass filters: category, brand, search, min, max, sort, page, limit
-            fetchProducts(
-                filterCategory || undefined,
-                filterBrand || undefined,
-                filterSearch || undefined,
-                undefined,
-                undefined,
-                undefined,
-                1,
-                1000
-            ),
-            fetch(`${BASE_URL}/categories`).then(res => res.json()).catch(() => []),
-            fetch(`${BASE_URL}/brands`).then(res => res.json()).catch(() => [])
-        ])
-        setProducts(productsData.products)
-        setCategories(categoriesData)
-        setBrands(brandsData)
-        setLoading(false)
-    }
-
-    async function handleSubmit(e: React.FormEvent) {
-        e.preventDefault()
         try {
-            let uploadedImageUrls: string[] = formData.images || []
-
-            // Handle New Uploads
-            if (imageFiles.length > 0) {
-                const uploadData = new FormData()
-                imageFiles.forEach(file => {
-                    uploadData.append('images', file)
-                })
-
-                console.log("Uploading multiple to /api/products/upload-multiple...");
-                const res = await fetch(`${BASE_URL}/products/upload-multiple`, {
-                    method: 'POST',
-                    body: uploadData
-                })
-
-                if (!res.ok) {
-                    const errText = await res.text();
-                    throw new Error(`Image upload failed: ${res.status} ${errText}`);
-                }
-
-                const { imageUrls } = await res.json()
-                // Append new images to existing ones (if any)
-                uploadedImageUrls = [...uploadedImageUrls, ...imageUrls]
-            }
-
-            // Primary image logic: if explicitly set use it, otherwise use first from array
-            const primaryImage = (uploadedImageUrls.length > 0) ? uploadedImageUrls[0] : (formData.image || "")
-
-            const productData = {
-                ...formData,
-                image: primaryImage,
-                images: uploadedImageUrls
-            }
-            console.log("Submitting Product Data:", productData);
-
-            const url = isEditing
-                ? `${BASE_URL}/products/${isEditing}`
-                : `${BASE_URL}/products`
-
-            const method = isEditing ? 'PUT' : 'POST'
-
-            const res = await fetch(url, {
-                method: method,
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(productData)
-            })
-
-            if (res.ok) {
-                alert(isEditing ? "Product updated!" : "Product created!")
-                resetForm()
-                loadData()
-            }
-        } catch (error) {
-            console.error(error)
-            alert("Failed to save product")
+            const [productsData, categoriesData, brandsData] = await Promise.all([
+                fetchProducts(
+                    filterCategory || undefined,
+                    filterBrand || undefined,
+                    filterSearch || undefined,
+                    undefined,
+                    undefined,
+                    undefined,
+                    1,
+                    1000
+                ),
+                fetch(`${BASE_URL}/categories`).then(res => res.json()).catch(() => []),
+                fetch(`${BASE_URL}/brands`).then(res => res.json()).catch(() => [])
+            ])
+            setProducts(productsData.products)
+            setCategories(categoriesData)
+            setBrands(brandsData)
+        } catch (e) {
+            console.error(e)
+        } finally {
+            setLoading(false)
         }
     }
 
     async function handleDelete(id: string) {
-        if (!confirm("Are you sure?")) return
+        if (!confirm("Are you sure you want to delete this product?")) return
         try {
             await fetch(`${BASE_URL}/products/${id}`, { method: 'DELETE' })
-            loadData()
+            setProducts(products.filter(p => p.id !== id))
         } catch (error) {
             console.error(error)
+            alert("Failed to delete")
         }
     }
 
-
-
-    function resetForm() {
-        setFormData({
-            name: "", category: "skincare", price: 0, description: "",
-            image: "", images: [], stockQuantity: 0, isNewArrival: false,
-            mrp: undefined, netContent: "", brand: ""
-        })
-        setDiscountPercent(0);
-        setImageFiles([])
-        setIsEditing(null)
-    }
-
-    // Inline Creation State
-    const [isAddingCategory, setIsAddingCategory] = useState(false);
-    const [newCategoryName, setNewCategoryName] = useState("");
-    const [isAddingBrand, setIsAddingBrand] = useState(false);
-    const [newBrandName, setNewBrandName] = useState("");
-
-    // Inline Creation Handlers
-    async function saveNewCategory() {
-        if (!newCategoryName) return;
-        const slug = newCategoryName.toLowerCase().replace(/ /g, '-').replace(/[^\w-]/g, '');
-
-        try {
-            const res = await fetch(`${BASE_URL}/categories`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ name: newCategoryName, slug })
-            });
-            if (res.ok) {
-                const newCat = await res.json();
-                setCategories([...categories, newCat]);
-                setFormData({ ...formData, category: newCat.slug }); // Auto-select
-                setIsAddingCategory(false);
-                setNewCategoryName("");
-                alert("Category added!");
-            } else {
-                alert("Failed to add category");
-            }
-        } catch (error) {
-            console.error(error);
-        }
-    }
-
-    async function saveNewBrand() {
-        if (!newBrandName) return;
-
-        try {
-            const res = await fetch(`${BASE_URL}/brands`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ name: newBrandName })
-            });
-            if (res.ok) {
-                const newBrand = await res.json();
-                setBrands([...brands, newBrand]);
-                setFormData({ ...formData, brand: newBrand.name }); // Auto-fill
-                setIsAddingBrand(false);
-                setNewBrandName("");
-                alert("Brand added!");
-            } else {
-                const err = await res.json();
-                alert("Failed: " + err.message);
-            }
-        } catch (error) {
-            console.error(error);
-        }
-    }
-
-    const [selectedProducts, setSelectedProducts] = useState<string[]>([])
-    const nameInputRef = useRef<HTMLInputElement>(null)
-
-    // Bulk Actions
     async function handleBulkDelete() {
         if (!confirm(`Delete ${selectedProducts.length} products?`)) return
         try {
@@ -214,382 +82,199 @@ export default function ProductsPage() {
         }
     }
 
-    function toggleSelect(id: string) {
-        setSelectedProducts(prev => prev.includes(id) ? prev.filter(p => p !== id) : [...prev, id])
+    const toggleSelect = (id: string) => {
+        setSelectedProducts(prev =>
+            prev.includes(id) ? prev.filter(p => p !== id) : [...prev, id]
+        )
     }
-
-    function handleEdit(product: Product) {
-        setFormData({
-            name: product.name,
-            category: product.category,
-            price: product.price,
-            description: product.description,
-            image: product.image,
-            images: product.images || (product.image ? [product.image] : []),
-            stockQuantity: product.stockQuantity || 0,
-            isNewArrival: product.isNewArrival,
-            mrp: product.mrp,
-            netContent: product.netContent,
-            brand: (product as any).brand
-        })
-
-        // Calculate existing discount % if applicable
-        if (product.mrp && product.mrp > product.price) {
-            setDiscountPercent(Math.round(((product.mrp - product.price) / product.mrp) * 100));
-        } else {
-            setDiscountPercent(0);
-        }
-
-        setImageFiles([]) // Clear file input
-        setIsEditing(product.id)
-
-        // Scroll to form and focus
-        if (nameInputRef.current) {
-            nameInputRef.current.scrollIntoView({ behavior: 'smooth', block: 'center' });
-            setTimeout(() => nameInputRef.current?.focus(), 500);
-        } else {
-            window.scrollTo({ top: 0, behavior: 'smooth' })
-        }
-    }
-
-    // Handle File Selection
-    const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        if (e.target.files) {
-            // Convert FileList to Array
-            setImageFiles(Array.from(e.target.files))
-        }
-    }
-
-    if (loading) return <div className="p-8">Loading Products...</div>
 
     return (
-        <div className="space-y-8">
-            <div className="flex flex-col gap-4">
-                <div className="flex justify-between items-center">
-                    <h1 className="text-3xl font-bold">Product Management</h1>
+        <div className="p-6 max-w-[1400px] mx-auto">
+            <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8">
+                <div>
+                    <h1 className="text-3xl font-bold tracking-tight text-gray-900">Products</h1>
+                    <p className="text-gray-500 mt-1">Manage your inventory, prices, and variants.</p>
+                </div>
+                <div className="flex gap-2">
                     {selectedProducts.length > 0 && (
                         <Button variant="destructive" onClick={handleBulkDelete}>
                             Delete Selected ({selectedProducts.length})
                         </Button>
                     )}
-                </div>
-
-                {/* Filters Bar */}
-                <div className="flex flex-wrap gap-4 bg-white p-4 rounded-lg shadow-sm border">
-                    <div className="flex-1 min-w-[200px]">
-                        <input
-                            type="text"
-                            placeholder="Search products..."
-                            className="w-full p-2 border rounded"
-                            value={filterSearch}
-                            onChange={(e) => setFilterSearch(e.target.value)}
-                        />
-                    </div>
-                    <div>
-                        <select
-                            className="p-2 border rounded w-[150px]"
-                            value={filterCategory}
-                            onChange={(e) => setFilterCategory(e.target.value)}
-                        >
-                            <option value="">All Categories</option>
-                            <optgroup label="Standard">
-                                <option value="skincare">Skincare</option>
-                                <option value="hair-care">Hair Care</option>
-                                <option value="baby-care">Baby Care</option>
-                                <option value="treatments">Treatments</option>
-                                <option value="bundles">Bundles</option>
-                            </optgroup>
-                            <optgroup label="Custom">
-                                {categories.map((cat: any) => (
-                                    <option key={cat._id || cat.slug} value={cat.slug}>{cat.name}</option>
-                                ))}
-                            </optgroup>
-                        </select>
-                    </div>
-                    <div>
-                        <input
-                            list="filter-brands"
-                            placeholder="Filter Brand"
-                            className="p-2 border rounded w-[150px]"
-                            value={filterBrand}
-                            onChange={(e) => setFilterBrand(e.target.value)}
-                        />
-                        <datalist id="filter-brands">
-                            {brands.map((b: any) => (
-                                <option key={b._id} value={b.name} />
-                            ))}
-                            {["CeraVe", "Cetaphil", "The Ordinary", "Bioderma", "Neutrogena", "La Roche-Posay"]
-                                .filter(n => !brands.find((b: any) => b.name === n))
-                                .map(n => <option key={n} value={n} />)
-                            }
-                        </datalist>
-                    </div>
-                    <Button variant="outline" onClick={() => {
-                        setFilterCategory("");
-                        setFilterBrand("");
-                        setFilterSearch("");
-                    }}>Clear</Button>
+                    <Link href="/admin/products/new">
+                        <Button className="bg-sky-600 hover:bg-sky-700 shadow-md">
+                            + Add New Product
+                        </Button>
+                    </Link>
                 </div>
             </div>
 
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                {/* Form */}
-                <div className="bg-white p-6 rounded-lg shadow-md h-fit">
-                    <h2 className="text-xl font-semibold mb-4">{isEditing ? 'Edit Product' : 'Add New Product'}</h2>
-                    <form onSubmit={handleSubmit} className="space-y-4">
-                        <div>
-                            <label className="block text-sm font-medium mb-1">Name</label>
-                            <input ref={nameInputRef} className="w-full p-2 border rounded" required
-                                value={formData.name} onChange={e => setFormData({ ...formData, name: e.target.value })} />
-                        </div>
-                        <div className="grid grid-cols-2 gap-4">
-                            <div>
-                                <label className="block text-sm font-medium mb-1">Price</label>
-                                <input type="number" className="w-full p-2 border rounded" required
-                                    value={formData.price} onChange={e => setFormData({ ...formData, price: Number(e.target.value) })} />
-                            </div>
-                            <div>
-                                <label className="block text-sm font-medium mb-1">Stock</label>
-                                <input type="number" className="w-full p-2 border rounded"
-                                    value={formData.stockQuantity} onChange={e => setFormData({ ...formData, stockQuantity: Number(e.target.value) })} />
-                            </div>
-                        </div>
-                        <div className="grid grid-cols-3 gap-4">
-                            <div>
-                                <label className="block text-sm font-medium mb-1">MRP <span className="text-xs text-gray-500">(Original)</span></label>
-                                <input type="number" className="w-full p-2 border rounded"
-                                    placeholder="749"
-                                    value={formData.mrp || ''}
-                                    onChange={e => {
-                                        const newMrp = Number(e.target.value);
-                                        // Auto-update price if discount is set
-                                        if (discountPercent > 0) {
-                                            const newPrice = Math.round(newMrp - (newMrp * discountPercent / 100));
-                                            setFormData({ ...formData, mrp: newMrp, price: newPrice });
-                                        } else {
-                                            setFormData({ ...formData, mrp: newMrp });
-                                        }
-                                    }} />
-                            </div>
-                            <div>
-                                <label className="block text-sm font-medium mb-1">Discount %</label>
-                                <input type="number" className="w-full p-2 border rounded border-blue-200 bg-blue-50"
-                                    placeholder="e.g. 20"
-                                    value={discountPercent || ''}
-                                    onChange={e => {
-                                        const newDist = Number(e.target.value);
-                                        setDiscountPercent(newDist);
-                                        if (formData.mrp) {
-                                            const newPrice = Math.round(formData.mrp - (formData.mrp * newDist / 100));
-                                            setFormData(prev => ({ ...prev, price: newPrice }));
-                                        }
-                                    }} />
-                            </div>
-                            <div>
-                                <label className="block text-sm font-medium mb-1">Net Content</label>
-                                <input type="text" className="w-full p-2 border rounded"
-                                    placeholder="80ml"
-                                    value={formData.netContent || ''} onChange={e => setFormData({ ...formData, netContent: e.target.value })} />
-                            </div>
-                        </div>
-                        <div className="flex items-center gap-2">
-                            <input type="checkbox" id="isNewArrival" className="h-4 w-4"
-                                checked={formData.isNewArrival || false}
-                                onChange={e => setFormData({ ...formData, isNewArrival: e.target.checked })} />
-                            <label htmlFor="isNewArrival" className="text-sm font-medium">Mark as New Arrival</label>
-                        </div>
-                        <div>
-                            <label className="block text-sm font-medium mb-1">Category</label>
-                            <div className="flex gap-2">
-                                {isAddingCategory ? (
-                                    <>
-                                        <input
-                                            className="w-full p-2 border rounded"
-                                            placeholder="New Category Name"
-                                            value={newCategoryName}
-                                            onChange={e => setNewCategoryName(e.target.value)}
-                                            autoFocus
-                                        />
-                                        <Button type="button" onClick={saveNewCategory} className="px-3" title="Save Category">✓</Button>
-                                        <Button type="button" variant="outline" onClick={() => setIsAddingCategory(false)} className="px-3" title="Cancel">✕</Button>
-                                    </>
-                                ) : (
-                                    <>
-                                        <select className="w-full p-2 border rounded" required
-                                            value={formData.category} onChange={e => setFormData({ ...formData, category: e.target.value })}>
-                                            <option value="">Select Category</option>
-                                            <optgroup label="Standard">
-                                                <option value="skincare">Skincare</option>
-                                                <option value="hair-care">Hair Care</option>
-                                                <option value="baby-care">Baby Care</option>
-                                                <option value="treatments">Treatments</option>
-                                                <option value="bundles">Bundles</option>
-                                            </optgroup>
-                                            <optgroup label="Custom">
-                                                {categories.map((cat: any) => (
-                                                    <option key={cat._id || cat.slug} value={cat.slug}>{cat.name}</option>
-                                                ))}
-                                            </optgroup>
-                                        </select>
-                                        <Button type="button" variant="secondary" onClick={() => setIsAddingCategory(true)} className="px-3" title="Add New Category">
-                                            +
-                                        </Button>
-                                    </>
-                                )}
-                            </div>
-                        </div>
-                        <div>
-                            <label className="block text-sm font-medium mb-1">Brand</label>
-                            <div className="flex gap-2">
-                                {isAddingBrand ? (
-                                    <>
-                                        <input
-                                            className="w-full p-2 border rounded"
-                                            placeholder="New Brand Name"
-                                            value={newBrandName}
-                                            onChange={e => setNewBrandName(e.target.value)}
-                                            autoFocus
-                                        />
-                                        <Button type="button" onClick={saveNewBrand} className="px-3" title="Save Brand">✓</Button>
-                                        <Button type="button" variant="outline" onClick={() => setIsAddingBrand(false)} className="px-3" title="Cancel">✕</Button>
-                                    </>
-                                ) : (
-                                    <>
-                                        <input
-                                            list="brand-suggestions"
-                                            className="w-full p-2 border rounded"
-                                            placeholder="Select or Type Brand"
-                                            value={formData.brand || ''}
-                                            onChange={e => setFormData({ ...formData, brand: e.target.value })}
-                                        />
-                                        <Button type="button" variant="secondary" onClick={() => setIsAddingBrand(true)} className="px-3" title="Add New Brand">
-                                            +
-                                        </Button>
-                                    </>
-                                )}
-                            </div>
-                            <datalist id="brand-suggestions">
-                                {brands.map((b: any) => (
-                                    <option key={b._id} value={b.name} />
-                                ))}
-                                {["CeraVe", "Cetaphil", "Bioderma", "Neutrogena", "La Roche-Posay", "The Ordinary", "Aveeno", "Minimalist", "Sebamed"]
-                                    .filter(n => !brands.find((b: any) => b.name === n))
-                                    .map(n => <option key={n} value={n} />)
-                                }
-                            </datalist>
-                        </div>
-
-                        {/* Multiple Image Selection */}
-                        <div>
-                            <label className="block text-sm font-medium mb-1">Images (Select Multiple)</label>
-                            <input
-                                type="file"
-                                accept="image/*"
-                                multiple
-                                className="w-full p-2 border rounded"
-                                onChange={handleFileChange}
-                            />
-
-                            {/* Preview Selected Files */}
-                            {imageFiles.length > 0 && (
-                                <div className="mt-2 text-xs text-blue-600">
-                                    {imageFiles.length} files selected to upload.
-                                </div>
-                            )}
-
-                            {/* Show Existing Images if Editing */}
-                            {formData.images && formData.images.length > 0 && (
-                                <div className="mt-2 grid grid-cols-3 gap-2">
-                                    {formData.images.map((img, idx) => (
-                                        <div key={idx} className="relative aspect-square border rounded overflow-hidden group">
-                                            <img src={img} className="w-full h-full object-cover" alt="preview" />
-                                            <button
-                                                type="button"
-                                                onClick={() => {
-                                                    const newImages = formData.images?.filter((_, i) => i !== idx);
-                                                    setFormData({ ...formData, images: newImages });
-                                                }}
-                                                className="absolute top-1 right-1 bg-red-500 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs opacity-0 group-hover:opacity-100 transition-opacity"
-                                                title="Remove Image"
-                                            >
-                                                ✕
-                                            </button>
-                                        </div>
-                                    ))}
-                                </div>
-                            )}
-                        </div>
-
-                        <div>
-                            <label className="block text-sm font-medium mb-1">Description</label>
-                            <textarea className="w-full p-2 border rounded" required
-                                value={formData.description} onChange={e => setFormData({ ...formData, description: e.target.value })} />
-                        </div>
-                        <div className="flex gap-2">
-                            <Button type="submit" className="flex-1">{isEditing ? 'Update' : 'Create'}</Button>
-                            {isEditing && <Button type="button" variant="outline" onClick={resetForm}>Cancel</Button>}
-                        </div>
-                    </form>
+            {/* Filters */}
+            <div className="grid grid-cols-2 lg:grid-cols-5 gap-3 mb-6 bg-white p-4 rounded-xl shadow-sm border border-gray-100">
+                <div className="col-span-2 lg:col-span-2">
+                    <input
+                        className="w-full p-2.5 border rounded-lg bg-gray-50 text-sm focus:outline-none focus:ring-2 focus:ring-sky-100 transition-all"
+                        placeholder="Search products..."
+                        value={filterSearch}
+                        onChange={e => setFilterSearch(e.target.value)}
+                    />
                 </div>
+                <select
+                    className="p-2.5 border rounded-lg bg-gray-50 text-sm focus:outline-none focus:ring-2 focus:ring-sky-100"
+                    value={filterCategory}
+                    onChange={e => setFilterCategory(e.target.value)}
+                >
+                    <option value="">All Categories</option>
+                    {categories.map((cat: any) => (
+                        <option key={cat._id || cat.slug} value={cat.slug}>{cat.name}</option>
+                    ))}
+                </select>
+                <select
+                    className="p-2.5 border rounded-lg bg-gray-50 text-sm focus:outline-none focus:ring-2 focus:ring-sky-100"
+                    value={filterBrand}
+                    onChange={e => setFilterBrand(e.target.value)}
+                >
+                    <option value="">All Brands</option>
+                    {brands.map((b: any) => (
+                        <option key={b._id || b.name} value={b.name}>{b.name}</option>
+                    ))}
+                </select>
+                <Button variant="outline" className="lg:hidden" onClick={loadData}>Refresh</Button>
+            </div>
 
-                {/* List */}
-                <div className="col-span-1 lg:col-span-2 bg-white p-6 rounded-lg shadow-md overflow-x-auto">
-                    <h2 className="text-xl font-semibold mb-4">Inventory ({products.length})</h2>
+            {/* List */}
+            <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+                <div className="overflow-x-auto">
                     <table className="w-full text-left">
                         <thead>
-                            <tr className="border-b">
-                                <th className="pb-2 w-10"></th>
-                                <th className="pb-2">Image</th>
-                                <th className="pb-2">Name</th>
-                                <th className="pb-2">Price</th>
-                                <th className="pb-2">Stock</th>
-                                <th className="pb-2">Category</th>
-                                <th className="pb-2">Actions</th>
+                            <tr className="bg-gray-50 border-b border-gray-200">
+                                <th className="py-4 px-4 w-10"></th>
+                                <th className="py-4 px-4 font-semibold text-gray-600 text-sm">Product</th>
+                                <th className="py-4 px-4 font-semibold text-gray-600 text-sm">Variants & Price</th>
+                                <th className="py-4 px-4 font-semibold text-gray-600 text-sm">Stock</th>
+                                <th className="py-4 px-4 font-semibold text-gray-600 text-sm">Category</th>
+                                <th className="py-4 px-4 font-semibold text-gray-600 text-sm text-right">Actions</th>
                             </tr>
                         </thead>
-                        <tbody>
-                            {products.map(product => (
-                                <tr key={product.id} className="border-b last:border-0 hover:bg-gray-50">
-                                    <td className="py-3 px-2">
-                                        <input type="checkbox" className="h-4 w-4 rounded border-gray-300"
+                        <tbody className="divide-y divide-gray-100">
+                            {loading ? (
+                                <tr>
+                                    <td colSpan={6} className="text-center py-20 text-gray-400">Loading products...</td>
+                                </tr>
+                            ) : products.map(product => (
+                                <tr key={product.id} className="group hover:bg-sky-50/30 transition-colors">
+                                    <td className="py-4 px-4 align-top">
+                                        <input type="checkbox" className="h-4 w-4 rounded border-gray-300 text-sky-600 focus:ring-sky-500"
                                             checked={selectedProducts.includes(product.id)}
                                             onChange={() => toggleSelect(product.id)}
                                         />
                                     </td>
-                                    <td className="py-3">
-                                        {/* Show First Image or Default */}
-                                        {product.image ? (
-                                            <div className="relative h-10 w-10">
-                                                <img
-                                                    src={product.image.startsWith('http') ? product.image : product.image}
-                                                    alt={product.name}
-                                                    className="h-10 w-10 object-cover rounded bg-gray-100"
-                                                />
+                                    <td className="py-4 px-4 align-top">
+                                        <div className="flex gap-4">
+                                            <div className="relative h-14 w-14 shrink-0 rounded-lg overflow-hidden border border-gray-100 bg-gray-50">
+                                                {product.image ? (
+                                                    <img
+                                                        src={product.image}
+                                                        alt={product.name}
+                                                        className="h-full w-full object-cover"
+                                                    />
+                                                ) : (
+                                                    <div className="h-full w-full flex items-center justify-center text-xs text-gray-300">No Img</div>
+                                                )}
                                                 {product.images && product.images.length > 1 && (
-                                                    <span className="absolute -bottom-1 -right-1 bg-black text-white text-[9px] px-1 rounded-full">
+                                                    <span className="absolute bottom-0 right-0 bg-black/60 text-white text-[9px] px-1.5 py-0.5 rounded-tl-md">
                                                         +{product.images.length - 1}
                                                     </span>
                                                 )}
                                             </div>
+                                            <div>
+                                                <div className="font-semibold text-gray-800 line-clamp-1">{product.name}</div>
+                                                <div className="text-xs text-gray-500 mt-0.5 line-clamp-1">{product.description?.substring(0, 50)}...</div>
+                                                {product.brand && (
+                                                    <span className="inline-flex items-center rounded-full bg-gray-100 px-2 py-0.5 text-xs font-medium text-gray-600 mt-1">
+                                                        {product.brand}
+                                                    </span>
+                                                )}
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td className="py-4 px-4 align-top">
+                                        {product.variants && product.variants.length > 0 ? (
+                                            <div className="flex flex-col gap-1.5">
+                                                {product.variants.slice(0, 3).map((v, i) => (
+                                                    <div key={i} className="flex items-center gap-2 text-sm text-gray-600">
+                                                        <span className="font-medium text-gray-900 bg-gray-100 px-1.5 rounded text-xs min-w-[3rem] text-center">{v.size}</span>
+                                                        <span className="text-gray-400">→</span>
+                                                        <span className="font-semibold text-green-700">₹{v.price}</span>
+                                                    </div>
+                                                ))}
+                                                {product.variants.length > 3 && (
+                                                    <span className="text-xs text-gray-400 pl-1">+{product.variants.length - 3} more...</span>
+                                                )}
+                                            </div>
                                         ) : (
-                                            <div className="h-10 w-10 bg-gray-100 rounded flex items-center justify-center text-xs text-gray-400">No</div>
+                                            <span className="font-bold text-green-700 text-lg">₹{product.price}</span>
                                         )}
                                     </td>
-                                    <td className="py-3 font-medium">{product.name}</td>
-                                    <td className="py-3">₹{product.price}</td>
-                                    <td className="py-3">
-                                        <span className={`px-2 py-1 rounded text-xs ${(product.stockQuantity || 0) > 5 ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
-                                            }`}>
-                                            {product.stockQuantity || 0}
+                                    <td className="py-4 px-4 align-top">
+                                        {/* Stock Column: Show Variant Stock if available */}
+                                        {product.variants && product.variants.length > 0 ? (
+                                            <div className="space-y-1">
+                                                {product.variants.slice(0, 3).map((v, i) => (
+                                                    <div key={i} className="flex items-center gap-2 text-xs">
+                                                        <span className="text-gray-500 w-10">{v.size}:</span>
+                                                        <span className={`font-bold ${(v.stock || 0) > 0 ? 'text-gray-700' : 'text-red-500'}`}>
+                                                            {v.stock || 0}
+                                                        </span>
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        ) : (
+                                            <span className={`px-2.5 py-1 rounded-full text-xs font-medium ${(product.stockQuantity || 0) > 5 ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
+                                                {product.stockQuantity || 0} in stock
+                                            </span>
+                                        )}
+                                    </td>
+                                    <td className="py-4 px-4 align-top capitalize">
+                                        <span className="bg-gray-50 text-gray-600 px-2.5 py-1 rounded text-xs border border-gray-100">
+                                            {product.category}
                                         </span>
                                     </td>
-                                    <td className="py-3 capitalize">{product.category}</td>
-                                    <td className="py-3 flex gap-2">
-                                        <Button variant="outline" size="sm" onClick={() => handleEdit(product)}>Edit</Button>
-                                        <Button variant="destructive" size="sm" onClick={() => handleDelete(product.id)}>Delete</Button>
+                                    <td className="py-4 px-4 align-top text-right">
+                                        <div className="flex justify-end gap-2 opacity-100 sm:opacity-0 group-hover:opacity-100 transition-opacity">
+                                            <button
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    router.push(`/admin/products/${product.id}`);
+                                                }}
+                                                className="p-2 text-sky-600 hover:bg-sky-50 rounded-lg transition-colors"
+                                                title="Edit"
+                                            >
+                                                ✏️
+                                            </button>
+                                            <button
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    handleDelete(product.id);
+                                                }}
+                                                className="p-2 text-red-500 hover:bg-red-50 rounded-lg transition-colors"
+                                                title="Delete"
+                                            >
+                                                🗑️
+                                            </button>
+                                        </div>
                                     </td>
                                 </tr>
                             ))}
+                            {products.length === 0 && !loading && (
+                                <tr>
+                                    <td colSpan={6} className="text-center py-20">
+                                        <div className="text-gray-400 mb-2 text-4xl">🔍</div>
+                                        <p className="text-gray-500 font-medium">No products found</p>
+                                        <p className="text-sm text-gray-400">Try adjusting your filters.</p>
+                                    </td>
+                                </tr>
+                            )}
                         </tbody>
                     </table>
                 </div>

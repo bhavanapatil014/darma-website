@@ -153,20 +153,42 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
         try {
             const updatedItems = await Promise.all(items.map(async (item) => {
                 try {
+                    // Handle Variant IDs (format: productId-size)
+                    const isVariant = item.id.includes('-');
+                    const realProductId = isVariant ? item.id.split('-')[0] : item.id;
+                    const variantSize = isVariant ? item.id.split('-').slice(1).join('-') : null;
+
                     // Add timestamp to force bypass browser cache + Next.js cache option
-                    const res = await fetch(`https://darma-website.onrender.com/api/products/${item.id}?t=${Date.now()}`, {
+                    const res = await fetch(`https://darma-website.onrender.com/api/products/${realProductId}?t=${Date.now()}`, {
                         cache: 'no-store',
                         headers: { 'Pragma': 'no-cache' }
                     });
+
                     if (res.ok) {
                         const productData = await res.json();
-                        // Preserve quantity, update details
+
+                        // If it's a variant, find the updated variant data
+                        if (isVariant && variantSize && productData.variants) {
+                            const variant = productData.variants.find((v: any) => v.size === variantSize);
+                            if (variant) {
+                                return {
+                                    ...item,
+                                    price: variant.price,
+                                    mrp: variant.mrp,
+                                    // image: productData.image, // Usually images are same, or could look up variant image if supported
+                                    // name: `${productData.name} (${variant.size})`, // Ensure name is consistent
+                                    stockQuantity: variant.stock // Update variant specific stock if available
+                                };
+                            }
+                        }
+
+                        // Default / Non-variant update
                         return {
                             ...item,
                             price: productData.price,
                             mrp: productData.mrp,
-                            image: productData.image, // In case image updated
-                            name: productData.name,   // In case name updated
+                            image: productData.image,
+                            name: productData.name,
                             stockQuantity: productData.stockQuantity
                         };
                     }
@@ -229,6 +251,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
 export function useCart() {
     const context = React.useContext(CartContext)
     if (context === undefined) {
+        // console.error("useCart error: Context undefined. Make sure CartProvider is in the tree.");
         throw new Error("useCart must be used within a CartProvider")
     }
     return context

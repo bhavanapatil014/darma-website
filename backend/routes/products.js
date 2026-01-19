@@ -116,6 +116,8 @@ router.get('/:id', async (req, res) => {
         product.images = (product.images && product.images.length > 0) ? product.images : (product.image ? [product.image] : []);
 
         console.log(`Sending Product: ${product.name} | MRP: ${product.mrp} | NetContent: ${product.netContent}`);
+        console.log(`Sending Variants: ${JSON.stringify(product.variants)}`);
+
         res.json(product);
     } catch (error) {
         res.status(500).json({ message: error.message });
@@ -149,6 +151,13 @@ router.put('/:id', async (req, res) => {
     try {
         console.log("PUT /products/:id body:", JSON.stringify(req.body, null, 2)); // Debug Log
         console.log(`Explicit fields - MRP: ${req.body.mrp}, NetContent: ${req.body.netContent}, Brand: ${req.body.brand}`);
+
+        if (req.body.variants) {
+            console.log("Updating Variants:", JSON.stringify(req.body.variants));
+        } else {
+            console.log("No variants payload found in body.");
+        }
+
         // Ensure image is set if images array is provided
         const updateData = { ...req.body };
         if (updateData.images && updateData.images.length > 0 && !updateData.image) {
@@ -161,7 +170,10 @@ router.put('/:id', async (req, res) => {
             { new: true }
         );
         if (!product) return res.status(404).json({ message: 'Product not found' });
-        console.log("Updated Product Images:", product.images);
+
+        console.log(`Updated Product: ${product.name}`);
+        console.log(`Updated Variants in DB: ${JSON.stringify(product.variants)}`);
+
         res.json(product);
     } catch (error) {
         console.error("PUT /products error:", error);

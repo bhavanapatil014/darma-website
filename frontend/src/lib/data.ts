@@ -14,9 +14,15 @@ export interface Product {
     mrp?: number;
     netContent?: string;
     brand?: string;
+    variants?: {
+        size: string;
+        price: number;
+        mrp?: number;
+        stock?: number; // Optional, can default to global stock or be 0
+    }[];
 }
 
-const API_URL = 'https://darma-website.onrender.com/api';
+const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000/api';
 
 // Fallback data for build time or error cases (optional, but good for stability)
 export const products: Product[] = [];
@@ -68,7 +74,8 @@ export async function fetchProductById(id: string): Promise<Product | undefined>
     try {
         const res = await fetch(`${API_URL}/products/${id}`, { cache: 'no-store' });
         if (!res.ok) return undefined;
-        return res.json();
+        const data = await res.json();
+        return data;
     } catch (error) {
         return undefined;
     }

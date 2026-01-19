@@ -15,7 +15,13 @@ const productSchema = new mongoose.Schema({
     inStock: { type: Boolean, default: true },
     mrp: { type: Number }, // Maximum Retail Price (for strikethrough)
     netContent: { type: String }, // e.g. "80ml", "50g"
-    brand: { type: String } // e.g. "CeraVe"
+    brand: { type: String }, // e.g. "CeraVe"
+    variants: [{
+        size: { type: String, required: true }, // e.g. "150ml"
+        price: { type: Number, required: true },
+        mrp: { type: Number },
+        stock: { type: Number, default: 0 }
+    }]
 }, { timestamps: true });
 
 module.exports = mongoose.model('Product', productSchema);
