@@ -243,27 +243,23 @@ export default function ProductsPage() {
                                         </span>
                                     </td>
                                     <td className="py-4 px-4 align-top text-right">
-                                        <div className="flex justify-end gap-2 opacity-100 sm:opacity-0 group-hover:opacity-100 transition-opacity">
-                                            <button
-                                                onClick={(e) => {
-                                                    e.stopPropagation();
-                                                    router.push(`/admin/products/${product.id}`);
-                                                }}
-                                                className="p-2 text-sky-600 hover:bg-sky-50 rounded-lg transition-colors"
-                                                title="Edit"
-                                            >
-                                                ✏️
-                                            </button>
-                                            <button
+                                        <div className="flex justify-end gap-2">
+                                            <Link href={`/admin/products/${product.id}`}>
+                                                <Button size="sm" variant="outline" className="h-8 text-sky-600 hover:text-sky-700 hover:bg-sky-50 border-sky-200">
+                                                    Edit
+                                                </Button>
+                                            </Link>
+                                            <Button
+                                                size="sm"
+                                                variant="ghost"
+                                                className="h-8 text-red-500 hover:text-red-700 hover:bg-red-50"
                                                 onClick={(e) => {
                                                     e.stopPropagation();
                                                     handleDelete(product.id);
                                                 }}
-                                                className="p-2 text-red-500 hover:bg-red-50 rounded-lg transition-colors"
-                                                title="Delete"
                                             >
-                                                🗑️
-                                            </button>
+                                                Delete
+                                            </Button>
                                         </div>
                                     </td>
                                 </tr>
