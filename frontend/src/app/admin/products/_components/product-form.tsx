@@ -33,7 +33,9 @@ export default function ProductForm({ initialData, categories: initialCategories
     const [isAddingBrand, setIsAddingBrand] = useState(false);
     const [newBrandName, setNewBrandName] = useState("");
 
-    const BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000/api';
+    let BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'https://darma-website.onrender.com/api';
+    BASE_URL = BASE_URL.replace(/\/$/, "");
+    if (!BASE_URL.endsWith('/api')) BASE_URL += '/api';
 
     // Initialize form with data if provided
     useEffect(() => {

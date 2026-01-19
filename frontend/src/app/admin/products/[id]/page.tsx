@@ -5,7 +5,9 @@ export const dynamic = 'force-dynamic';
 
 export default async function EditProductPage({ params }: { params: Promise<{ id: string }> }) {
     const { id } = await params;
-    const BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000/api';
+    let BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'https://darma-website.onrender.com/api';
+    BASE_URL = BASE_URL.replace(/\/$/, "");
+    if (!BASE_URL.endsWith('/api')) BASE_URL += '/api';
 
     const [product, categories, brands] = await Promise.all([
         fetch(`${BASE_URL}/products/${id}`, { cache: 'no-store' }).then(res => res.ok ? res.json() : null).catch(() => null),

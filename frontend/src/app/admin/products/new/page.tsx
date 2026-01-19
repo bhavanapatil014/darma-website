@@ -4,7 +4,9 @@ import { redirect } from "next/navigation"
 export const dynamic = 'force-dynamic';
 
 export default async function NewProductPage() {
-    const BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000/api';
+    let BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'https://darma-website.onrender.com/api';
+    BASE_URL = BASE_URL.replace(/\/$/, "");
+    if (!BASE_URL.endsWith('/api')) BASE_URL += '/api';
 
     const [categories, brands] = await Promise.all([
         fetch(`${BASE_URL}/categories`, { cache: 'no-store' }).then(res => res.json()).catch(() => []),

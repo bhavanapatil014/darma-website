@@ -19,7 +19,9 @@ export default function ProductsPage() {
 
     const [selectedProducts, setSelectedProducts] = useState<string[]>([])
 
-    const BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000/api';
+    let BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'https://darma-website.onrender.com/api';
+    BASE_URL = BASE_URL.replace(/\/$/, "");
+    if (!BASE_URL.endsWith('/api')) BASE_URL += '/api';
 
     useEffect(() => {
         loadData()
