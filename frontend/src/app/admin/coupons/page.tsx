@@ -14,6 +14,8 @@ interface Coupon {
     applicableProducts: string[];
     applicableCategories: string[];
     applicableBrands: string[];
+    usageLimit?: number;
+    usedCount?: number;
 }
 
 interface Product {
@@ -95,6 +97,23 @@ export default function CouponsPage() {
             console.error(err)
         }
         setLoading(false)
+    }
+
+    async function loadNegotiations() {
+        try {
+            const token = localStorage.getItem('token');
+            if (!token) return;
+
+            const res = await fetch('https://darma-website.onrender.com/api/negotiate/all', {
+                headers: { 'Authorization': `Bearer ${token}` }
+            })
+            if (res.ok) {
+                const data = await res.json();
+                setNegotiations(data);
+            }
+        } catch (err) {
+            console.error("Failed to load negotiations", err)
+        }
     }
 
     async function loadProducts() {
@@ -494,7 +513,7 @@ export default function CouponsPage() {
                             <tr className="bg-gray-50 border-b border-gray-200 text-xs font-bold uppercase tracking-wider text-gray-500">
                                 <th className="py-4 px-6 w-[20%]">Code</th>
                                 <th className="py-4 px-6 w-[15%]">Discount</th>
-                                <th className="py-4 px-6 w-[25%]">Applicability</th>
+                                <th className="py-4 px-6 w-[25%]">{activeTab === 'negotiation' ? 'Created For' : 'Applicability'}</th>
                                 <th className="py-4 px-6 w-[15%]">Min Order</th>
                                 <th className="py-4 px-6 w-[15%]">Expiry</th>
                                 <th className="py-4 px-6 w-[10%] text-right">Action</th>
@@ -503,35 +522,59 @@ export default function CouponsPage() {
                         <tbody className="divide-y divide-gray-100">
                             {displayedCoupons.map(coupon => {
                                 const isExpired = coupon.expirationDate && new Date() > new Date(coupon.expirationDate);
+                                const isUsed = activeTab === 'negotiation' && coupon.usedCount && coupon.usageLimit && coupon.usedCount >= coupon.usageLimit;
+                                const negotiationDetails = activeTab === 'negotiation'
+                                    ? negotiations.find(n => n.couponCode === coupon.code)
+                                    : null;
+
                                 return (
-                                    <tr key={coupon._id} className={`group hover:bg-gray-50/50 transition-colors ${isExpired ? 'bg-gray-50/40' : ''}`}>
+                                    <tr key={coupon._id} className={`group hover:bg-gray-50/50 transition-colors ${isExpired || isUsed ? 'bg-gray-50/40' : ''}`}>
                                         <td className="py-4 px-6">
                                             <div className="font-mono font-bold text-gray-800 text-base">{coupon.code}</div>
-                                            {isExpired && <span className="inline-block mt-1 text-[10px] uppercase font-bold text-red-600 bg-red-100 px-1.5 py-0.5 rounded">Expired</span>}
+                                            {isExpired && <span className="inline-block mt-1 text-[10px] uppercase font-bold text-red-600 bg-red-100 px-1.5 py-0.5 rounded mr-1">Expired</span>}
+                                            {isUsed && <span className="inline-block mt-1 text-[10px] uppercase font-bold text-gray-600 bg-gray-200 px-1.5 py-0.5 rounded">Used</span>}
                                         </td>
                                         <td className="py-4 px-6">
-                                            <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold ${activeTab === 'expired' ? 'bg-gray-100 text-gray-600' : 'bg-green-100 text-green-700'}`}>
+                                            <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold ${activeTab === 'expired' || isUsed ? 'bg-gray-100 text-gray-600' : 'bg-green-100 text-green-700'}`}>
                                                 {coupon.type === 'percentage' ? `${coupon.value}% OFF` : `₹${coupon.value} OFF`}
                                             </span>
                                         </td>
                                         <td className="py-4 px-6 text-sm text-gray-600">
-                                            <div className="space-y-1">
-                                                {(!coupon.applicableProducts?.length && !coupon.applicableCategories?.length && !coupon.applicableBrands?.length) ? (
-                                                    <span className="font-medium text-gray-400 italic">Entire Store</span>
-                                                ) : (
-                                                    <>
-                                                        {(coupon.applicableBrands?.length || 0) > 0 && (
-                                                            <div className="flex gap-1 items-center"><span className="text-gray-400 text-xs w-16">Brands:</span> <span className="font-medium truncate max-w-[200px]">{coupon.applicableBrands.join(', ')}</span></div>
-                                                        )}
-                                                        {(coupon.applicableCategories?.length || 0) > 0 && (
-                                                            <div className="flex gap-1 items-center"><span className="text-gray-400 text-xs w-16">Categories:</span> <span className="font-medium truncate max-w-[200px]">{coupon.applicableCategories.join(', ')}</span></div>
-                                                        )}
-                                                        {(coupon.applicableProducts?.length || 0) > 0 && (
-                                                            <div className="flex gap-1 items-center"><span className="text-gray-400 text-xs w-16">Products:</span> <span className="font-medium">{coupon.applicableProducts.length} items selected</span></div>
-                                                        )}
-                                                    </>
-                                                )}
-                                            </div>
+                                            {activeTab === 'negotiation' ? (
+                                                <div className="space-y-1">
+                                                    {negotiationDetails ? (
+                                                        <>
+                                                            <div className="font-semibold text-gray-800">{negotiationDetails.user?.name || "Unknown User"}</div>
+                                                            <div className="text-xs text-gray-500">{negotiationDetails.user?.email}</div>
+                                                            {negotiationDetails.product && (
+                                                                <div className="text-xs text-indigo-600 mt-1 truncate max-w-[200px]" title={negotiationDetails.product.name}>
+                                                                    Product: {negotiationDetails.product.name}
+                                                                </div>
+                                                            )}
+                                                        </>
+                                                    ) : (
+                                                        <span className="italic text-gray-400">User details not found</span>
+                                                    )}
+                                                </div>
+                                            ) : (
+                                                <div className="space-y-1">
+                                                    {(!coupon.applicableProducts?.length && !coupon.applicableCategories?.length && !coupon.applicableBrands?.length) ? (
+                                                        <span className="font-medium text-gray-400 italic">Entire Store</span>
+                                                    ) : (
+                                                        <>
+                                                            {(coupon.applicableBrands?.length || 0) > 0 && (
+                                                                <div className="flex gap-1 items-center"><span className="text-gray-400 text-xs w-16">Brands:</span> <span className="font-medium truncate max-w-[200px]">{coupon.applicableBrands.join(', ')}</span></div>
+                                                            )}
+                                                            {(coupon.applicableCategories?.length || 0) > 0 && (
+                                                                <div className="flex gap-1 items-center"><span className="text-gray-400 text-xs w-16">Categories:</span> <span className="font-medium truncate max-w-[200px]">{coupon.applicableCategories.join(', ')}</span></div>
+                                                            )}
+                                                            {(coupon.applicableProducts?.length || 0) > 0 && (
+                                                                <div className="flex gap-1 items-center"><span className="text-gray-400 text-xs w-16">Products:</span> <span className="font-medium">{coupon.applicableProducts.length} items selected</span></div>
+                                                            )}
+                                                        </>
+                                                    )}
+                                                </div>
+                                            )}
                                         </td>
                                         <td className="py-4 px-6 text-sm font-medium text-gray-700">
                                             {coupon.minOrderAmount > 0 ? `₹${coupon.minOrderAmount}` : 'None'}
