@@ -8,8 +8,8 @@ import { useRouter } from "next/navigation"
 export default function ProductsPage() {
     const router = useRouter()
     const [products, setProducts] = useState<Product[]>([])
-    const [categories, setCategories] = useState<any[]>([])
-    const [brands, setBrands] = useState<any[]>([])
+    const [currentPage, setCurrentPage] = useState(1);
+    const [totalPages, setTotalPages] = useState(1);
     const [loading, setLoading] = useState(true)
 
     // Filters
@@ -24,20 +24,18 @@ export default function ProductsPage() {
     if (!BASE_URL.endsWith('/api')) BASE_URL += '/api';
 
     useEffect(() => {
+        setCurrentPage(1); // Reset to page 1 on filter change
         loadData()
-    }, [filterCategory, filterBrand])
+    }, [filterCategory, filterBrand, filterSearch])
 
     useEffect(() => {
-        const timer = setTimeout(() => {
-            loadData()
-        }, 500)
-        return () => clearTimeout(timer)
-    }, [filterSearch])
+        loadData() // Reload when page changes
+    }, [currentPage])
 
     async function loadData() {
         setLoading(true)
         try {
-            const [productsData, categoriesData, brandsData] = await Promise.all([
+            const [productsResponse, categoriesData, brandsData] = await Promise.all([
                 fetchProducts(
                     filterCategory || undefined,
                     filterBrand || undefined,
@@ -45,13 +43,14 @@ export default function ProductsPage() {
                     undefined,
                     undefined,
                     undefined,
-                    1,
-                    1000
+                    currentPage, // Use current page
+                    10 // Limit to 10 items
                 ),
                 fetch(`${BASE_URL}/categories`).then(res => res.json()).catch(() => []),
                 fetch(`${BASE_URL}/brands`).then(res => res.json()).catch(() => [])
             ])
-            setProducts(productsData.products)
+            setProducts(productsResponse.products)
+            setTotalPages(productsResponse.pagination?.totalPages || 1)
             setCategories(categoriesData)
             setBrands(brandsData)
         } catch (e) {
@@ -274,9 +273,30 @@ export default function ProductsPage() {
                                 </tr>
                             )}
                         </tbody>
-                    </table>
+                        {/* Pagination Controls */}
+                        <div className="flex items-center justify-between mt-4 border-t pt-4">
+                            <div className="text-sm text-gray-500">
+                                Showing page {currentPage} of {totalPages}
+                            </div>
+                            <div className="flex gap-2">
+                                <Button
+                                    variant="outline"
+                                    size="sm"
+                                    disabled={currentPage <= 1}
+                                    onClick={() => setCurrentPage(prev => prev - 1)}
+                                >
+                                    Previous
+                                </Button>
+                                <Button
+                                    variant="outline"
+                                    size="sm"
+                                    disabled={currentPage >= totalPages}
+                                    onClick={() => setCurrentPage(prev => prev + 1)}
+                                >
+                                    Next
+                                </Button>
+                            </div>
+                        </div>
                 </div>
-            </div>
-        </div>
-    )
+                )
 }
