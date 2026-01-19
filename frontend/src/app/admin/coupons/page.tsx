@@ -41,6 +41,8 @@ export default function CouponsPage() {
     })
 
     const [showForm, setShowForm] = useState(false);
+    const [productSearch, setProductSearch] = useState("")
+    const [brandSearch, setBrandSearch] = useState("")
 
     function handleAddNew() {
         resetForm();
@@ -361,25 +363,35 @@ export default function CouponsPage() {
                                 {/* Product Selector */}
                                 <div className="border border-gray-200 rounded-lg flex flex-col bg-gray-50/50">
                                     <div className="p-3 border-b text-xs font-bold uppercase text-gray-500 bg-gray-100/50 rounded-t-lg">Specific Products</div>
+                                    <div className="px-2 pt-2 pb-1 border-b border-gray-100">
+                                        <input
+                                            placeholder="Search products..."
+                                            className="w-full text-xs p-1.5 border rounded outline-none focus:border-sky-500"
+                                            value={productSearch}
+                                            onChange={(e) => setProductSearch(e.target.value)}
+                                        />
+                                    </div>
                                     <div className="h-60 overflow-y-auto p-2 space-y-1 custom-scrollbar">
-                                        {products.map(product => (
-                                            <label key={product.id} className="flex items-center gap-3 cursor-pointer hover:bg-sky-50 p-2 rounded transition-colors group">
-                                                <input
-                                                    type="checkbox"
-                                                    checked={(formData.applicableProducts || []).includes(product.id)}
-                                                    onChange={() => toggleProductSelection(product.id)}
-                                                    className="h-4 w-4 rounded border-gray-300 text-sky-600 focus:ring-sky-500"
-                                                />
-                                                <span className="text-sm text-gray-700 group-hover:text-gray-900 truncate">{product.name}</span>
-                                            </label>
-                                        ))}
+                                        {products
+                                            .filter(p => p.name.toLowerCase().includes(productSearch.toLowerCase()))
+                                            .map(product => (
+                                                <label key={product.id} className="flex items-center gap-3 cursor-pointer hover:bg-sky-50 p-2 rounded transition-colors group">
+                                                    <input
+                                                        type="checkbox"
+                                                        checked={(formData.applicableProducts || []).includes(product.id)}
+                                                        onChange={() => toggleProductSelection(product.id)}
+                                                        className="h-4 w-4 rounded border-gray-300 text-sky-600 focus:ring-sky-500"
+                                                    />
+                                                    <span className="text-sm text-gray-700 group-hover:text-gray-900 truncate">{product.name}</span>
+                                                </label>
+                                            ))}
                                     </div>
                                 </div>
 
                                 {/* Category Selector */}
                                 <div className="border border-gray-200 rounded-lg flex flex-col bg-gray-50/50">
                                     <div className="p-3 border-b text-xs font-bold uppercase text-gray-500 bg-gray-100/50 rounded-t-lg">Specific Categories</div>
-                                    <div className="h-60 overflow-y-auto p-2 space-y-1 custom-scrollbar">
+                                    <div className="h-[285px] overflow-y-auto p-2 space-y-1 custom-scrollbar">
                                         {categories.map(cat => (
                                             <label key={cat._id} className="flex items-center gap-3 cursor-pointer hover:bg-sky-50 p-2 rounded transition-colors group">
                                                 <input
@@ -397,21 +409,31 @@ export default function CouponsPage() {
                                 {/* Brand Selector */}
                                 <div className="border border-gray-200 rounded-lg flex flex-col bg-gray-50/50">
                                     <div className="p-3 border-b text-xs font-bold uppercase text-gray-500 bg-gray-100/50 rounded-t-lg">Specific Brands</div>
+                                    <div className="px-2 pt-2 pb-1 border-b border-gray-100">
+                                        <input
+                                            placeholder="Search brands..."
+                                            className="w-full text-xs p-1.5 border rounded outline-none focus:border-sky-500"
+                                            value={brandSearch}
+                                            onChange={(e) => setBrandSearch(e.target.value)}
+                                        />
+                                    </div>
                                     <div className="h-60 overflow-y-auto p-2 space-y-1 custom-scrollbar">
-                                        {availableBrands.map(brand => {
-                                            const isChecked = (formData.applicableBrands || []).some(b => b.trim().toLowerCase() === brand.trim().toLowerCase());
-                                            return (
-                                                <label key={brand} className="flex items-center gap-3 cursor-pointer hover:bg-sky-50 p-2 rounded transition-colors group">
-                                                    <input
-                                                        type="checkbox"
-                                                        checked={isChecked}
-                                                        onChange={() => toggleBrandSelection(brand)}
-                                                        className="h-4 w-4 rounded border-gray-300 text-sky-600 focus:ring-sky-500"
-                                                    />
-                                                    <span className="text-sm text-gray-700 group-hover:text-gray-900 truncate">{brand}</span>
-                                                </label>
-                                            );
-                                        })}
+                                        {availableBrands
+                                            .filter(b => b.toLowerCase().includes(brandSearch.toLowerCase()))
+                                            .map(brand => {
+                                                const isChecked = (formData.applicableBrands || []).some(b => b.trim().toLowerCase() === brand.trim().toLowerCase());
+                                                return (
+                                                    <label key={brand} className="flex items-center gap-3 cursor-pointer hover:bg-sky-50 p-2 rounded transition-colors group">
+                                                        <input
+                                                            type="checkbox"
+                                                            checked={isChecked}
+                                                            onChange={() => toggleBrandSelection(brand)}
+                                                            className="h-4 w-4 rounded border-gray-300 text-sky-600 focus:ring-sky-500"
+                                                        />
+                                                        <span className="text-sm text-gray-700 group-hover:text-gray-900 truncate">{brand}</span>
+                                                    </label>
+                                                );
+                                            })}
                                     </div>
                                 </div>
                             </div>
