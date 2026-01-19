@@ -9,6 +9,9 @@ import { motion, AnimatePresence } from "framer-motion"
 export default function AccountPage() {
     const { user, logout } = useAuth()
     const router = useRouter()
+    const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false)
+    const [isEditModalOpen, setIsEditModalOpen] = useState(false)
+
     useEffect(() => {
         if (!user) {
             router.push("/login")
@@ -23,9 +26,6 @@ export default function AccountPage() {
             </div>
         )
     }
-
-    const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false)
-    const [isEditModalOpen, setIsEditModalOpen] = useState(false) // NEW State
 
     // ...
 
