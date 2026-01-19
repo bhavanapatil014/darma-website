@@ -357,11 +357,11 @@ export default function CouponsPage() {
                             <label className="block text-sm font-semibold text-gray-700">Applicability Rules (Optional)</label>
                             <p className="text-xs text-gray-500 mb-3">Leave all empty for <strong>Storewide</strong>. Select specific rules to restrict usage.</p>
 
-                            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 h-64">
+                            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                                 {/* Product Selector */}
-                                <div className="border border-gray-200 rounded-lg flex flex-col h-full bg-gray-50/50">
+                                <div className="border border-gray-200 rounded-lg flex flex-col bg-gray-50/50">
                                     <div className="p-3 border-b text-xs font-bold uppercase text-gray-500 bg-gray-100/50 rounded-t-lg">Specific Products</div>
-                                    <div className="flex-1 overflow-y-auto p-2 space-y-1 custom-scrollbar">
+                                    <div className="h-60 overflow-y-auto p-2 space-y-1 custom-scrollbar">
                                         {products.map(product => (
                                             <label key={product.id} className="flex items-center gap-3 cursor-pointer hover:bg-sky-50 p-2 rounded transition-colors group">
                                                 <input
@@ -377,9 +377,9 @@ export default function CouponsPage() {
                                 </div>
 
                                 {/* Category Selector */}
-                                <div className="border border-gray-200 rounded-lg flex flex-col h-full bg-gray-50/50">
+                                <div className="border border-gray-200 rounded-lg flex flex-col bg-gray-50/50">
                                     <div className="p-3 border-b text-xs font-bold uppercase text-gray-500 bg-gray-100/50 rounded-t-lg">Specific Categories</div>
-                                    <div className="flex-1 overflow-y-auto p-2 space-y-1 custom-scrollbar">
+                                    <div className="h-60 overflow-y-auto p-2 space-y-1 custom-scrollbar">
                                         {categories.map(cat => (
                                             <label key={cat._id} className="flex items-center gap-3 cursor-pointer hover:bg-sky-50 p-2 rounded transition-colors group">
                                                 <input
@@ -395,9 +395,9 @@ export default function CouponsPage() {
                                 </div>
 
                                 {/* Brand Selector */}
-                                <div className="border border-gray-200 rounded-lg flex flex-col h-full bg-gray-50/50">
+                                <div className="border border-gray-200 rounded-lg flex flex-col bg-gray-50/50">
                                     <div className="p-3 border-b text-xs font-bold uppercase text-gray-500 bg-gray-100/50 rounded-t-lg">Specific Brands</div>
-                                    <div className="flex-1 overflow-y-auto p-2 space-y-1 custom-scrollbar">
+                                    <div className="h-60 overflow-y-auto p-2 space-y-1 custom-scrollbar">
                                         {availableBrands.map(brand => {
                                             const isChecked = (formData.applicableBrands || []).some(b => b.trim().toLowerCase() === brand.trim().toLowerCase());
                                             return (
