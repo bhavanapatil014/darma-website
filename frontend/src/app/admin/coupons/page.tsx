@@ -449,8 +449,24 @@ export default function CouponsPage() {
                 </div>
             )}
 
-            {/* List */}
+            {/* Tabs & List */}
             <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+                {/* Tabs Header */}
+                <div className="flex border-b border-gray-200">
+                    <button
+                        onClick={() => setActiveTab('active')}
+                        className={`flex-1 py-4 text-sm font-semibold text-center transition-colors ${activeTab === 'active' ? 'bg-white text-sky-600 border-b-2 border-sky-600' : 'bg-gray-50 text-gray-500 hover:bg-gray-100 hover:text-gray-700'}`}
+                    >
+                        Active Coupons ({activeCoupons.length})
+                    </button>
+                    <button
+                        onClick={() => setActiveTab('expired')}
+                        className={`flex-1 py-4 text-sm font-semibold text-center transition-colors ${activeTab === 'expired' ? 'bg-white text-red-600 border-b-2 border-red-600' : 'bg-gray-50 text-gray-500 hover:bg-gray-100 hover:text-gray-700'}`}
+                    >
+                        Expired Coupons ({expiredCoupons.length})
+                    </button>
+                </div>
+
                 <div className="overflow-x-auto">
                     <table className="w-full text-left">
                         <thead>
@@ -464,16 +480,16 @@ export default function CouponsPage() {
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-gray-100">
-                            {coupons.map(coupon => {
+                            {displayedCoupons.map(coupon => {
                                 const isExpired = coupon.expirationDate && new Date() > new Date(coupon.expirationDate);
                                 return (
-                                    <tr key={coupon._id} className={`group hover:bg-gray-50/50 transition-colors ${isExpired ? 'bg-gray-50/80 grayscale opacity-60' : ''}`}>
+                                    <tr key={coupon._id} className={`group hover:bg-gray-50/50 transition-colors ${isExpired ? 'bg-gray-50/40' : ''}`}>
                                         <td className="py-4 px-6">
                                             <div className="font-mono font-bold text-gray-800 text-base">{coupon.code}</div>
                                             {isExpired && <span className="inline-block mt-1 text-[10px] uppercase font-bold text-red-600 bg-red-100 px-1.5 py-0.5 rounded">Expired</span>}
                                         </td>
                                         <td className="py-4 px-6">
-                                            <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold bg-green-100 text-green-700">
+                                            <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold ${activeTab === 'expired' ? 'bg-gray-100 text-gray-600' : 'bg-green-100 text-green-700'}`}>
                                                 {coupon.type === 'percentage' ? `${coupon.value}% OFF` : `₹${coupon.value} OFF`}
                                             </span>
                                         </td>
@@ -517,13 +533,12 @@ export default function CouponsPage() {
                                     </tr>
                                 );
                             })}
-                            {coupons.length === 0 && (
+                            {displayedCoupons.length === 0 && (
                                 <tr>
                                     <td colSpan={6} className="py-20 text-center">
                                         <div className="flex flex-col items-center justify-center text-gray-400">
                                             <svg className="w-12 h-12 mb-3 opacity-20" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 5v2m0 4v2m0 4v2M5 5a2 2 0 00-2 2v3a2 2 0 110 4v3a2 2 0 002 2h14a2 2 0 002-2v-3a2 2 0 110-4V7a2 2 0 00-2-2H5z"></path></svg>
-                                            <p className="text-lg font-medium text-gray-500">No active coupons</p>
-                                            <p className="text-sm">Create one to get started!</p>
+                                            <p className="text-lg font-medium text-gray-500">No {activeTab} coupons found</p>
                                         </div>
                                     </td>
                                 </tr>
