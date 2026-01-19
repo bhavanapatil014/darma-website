@@ -26,6 +26,7 @@ export default function ProductForm({ initialData, categories: initialCategories
     const [discountPercent, setDiscountPercent] = useState<number>(0);
     const [variantInput, setVariantInput] = useState({ size: '', price: '', mrp: '', discount: '', stock: '' });
     const [editingVariantIndex, setEditingVariantIndex] = useState<number | null>(null);
+    const [isAddingVariant, setIsAddingVariant] = useState(false);
 
     // Inline Creation State
     const [isAddingCategory, setIsAddingCategory] = useState(false);
@@ -323,33 +324,30 @@ export default function ProductForm({ initialData, categories: initialCategories
 
                                 {/* Actions */}
                                 <div className="flex items-center gap-3 ml-auto border-l pl-6 border-gray-100">
-                                    {editingVariantIndex === idx ? (
-                                        <span className="text-xs font-bold text-sky-600 bg-sky-100 px-3 py-1.5 rounded-full animate-pulse">
-                                            Editing Now
-                                        </span>
-                                    ) : (
-                                        <Button
-                                            type="button"
-                                            variant="ghost"
-                                            size="sm"
-                                            className="text-sky-600 hover:text-sky-700 hover:bg-sky-50 font-medium"
-                                            onClick={() => {
-                                                setVariantInput({
-                                                    size: v.size,
-                                                    price: v.price.toString(),
-                                                    mrp: v.mrp ? v.mrp.toString() : '',
-                                                    discount: (v.mrp && v.price) ? Math.round(((v.mrp - v.price) / v.mrp) * 100).toString() : '',
-                                                    stock: v.stock ? v.stock.toString() : ''
-                                                });
-                                                setEditingVariantIndex(idx);
-                                                // Scroll form into view
+                                    <Button
+                                        type="button"
+                                        variant="ghost"
+                                        size="sm"
+                                        className="text-sky-600 hover:text-sky-700 hover:bg-sky-50 font-medium"
+                                        onClick={() => {
+                                            setVariantInput({
+                                                size: v.size,
+                                                price: v.price.toString(),
+                                                mrp: v.mrp ? v.mrp.toString() : '',
+                                                discount: (v.mrp && v.price) ? Math.round(((v.mrp - v.price) / v.mrp) * 100).toString() : '',
+                                                stock: v.stock ? v.stock.toString() : ''
+                                            });
+                                            setEditingVariantIndex(idx);
+                                            setIsAddingVariant(true);
+                                            // Scroll form into view
+                                            setTimeout(() => {
                                                 const formEl = document.getElementById('variant-form');
                                                 if (formEl) formEl.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-                                            }}
-                                        >
-                                            Edit
-                                        </Button>
-                                    )}
+                                            }, 100);
+                                        }}
+                                    >
+                                        Edit
+                                    </Button>
 
                                     <button
                                         type="button"
@@ -363,6 +361,7 @@ export default function ProductForm({ initialData, categories: initialCategories
                                                 if (editingVariantIndex === idx) {
                                                     setEditingVariantIndex(null);
                                                     setVariantInput({ size: '', price: '', mrp: '', discount: '', stock: '' });
+                                                    setIsAddingVariant(false);
                                                 }
                                             }
                                         }}
@@ -375,188 +374,209 @@ export default function ProductForm({ initialData, categories: initialCategories
                         ))}
 
                         {(!formData.variants || formData.variants.length === 0) && (
-                            <div className="flex flex-col items-center justify-center p-10 border-2 border-dashed border-gray-300 rounded-xl bg-white text-center">
-                                <div className="text-gray-300 mb-3 text-4xl">📦</div>
-                                <p className="text-gray-500 font-medium">No size variants added yet.</p>
-                                <p className="text-sm text-gray-400 mt-1">Add sizes like 50ml, 100ml below.</p>
+                            <div className="flex flex-col items-center justify-center p-8 border-2 border-dashed border-gray-300 rounded-xl bg-gray-50/50 text-center">
+                                <p className="text-gray-500 font-medium text-sm">No extra size variants added.</p>
+                                <p className="text-xs text-gray-400 mt-1">If this product has multiple sizes (e.g. 50g vs 100g), add them here.</p>
                             </div>
                         )}
                     </div>
 
-                    {/* Editor Form */}
-                    <div id="variant-form" className={`
-                        mt-8 rounded-xl border transition-all duration-300 overflow-hidden
-                        ${editingVariantIndex !== null
-                            ? 'bg-sky-50/40 border-sky-200 ring-1 ring-sky-100 shadow-lg'
-                            : 'bg-white border-gray-200 shadow-sm'
-                        }
-                    `}>
-                        <div className={`px-6 py-4 border-b flex justify-between items-center ${editingVariantIndex !== null ? 'bg-sky-100/50 border-sky-200' : 'bg-gray-50 border-gray-100'}`}>
-                            <h4 className={`font-bold flex items-center gap-2 ${editingVariantIndex !== null ? 'text-sky-800' : 'text-gray-700'}`}>
-                                {editingVariantIndex !== null ? (
-                                    <>✏️ Edit Variant #{editingVariantIndex + 1}</>
-                                ) : (
-                                    <>＋ Add New Variant</>
-                                )}
-                            </h4>
+                    {/* Add New Button (Only visible when form is hidden) */}
+                    {!isAddingVariant && (
+                        <Button
+                            type="button"
+                            variant="outline"
+                            className="w-full py-4 border-dashed border-2 border-sky-200 bg-sky-50 text-sky-700 hover:bg-sky-100 hover:border-sky-300 font-semibold"
+                            onClick={() => {
+                                setIsAddingVariant(true);
+                                setEditingVariantIndex(null);
+                                setVariantInput({ size: '', price: '', mrp: '', discount: '', stock: '' });
+                            }}
+                        >
+                            ＋ Add Variant
+                        </Button>
+                    )}
 
-                            {editingVariantIndex !== null && (
+                    {/* Editor Form (Collapsible) */}
+                    {isAddingVariant && (
+                        <div id="variant-form" className={`
+                            mt-4 rounded-xl border transition-all duration-300 overflow-hidden animate-in fade-in slide-in-from-top-4
+                            ${editingVariantIndex !== null
+                                ? 'bg-sky-50/40 border-sky-200 ring-1 ring-sky-100 shadow-lg'
+                                : 'bg-white border-gray-200 shadow-sm'
+                            }
+                        `}>
+                            <div className={`px-6 py-4 border-b flex justify-between items-center ${editingVariantIndex !== null ? 'bg-sky-100/50 border-sky-200' : 'bg-gray-50 border-gray-100'}`}>
+                                <h4 className={`font-bold flex items-center gap-2 ${editingVariantIndex !== null ? 'text-sky-800' : 'text-gray-700'}`}>
+                                    {editingVariantIndex !== null ? (
+                                        <>✏️ Edit Variant #{editingVariantIndex + 1}</>
+                                    ) : (
+                                        <>＋ Add New Variant</>
+                                    )}
+                                </h4>
+
                                 <Button
                                     type="button"
                                     variant="ghost"
                                     size="sm"
                                     className="h-8 text-xs text-gray-500 hover:text-gray-800 bg-white/50 hover:bg-white border border-transparent hover:border-gray-200 shadow-sm"
                                     onClick={() => {
+                                        setIsAddingVariant(false);
                                         setEditingVariantIndex(null);
                                         setVariantInput({ size: '', price: '', mrp: '', discount: '', stock: '' });
                                     }}
                                 >
                                     Cancel
                                 </Button>
-                            )}
-                        </div>
-
-                        <div className="p-6 grid grid-cols-12 gap-x-6 gap-y-6">
-                            {/* Row 1: Size & Stock */}
-                            <div className="col-span-12 md:col-span-4">
-                                <label className="block text-xs font-bold text-gray-500 uppercase tracking-widest mb-2">Size Name *</label>
-                                <input
-                                    placeholder="e.g. 250ml"
-                                    className="w-full px-4 py-2.5 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-transparent transition-width shadow-sm"
-                                    value={variantInput.size}
-                                    onChange={e => setVariantInput({ ...variantInput, size: e.target.value })}
-                                    onKeyDown={(e) => e.key === 'Enter' && e.preventDefault()}
-                                />
                             </div>
 
-                            <div className="col-span-12 md:col-span-2">
-                                <label className="block text-xs font-bold text-gray-500 uppercase tracking-widest mb-2">Stock</label>
-                                <input
-                                    type="number"
-                                    placeholder="0"
-                                    className="w-full px-4 py-2.5 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-sky-500 transition-width shadow-sm"
-                                    value={variantInput.stock}
-                                    onChange={e => setVariantInput({ ...variantInput, stock: e.target.value })}
-                                    onKeyDown={(e) => e.key === 'Enter' && e.preventDefault()}
-                                />
-                            </div>
+                            <div className="p-6 grid grid-cols-12 gap-x-6 gap-y-6">
+                                {/* Row 1: Size & Stock */}
+                                <div className="col-span-12 md:col-span-4">
+                                    <label className="block text-xs font-bold text-gray-500 uppercase tracking-widest mb-2">Size Name *</label>
+                                    <input
+                                        placeholder="e.g. 250ml"
+                                        className="w-full px-4 py-2.5 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-transparent transition-width shadow-sm"
+                                        value={variantInput.size}
+                                        onChange={e => setVariantInput({ ...variantInput, size: e.target.value })}
+                                        onKeyDown={(e) => e.key === 'Enter' && e.preventDefault()}
+                                    />
+                                </div>
 
-                            <div className="col-span-12"><hr className="border-gray-100" /></div>
-
-                            {/* Row 2/3: Pricing Logic */}
-                            <div className="col-span-6 md:col-span-2">
-                                <label className="block text-xs font-bold text-gray-500 uppercase tracking-widest mb-2">MRP <span className="text-[10px] font-normal text-gray-400 normal-case">(Optional)</span></label>
-                                <div className="relative">
-                                    <span className="absolute left-3 top-2.5 text-gray-400 text-sm">₹</span>
+                                <div className="col-span-12 md:col-span-2">
+                                    <label className="block text-xs font-bold text-gray-500 uppercase tracking-widest mb-2">Stock</label>
                                     <input
                                         type="number"
                                         placeholder="0"
-                                        className="w-full pl-7 pr-3 py-2.5 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-sky-500 transition-width shadow-sm"
-                                        value={variantInput.mrp}
-                                        onChange={e => {
-                                            const newMrp = Number(e.target.value);
-                                            const discount = Number(variantInput.discount);
-                                            let newPrice = Number(variantInput.price);
+                                        className="w-full px-4 py-2.5 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-sky-500 transition-width shadow-sm"
+                                        value={variantInput.stock}
+                                        onChange={e => setVariantInput({ ...variantInput, stock: e.target.value })}
+                                        onKeyDown={(e) => e.key === 'Enter' && e.preventDefault()}
+                                    />
+                                </div>
 
-                                            if (discount > 0 && newMrp > 0) {
-                                                newPrice = Math.round(newMrp - (newMrp * discount / 100));
-                                            } else if (!variantInput.price && newMrp > 0) {
-                                                newPrice = newMrp;
-                                            }
+                                <div className="col-span-12"><hr className="border-gray-100" /></div>
 
-                                            setVariantInput({
-                                                ...variantInput,
-                                                mrp: e.target.value,
-                                                price: newPrice ? newPrice.toString() : variantInput.price
+                                {/* Row 2/3: Pricing Logic */}
+                                <div className="col-span-6 md:col-span-2">
+                                    <label className="block text-xs font-bold text-gray-500 uppercase tracking-widest mb-2">MRP <span className="text-[10px] font-normal text-gray-400 normal-case">(Optional)</span></label>
+                                    <div className="relative">
+                                        <span className="absolute left-3 top-2.5 text-gray-400 text-sm">₹</span>
+                                        <input
+                                            type="number"
+                                            placeholder="0"
+                                            className="w-full pl-7 pr-3 py-2.5 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-sky-500 transition-width shadow-sm"
+                                            value={variantInput.mrp}
+                                            onChange={e => {
+                                                const newMrp = Number(e.target.value);
+                                                const discount = Number(variantInput.discount);
+                                                let newPrice = Number(variantInput.price);
+
+                                                if (discount > 0 && newMrp > 0) {
+                                                    newPrice = Math.round(newMrp - (newMrp * discount / 100));
+                                                } else if (!variantInput.price && newMrp > 0) {
+                                                    newPrice = newMrp;
+                                                }
+
+                                                setVariantInput({
+                                                    ...variantInput,
+                                                    mrp: e.target.value,
+                                                    price: newPrice ? newPrice.toString() : variantInput.price
+                                                });
+                                            }}
+                                            onKeyDown={(e) => e.key === 'Enter' && e.preventDefault()}
+                                        />
+                                    </div>
+                                </div>
+
+                                <div className="col-span-6 md:col-span-2">
+                                    <label className="block text-xs font-bold text-gray-500 uppercase tracking-widest mb-2">Discount</label>
+                                    <div className="relative">
+                                        <input
+                                            type="number"
+                                            placeholder="0"
+                                            className="w-full px-4 py-2.5 text-sm border border-blue-200 bg-blue-50 rounded-lg focus:outline-none focus:ring-2 focus:ring-sky-500 transition-width text-blue-700 font-bold shadow-sm"
+                                            value={variantInput.discount}
+                                            onChange={e => {
+                                                const newDiscount = Number(e.target.value);
+                                                const mrp = Number(variantInput.mrp);
+                                                let newPrice = Number(variantInput.price);
+
+                                                if (mrp > 0) {
+                                                    newPrice = Math.round(mrp - (mrp * newDiscount / 100));
+                                                }
+
+                                                setVariantInput({
+                                                    ...variantInput,
+                                                    discount: e.target.value,
+                                                    price: newPrice ? newPrice.toString() : variantInput.price
+                                                });
+                                            }}
+                                            onKeyDown={(e) => e.key === 'Enter' && e.preventDefault()}
+                                        />
+                                        <span className="absolute right-3 top-2.5 text-blue-400 text-xs font-bold">% OFF</span>
+                                    </div>
+                                </div>
+
+                                <div className="col-span-12 md:col-span-2">
+                                    <label className="block text-xs font-bold text-green-600 uppercase tracking-widest mb-2">Final Price *</label>
+                                    <div className="relative">
+                                        <span className="absolute left-3 top-2.5 text-green-600 font-bold text-sm">₹</span>
+                                        <input
+                                            type="number"
+                                            placeholder="0"
+                                            className="w-full pl-7 pr-3 py-2.5 text-lg border border-green-300 bg-green-50 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 transition-width font-bold text-green-800 shadow-sm"
+                                            value={variantInput.price}
+                                            onChange={e => setVariantInput({ ...variantInput, price: e.target.value })}
+                                            onKeyDown={(e) => e.key === 'Enter' && e.preventDefault()}
+                                        />
+                                    </div>
+                                </div>
+
+                                {/* Action Button */}
+                                <div className="col-span-12 flex justify-end gap-3 mt-4 pt-4 border-t border-gray-100">
+                                    <Button
+                                        type="button"
+                                        size="lg"
+                                        className={`min-w-[160px] shadow-lg transition-all ${editingVariantIndex !== null ? 'bg-sky-600 hover:bg-sky-700' : 'bg-gray-900 hover:bg-black'}`}
+                                        onClick={(e) => {
+                                            e.preventDefault();
+                                            if (!variantInput.size) return alert("Please enter a Size (e.g. 100ml)");
+                                            if (!variantInput.price) return alert("Please enter a Price");
+
+                                            const newVariant = {
+                                                size: variantInput.size,
+                                                price: Number(variantInput.price),
+                                                mrp: variantInput.mrp ? Number(variantInput.mrp) : undefined,
+                                                stock: variantInput.stock ? Number(variantInput.stock) : 0
+                                            };
+
+                                            setFormData(prev => {
+                                                const currentVariants = prev.variants ? [...prev.variants] : [];
+                                                if (editingVariantIndex !== null) {
+                                                    currentVariants[editingVariantIndex] = newVariant;
+                                                } else {
+                                                    currentVariants.push(newVariant);
+                                                }
+                                                return { ...prev, variants: currentVariants };
                                             });
+
+                                            // Close form after successful add? Or keep open? User asked "add varient onclick then show tha adding table"
+                                            // The implication is that "Add Variant" opens it.
+                                            // Assuming we clear and keep open for bulk add or close?
+                                            // Let's keep it open but reset for adding more, as per typical UX, or close it. 
+                                            // Let's close it to keep the UI clean as requested ("otherwise show only add varient tab")
+                                            setVariantInput({ size: '', price: '', mrp: '', discount: '', stock: '' });
+                                            setEditingVariantIndex(null);
+                                            setIsAddingVariant(false);
                                         }}
-                                        onKeyDown={(e) => e.key === 'Enter' && e.preventDefault()}
-                                    />
+                                    >
+                                        {editingVariantIndex !== null ? '✓ Update Variant' : '＋ Add Variant'}
+                                    </Button>
                                 </div>
-                            </div>
-
-                            <div className="col-span-6 md:col-span-2">
-                                <label className="block text-xs font-bold text-gray-500 uppercase tracking-widest mb-2">Discount</label>
-                                <div className="relative">
-                                    <input
-                                        type="number"
-                                        placeholder="0"
-                                        className="w-full px-4 py-2.5 text-sm border border-blue-200 bg-blue-50 rounded-lg focus:outline-none focus:ring-2 focus:ring-sky-500 transition-width text-blue-700 font-bold shadow-sm"
-                                        value={variantInput.discount}
-                                        onChange={e => {
-                                            const newDiscount = Number(e.target.value);
-                                            const mrp = Number(variantInput.mrp);
-                                            let newPrice = Number(variantInput.price);
-
-                                            if (mrp > 0) {
-                                                newPrice = Math.round(mrp - (mrp * newDiscount / 100));
-                                            }
-
-                                            setVariantInput({
-                                                ...variantInput,
-                                                discount: e.target.value,
-                                                price: newPrice ? newPrice.toString() : variantInput.price
-                                            });
-                                        }}
-                                        onKeyDown={(e) => e.key === 'Enter' && e.preventDefault()}
-                                    />
-                                    <span className="absolute right-3 top-2.5 text-blue-400 text-xs font-bold">% OFF</span>
-                                </div>
-                            </div>
-
-                            <div className="col-span-12 md:col-span-2">
-                                <label className="block text-xs font-bold text-green-600 uppercase tracking-widest mb-2">Final Price *</label>
-                                <div className="relative">
-                                    <span className="absolute left-3 top-2.5 text-green-600 font-bold text-sm">₹</span>
-                                    <input
-                                        type="number"
-                                        placeholder="0"
-                                        className="w-full pl-7 pr-3 py-2.5 text-lg border border-green-300 bg-green-50 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 transition-width font-bold text-green-800 shadow-sm"
-                                        value={variantInput.price}
-                                        onChange={e => setVariantInput({ ...variantInput, price: e.target.value })}
-                                        onKeyDown={(e) => e.key === 'Enter' && e.preventDefault()}
-                                    />
-                                </div>
-                            </div>
-
-                            {/* Action Button */}
-                            <div className="col-span-12 flex justify-end gap-3 mt-4 pt-4 border-t border-gray-100">
-                                <Button
-                                    type="button"
-                                    size="lg"
-                                    className={`min-w-[160px] shadow-lg transition-all ${editingVariantIndex !== null ? 'bg-sky-600 hover:bg-sky-700' : 'bg-gray-900 hover:bg-black'}`}
-                                    onClick={(e) => {
-                                        e.preventDefault();
-                                        if (!variantInput.size) return alert("Please enter a Size (e.g. 100ml)");
-                                        if (!variantInput.price) return alert("Please enter a Price");
-
-                                        const newVariant = {
-                                            size: variantInput.size,
-                                            price: Number(variantInput.price),
-                                            mrp: variantInput.mrp ? Number(variantInput.mrp) : undefined,
-                                            stock: variantInput.stock ? Number(variantInput.stock) : 0
-                                        };
-
-                                        setFormData(prev => {
-                                            const currentVariants = prev.variants ? [...prev.variants] : [];
-                                            if (editingVariantIndex !== null) {
-                                                currentVariants[editingVariantIndex] = newVariant;
-                                            } else {
-                                                currentVariants.push(newVariant);
-                                            }
-                                            return { ...prev, variants: currentVariants };
-                                        });
-
-                                        // Prepare for next entry
-                                        setVariantInput({ size: '', price: '', mrp: '', discount: '', stock: '' });
-                                        setEditingVariantIndex(null);
-                                    }}
-                                >
-                                    {editingVariantIndex !== null ? '✓ Update Variant' : '＋ Add Variant'}
-                                </Button>
                             </div>
                         </div>
-                    </div>
+                    )}
                 </div>
             </div>
 
