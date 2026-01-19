@@ -13,7 +13,44 @@ const connectDB = require('./config/db');
 connectDB();
 
 // Middleware
-app.use(cors());
+// Security & Performance
+const helmet = require('helmet');
+const compression = require('compression');
+const rateLimit = require('express-rate-limit');
+const morgan = require('morgan');
+
+// Middleware
+// 1. Security Headers
+app.use(helmet({
+    crossOriginResourcePolicy: { policy: "cross-origin" } // Allow images to be loaded from other domains
+}));
+
+// 2. Logging
+app.use(morgan('dev'));
+
+// 3. Compression
+app.use(compression());
+
+// 4. Rate Limiting (100 requests per 15 mins)
+const limiter = rateLimit({
+    windowMs: 15 * 60 * 1000,
+    max: 100,
+    standardHeaders: true,
+    legacyHeaders: false,
+});
+// Apply rate limiting to all requests
+app.use(limiter);
+
+// 5. CORS (Hardened)
+app.use(cors({
+    origin: process.env.FRONTEND_URL || '*', // Ideally set strict origin in PROD
+    methods: ['GET', 'POST', 'PUT', 'DELETE'],
+    credentials: true,
+}));
+
+// Trust Proxy (Required for Rate Limiting behind Render/Load Balancers)
+app.set('trust proxy', 1);
+
 app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ limit: '50mb', extended: true }));
 
