@@ -8,6 +8,8 @@ import { useRouter } from "next/navigation"
 export default function ProductsPage() {
     const router = useRouter()
     const [products, setProducts] = useState<Product[]>([])
+    const [categories, setCategories] = useState<any[]>([]) // Restored
+    const [brands, setBrands] = useState<any[]>([])         // Restored
     const [currentPage, setCurrentPage] = useState(1);
     const [totalPages, setTotalPages] = useState(1);
     const [loading, setLoading] = useState(true)
