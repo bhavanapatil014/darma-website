@@ -528,7 +528,7 @@ export default function CouponsPage() {
                                     : null;
 
                                 return (
-                                    <tr key={coupon._id} className={`group hover:bg-gray-50/50 transition-colors ${isExpired || isUsed ? 'bg-gray-50/40' : ''}`}>
+                                    <tr key={coupon._id} className={`group hover:bg-gray-50/50 transition-colors ${isExpired ? 'bg-gray-50 opacity-50 blur-[0.5px]' : (isUsed ? 'bg-gray-50/40' : '')}`}>
                                         <td className="py-4 px-6">
                                             <div className="font-mono font-bold text-gray-800 text-base">{coupon.code}</div>
                                             {isExpired && <span className="inline-block mt-1 text-[10px] uppercase font-bold text-red-600 bg-red-100 px-1.5 py-0.5 rounded mr-1">Expired</span>}
