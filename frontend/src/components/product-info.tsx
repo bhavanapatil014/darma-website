@@ -152,8 +152,8 @@ export function ProductDetails({ product }: { product: Product }) {
                                     <span className="text-xs text-gray-500 mb-2">(Pack of 1)</span>
 
                                     {/* Price Section */}
-                                    <div className="mt-auto flex flex-col items-start">
-                                        <div className="flex items-baseline gap-1.5">
+                                    <div className="mt-auto flex flex-col items-start w-full">
+                                        <div className="flex flex-wrap items-baseline gap-x-1.5 w-full">
                                             {v.mrp && v.mrp > v.price && (
                                                 <span className="text-xs text-gray-400 line-through">₹{v.mrp}</span>
                                             )}
@@ -161,8 +161,8 @@ export function ProductDetails({ product }: { product: Product }) {
                                         </div>
                                         {/* Unit Price Simulation */}
                                         {v.size && v.size.toLowerCase().includes('ml') && (
-                                            <span className="text-[10px] text-gray-500 mt-0.5">
-                                                (₹{(v.price / parseInt(v.size)).toFixed(2)} / ml)
+                                            <span className="text-[10px] text-gray-500 mt-0.5 w-full break-words leading-tight">
+                                                (₹{(v.price / parseInt(v.size)).toFixed(2)}/ml)
                                             </span>
                                         )}
                                     </div>
