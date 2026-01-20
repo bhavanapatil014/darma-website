@@ -37,12 +37,34 @@ const CheckoutContent = () => {
         if (isBuyNow) {
             const pId = searchParams.get('productId');
             const qty = parseInt(searchParams.get('quantity') || '1');
+            const vSize = searchParams.get('variantSize');
 
             if (pId) {
                 fetch(`https://darma-website.onrender.com/api/products/${pId}`)
                     .then(res => res.json())
                     .then(product => {
-                        setBuyNowItem({ product, quantity: qty });
+                        let finalProduct = product;
+                        // Handle Variant Selection logic
+                        if (vSize && product.variants) {
+                            const variant = product.variants.find((v: any) => v.size === vSize);
+                            if (variant) {
+                                finalProduct = {
+                                    ...product,
+                                    price: variant.price,
+                                    mrp: variant.mrp,
+                                    name: `${product.name} (${variant.size})`,
+                                    id: `${product.id}-${variant.size}` // Ensure ID matches CartItem pattern
+                                };
+                            }
+                        } else if (vSize && product.netContent === vSize) {
+                            // Case where base product implicitly matches the size (virtual variant)
+                            finalProduct = {
+                                ...product,
+                                name: `${product.name} (${product.netContent})`
+                            };
+                        }
+
+                        setBuyNowItem({ product: finalProduct, quantity: qty });
                     })
                     .catch(err => console.error("Failed to load buy now product", err));
             }

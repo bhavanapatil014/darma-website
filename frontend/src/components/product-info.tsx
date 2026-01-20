@@ -258,16 +258,16 @@ export function ProductDetails({ product }: { product: Product }) {
                         className="w-full h-12 text-base font-semibold border-gray-300 text-gray-900 hover:bg-gray-50 hover:text-black rounded-full"
                         disabled={(currentStock || 0) <= 0}
                         onClick={() => {
-                            // Add to cart then redirect
-                            addItem({
-                                ...product,
-                                price: currentPrice,
-                                name: selectedVariant ? `${product.name} (${selectedVariant.size})` : product.name,
-                                id: selectedVariant ? `${product.id}-${selectedVariant.size}` : product.id
-                            }, quantity);
+                            // Direct Buy Now Flow (Avoids mixing with Cart)
+                            const baseId = product.id;
+                            const size = selectedVariant ? selectedVariant.size : null;
+                            const qty = quantity;
 
-                            // Using window location for strict redirect or we could use router
-                            router.push('/checkout');
+                            let url = `/checkout?buyNow=true&productId=${baseId}&quantity=${qty}`;
+                            if (size) {
+                                url += `&variantSize=${encodeURIComponent(size)}`;
+                            }
+                            router.push(url);
                         }}
                     >
                         Buy It Now
