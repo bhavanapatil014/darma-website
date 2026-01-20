@@ -121,7 +121,7 @@ export function ProductDetails({ product }: { product: Product }) {
             {allVariants.length > 0 && (
                 <div>
                     <h3 className="text-sm font-semibold text-gray-900 mb-3">Pack Size</h3>
-                    <div className="flex flex-wrap gap-3">
+                    <div className="grid grid-cols-3 sm:grid-cols-4 gap-3">
                         {allVariants.map((v, idx) => {
                             const isSelected = selectedVariant && selectedVariant.size === v.size;
                             const isOutOfStock = (v.stock || 0) <= 0;
@@ -136,14 +136,13 @@ export function ProductDetails({ product }: { product: Product }) {
                                     }}
                                     disabled={isOutOfStock}
                                     className={`
-                                        group relative flex flex-col items-start p-4 rounded-xl border transition-all duration-200
+                                        group relative flex flex-col items-start p-3 rounded-xl border transition-all duration-200 h-full
                                         ${isSelected
                                             ? 'border-blue-600 ring-1 ring-blue-600 bg-blue-50/50'
                                             : 'border-gray-200 hover:border-gray-300 bg-white hover:shadow-sm'
                                         }
                                         ${isOutOfStock ? 'opacity-50 cursor-not-allowed bg-gray-50' : 'cursor-pointer'}
                                     `}
-                                    style={{ minWidth: '140px' }}
                                 >
                                     {/* Size Header */}
                                     <span className={`text-sm font-bold mb-1 ${isSelected ? 'text-blue-900' : 'text-gray-900'}`}>
