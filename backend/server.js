@@ -75,6 +75,7 @@ const couponRoutes = require('./routes/coupons');
 app.use('/api/products', productRoutes);
 app.use('/api/categories', categoryRoutes);
 app.use('/api/auth', authRoutes);
+app.use('/api/user', require('./routes/user'));
 // app.use('/api/cart', cartRoutes);
 app.use('/api/orders', orderRoutes);
 app.use('/api/coupons', couponRoutes);

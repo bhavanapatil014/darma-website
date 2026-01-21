@@ -207,7 +207,13 @@ export function ProductCard({ product, isWishlist = false }: ProductCardProps) {
 
                             <div className="grid grid-cols-1 gap-3 mt-6">
                                 <Button
-                                    onClick={(e) => { e.preventDefault(); router.push('/cart'); }}
+                                    onClick={(e) => {
+                                        e.preventDefault();
+                                        e.stopPropagation(); // Ensure click doesn't bubble
+                                        setShowSuccessPopup(false); // Close modal first
+                                        router.push('/cart');
+                                    }}
+                                    style={{ backgroundColor: '#2563eb', color: '#ffffff' }} // Force styles
                                     className="w-full bg-blue-600 hover:bg-blue-700 text-white h-11"
                                 >
                                     Go to Cart

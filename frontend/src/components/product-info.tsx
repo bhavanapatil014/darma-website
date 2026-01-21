@@ -324,7 +324,13 @@ export function ProductDetails({ product }: { product: Product }) {
 
                             <div className="grid grid-cols-1 gap-3 mt-6">
                                 <Button
-                                    onClick={() => router.push('/cart')}
+                                    onClick={(e) => {
+                                        e.preventDefault();
+                                        e.stopPropagation();
+                                        setShowSuccessModal(false);
+                                        router.push('/cart');
+                                    }}
+                                    style={{ backgroundColor: '#2563eb', color: '#ffffff' }}
                                     className="w-full bg-blue-600 hover:bg-blue-700 text-white h-11"
                                 >
                                     Go to Cart

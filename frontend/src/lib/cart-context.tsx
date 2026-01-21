@@ -32,34 +32,102 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     const { user } = useAuth(); // Assuming useAuth is exported from auth-context
     const getCartKey = () => user ? `darma-cart-${user.email}` : 'darma-cart-guest';
 
+    // Flag to prevent saving empty/stale state to server before initial fetch
+    const [isInitialized, setIsInitialized] = React.useState(false);
+
     // ... Load and Save useEffects for Items (unchanged)
+    // Load Cart (Server Sync)
     React.useEffect(() => {
         if (!user) {
-            setItems([]); // Clear cart to start with if guest (or reset on logout)
+            // Guest: Load from local storage specific to guest
+            const saved = localStorage.getItem('darma-cart-guest');
+            if (saved) {
+                try { setItems(JSON.parse(saved)); } catch (e) { setItems([]); }
+            } else { items.length > 0 && setItems([]); } // Clear if switching from user to guest
+            setIsInitialized(true); // Treat guest as initialized immediately
             return;
         }
 
-        const key = getCartKey();
-        const saved = localStorage.getItem(key);
+        // When user logs in, mark as not initialized until we fetch
+        setIsInitialized(false);
 
-        if (saved) {
+        const syncServerCart = async () => {
             try {
-                setItems(JSON.parse(saved));
-            } catch (e) {
-                console.error("Failed to parse cart", e);
-                setItems([]);
+                const token = localStorage.getItem('token');
+                // 1. Fetch Server Cart
+                const res = await fetch('https://darma-website.onrender.com/api/user/cart', {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                if (res.ok) {
+                    const serverCart = await res.json();
+
+                    // 2. Check for Guest Items to Merge (from immediate context or local)
+                    // Because this effect runs when 'user' changes (e.g. login), 'items' might still hold guest items
+                    // BUT 'items' usually gets cleared or reset. 
+                    // Best strategy: check the 'guest' local storage directly.
+                    const guestStr = localStorage.getItem('darma-cart-guest');
+                    let guestItems: CartItem[] = [];
+                    if (guestStr) {
+                        try { guestItems = JSON.parse(guestStr); } catch (e) { }
+                    }
+
+                    if (guestItems.length > 0) {
+                        // Merge Logic
+                        const merged = [...serverCart];
+                        guestItems.forEach(gItem => {
+                            const existing = merged.find(sItem => sItem.id === gItem.id);
+                            if (existing) {
+                                // Update quantity (limit to stock if needed, but simple add for now)
+                                existing.quantity += gItem.quantity;
+                            } else {
+                                merged.push(gItem);
+                            }
+                        });
+
+                        setItems(merged);
+
+                        // Clear guest cart
+                        localStorage.removeItem('darma-cart-guest');
+
+                        // Push merged to server immediately
+                        await fetch('https://darma-website.onrender.com/api/user/cart', {
+                            method: 'PUT',
+                            headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                            body: JSON.stringify({ items: merged })
+                        });
+                    } else {
+                        setItems(serverCart);
+                    }
+                }
+            } catch (err) {
+                console.error("Cart sync error", err);
+            } finally {
+                setIsInitialized(true);
             }
-        } else {
-            setItems([]);
-        }
+        };
+
+        syncServerCart();
+
     }, [user]);
 
+    // Save Cart (Local + Server)
     React.useEffect(() => {
-        if (user) {
-            const key = getCartKey();
-            localStorage.setItem(key, JSON.stringify(items));
+        // 1. Save Local
+        const key = user ? `darma-cart-${user.email}` : 'darma-cart-guest';
+        localStorage.setItem(key, JSON.stringify(items));
+
+        // 2. Save Server (Debounce could be good, but direct for now)
+        if (user && isInitialized) {
+            const token = localStorage.getItem('token');
+            // We ignore errors here to prevent blocking UI, maybe retry?
+            // Use simple fire-and-forget for UX speed, but ideally use queue.
+            fetch('https://darma-website.onrender.com/api/user/cart', {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                body: JSON.stringify({ items })
+            }).catch(e => console.error("Failed to save cart to server", e));
         }
-    }, [items, user]);
+    }, [items, user, isInitialized]);
 
     // ... addItem, removeItem, updateQuantity logic (unchanged)
 

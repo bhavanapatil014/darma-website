@@ -16,7 +16,16 @@ const userSchema = new mongoose.Schema({
     isDeleted: { type: Boolean, default: false },
     deletedAt: { type: Date },
     deletedBy: { type: String, enum: ['self', 'admin'] },
-    originalEmail: { type: String }
+    originalEmail: { type: String },
+    cart: [{
+        productId: { type: mongoose.Schema.Types.ObjectId, ref: 'Product' },
+        variantId: { type: String },
+        quantity: { type: Number, default: 1 }
+    }],
+    wishlist: [{
+        productId: { type: mongoose.Schema.Types.ObjectId, ref: 'Product' },
+        variantId: { type: String }
+    }]
 }, { timestamps: true });
 
 module.exports = mongoose.model('User', userSchema);

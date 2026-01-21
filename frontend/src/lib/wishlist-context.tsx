@@ -23,32 +23,48 @@ export function WishlistProvider({ children }: { children: React.ReactNode }) {
     // Helper to get storage key
     const getWishlistKey = () => user ? `darma-wishlist-${user.email}` : null;
 
-    // Load Wishlist on User Change
+    // Load Wishlist (Server Sync)
     React.useEffect(() => {
         if (!user) {
             setItems([]);
             return;
         }
-        const key = getWishlistKey();
-        if (key) {
-            const saved = localStorage.getItem(key);
-            if (saved) {
-                try {
-                    setItems(JSON.parse(saved));
-                } catch (e) {
-                    setItems([]);
+
+        const syncServerWishlist = async () => {
+            try {
+                const token = localStorage.getItem('token');
+                const res = await fetch('https://darma-website.onrender.com/api/user/wishlist', {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                if (res.ok) {
+                    const serverWishlist = await res.json();
+
+                    // Check local guest wishlist (if you want to support guest wishlist persisting)
+                    // Currently getWishlistKey returned null for guest, meaning guest wishlist wasn't strictly supported in previous code
+                    // (previous code: if(!user) setItems([]); return;)
+                    // So we can assume no guest merging needed for wishlist based on previous logic.
+                    // Just set server wishlist.
+                    setItems(serverWishlist);
                 }
-            } else {
-                setItems([]);
+            } catch (e) {
+                console.error("Wishlist sync error", e);
             }
-        }
+        };
+        syncServerWishlist();
     }, [user]);
 
-    // Save Wishlist on Change
+    // Save Wishlist
     React.useEffect(() => {
-        const key = getWishlistKey();
-        if (user && key) {
-            localStorage.setItem(key, JSON.stringify(items));
+        if (user) {
+            const key = getWishlistKey(); // returns darma-wishlist-email
+            if (key) localStorage.setItem(key, JSON.stringify(items));
+
+            const token = localStorage.getItem('token');
+            fetch('https://darma-website.onrender.com/api/user/wishlist', {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                body: JSON.stringify({ items })
+            }).catch(e => console.error("Failed to save wishlist", e));
         }
     }, [items, user]);
 
