@@ -312,7 +312,7 @@ export function ProductDetails({ product }: { product: Product }) {
                                     onClick={() => router.push('/cart')}
                                     className="w-full bg-blue-600 hover:bg-blue-700 text-white h-11"
                                 >
-                                    View Cart & Checkout
+                                    Go to Cart
                                 </Button>
                                 <Button
                                     variant="outline"
