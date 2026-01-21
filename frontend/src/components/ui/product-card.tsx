@@ -127,8 +127,45 @@ export function ProductCard({ product, isWishlist = false }: ProductCardProps) {
                             onClick={(e) => {
                                 e.preventDefault();
                                 e.stopPropagation();
-                                if (product.stockQuantity && product.stockQuantity > 0) {
-                                    addItem(product);
+
+                                // Determine Unity Variant Logic (Same as product-info.tsx)
+                                // This ensures we pick the default/first variant ID effectively so it merges with Detail Page additions.
+                                let itemToAdd = { ...product };
+                                let effectiveStock = product.stockQuantity;
+
+                                if (product.variants && product.variants.length > 0) {
+                                    // Construct unified list to find default
+                                    const unifiedVariants = [
+                                        ...(product.netContent && !product.variants.some(v => v.size === product.netContent)
+                                            ? [{
+                                                size: product.netContent,
+                                                price: product.price,
+                                                mrp: product.mrp,
+                                                stock: product.stockQuantity
+                                            }]
+                                            : []),
+                                        ...product.variants
+                                    ];
+
+                                    // Pick first in-stock variant, or just first
+                                    const defaultVariant = unifiedVariants.find(v => (v.stock || 0) > 0) || unifiedVariants[0];
+
+                                    if (defaultVariant) {
+                                        itemToAdd = {
+                                            ...product,
+                                            price: defaultVariant.price,
+                                            mrp: defaultVariant.mrp || product.mrp,
+                                            name: `${product.name} (${defaultVariant.size})`,
+                                            id: `${product.id}-${defaultVariant.size}`,
+                                            stockQuantity: defaultVariant.stock
+                                        };
+                                        effectiveStock = defaultVariant.stock;
+                                    }
+                                }
+
+
+                                if (effectiveStock && effectiveStock > 0) {
+                                    addItem(itemToAdd);
                                     if (isWishlist) {
                                         removeFromWishlist(product.id);
                                     }
