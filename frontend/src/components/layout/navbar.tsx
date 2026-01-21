@@ -15,7 +15,7 @@ export function Navbar() {
     const [isScrolled, setIsScrolled] = React.useState(false);
     const { setIsOpen, items } = useCart();
     const { user } = useAuth();
-    const pathname = usePathname()
+    const pathname = usePathname();
     const { wishlistCount } = useWishlist();
     const cartCount = items.reduce((acc, item) => acc + item.quantity, 0);
 
@@ -362,38 +362,54 @@ export function Navbar() {
                     </div>
                 </div>
 
-                {/* Mobile Tab Navigation (Standard View) */}
-                <div className="md:hidden w-full overflow-x-auto bg-white border-t border-gray-100 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
-                    <div className="flex items-center px-4 h-12 gap-6 text-sm font-medium text-gray-600 whitespace-nowrap">
-                        <Link href="/shop" className="flex flex-col justify-center h-full border-b-2 border-transparent hover:text-teal-600 hover:border-teal-600 transition-all">Shop All</Link>
-                        <Link href="/shop?category=cleansers" className="flex flex-col justify-center h-full border-b-2 border-transparent hover:text-teal-600 hover:border-teal-600 transition-all">Skin Care</Link>
-                        <Link href="/shop?category=shampoo" className="flex flex-col justify-center h-full border-b-2 border-transparent hover:text-teal-600 hover:border-teal-600 transition-all">Hair Care</Link>
-                        <Link href="/shop?brand=cerave" className="flex flex-col justify-center h-full border-b-2 border-transparent hover:text-teal-600 hover:border-teal-600 transition-all">Brands</Link>
-                        <Link href="/shop?category=baby-care" className="flex flex-col justify-center h-full border-b-2 border-transparent hover:text-teal-600 hover:border-teal-600 transition-all">Baby Care</Link>
-                    </div>
-                </div>
 
-                {/* Mobile Menu Overlay */}
+
+                {/* Mobile Menu Overlay (Standard Dropdown) */}
                 {isMobileMenuOpen && (
-                    <div className="md:hidden absolute top-full left-0 w-full bg-white border-t border-gray-100 shadow-lg py-4 px-4 flex flex-col gap-4 animate-in slide-in-from-top-2">
-                        <div className="space-y-4">
-                            <div className="font-semibold text-gray-900 border-b pb-2">Brands</div>
-                            <Link href="/shop?brand=cerave" className="block pl-4 text-sm text-gray-600" onClick={() => setIsMobileMenuOpen(false)}>CeraVe</Link>
-                            <Link href="/shop?brand=cetaphil" className="block pl-4 text-sm text-gray-600" onClick={() => setIsMobileMenuOpen(false)}>Cetaphil</Link>
-                            <Link href="/shop?brand=bioderma" className="block pl-4 text-sm text-gray-600" onClick={() => setIsMobileMenuOpen(false)}>Bioderma</Link>
+                    <div className="md:hidden absolute top-full left-0 w-full bg-white border-t border-gray-100 shadow-xl h-[calc(100vh-64px)] overflow-y-auto animate-in slide-in-from-top-2 z-50">
+                        <div className="flex flex-col p-4 space-y-6 pb-20">
+                            {/* Quick Actions */}
+                            <div className="grid grid-cols-2 gap-3">
+                                <Link href="/shop" onClick={() => setIsMobileMenuOpen(false)} className="bg-teal-50 text-teal-700 text-center py-3 rounded-lg font-semibold text-sm hover:bg-teal-100 transition-colors border border-teal-100">
+                                    Shop All
+                                </Link>
+                                <Link href="/account" onClick={() => setIsMobileMenuOpen(false)} className="bg-gray-50 text-gray-700 text-center py-3 rounded-lg font-semibold text-sm hover:bg-gray-100 transition-colors border border-gray-200">
+                                    My Account
+                                </Link>
+                            </div>
 
-                            <div className="font-semibold text-gray-900 border-b pb-2 pt-2">Skincare</div>
-                            <Link href="/shop?category=cleansers" className="block pl-4 text-sm text-gray-600" onClick={() => setIsMobileMenuOpen(false)}>Cleansers</Link>
-                            <Link href="/shop?category=moisturizers" className="block pl-4 text-sm text-gray-600" onClick={() => setIsMobileMenuOpen(false)}>Moisturizers</Link>
-                            <Link href="/shop?category=sunscreens" className="block pl-4 text-sm text-gray-600" onClick={() => setIsMobileMenuOpen(false)}>Sunscreens</Link>
+                            {/* Categories Breakdown */}
+                            <div className="space-y-3">
+                                <h3 className="font-bold text-gray-900 text-base uppercase tracking-wider text-xs border-b pb-2">
+                                    Shop Categories
+                                </h3>
+                                <div className="space-y-1">
+                                    <Link href="/shop?category=skincare" className="block py-2.5 px-2 text-gray-600 hover:text-teal-700 hover:bg-teal-50 rounded-md transition-colors font-medium flex items-center justify-between group" onClick={() => setIsMobileMenuOpen(false)}>
+                                        Skin Care
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-gray-300 group-hover:text-teal-500"><path d="m9 18 6-6-6-6" /></svg>
+                                    </Link>
+                                    <Link href="/shop?category=haircare" className="block py-2.5 px-2 text-gray-600 hover:text-teal-700 hover:bg-teal-50 rounded-md transition-colors font-medium flex items-center justify-between group" onClick={() => setIsMobileMenuOpen(false)}>
+                                        Hair Care
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-gray-300 group-hover:text-teal-500"><path d="m9 18 6-6-6-6" /></svg>
+                                    </Link>
+                                    <Link href="/shop?category=baby-care" className="block py-2.5 px-2 text-gray-600 hover:text-teal-700 hover:bg-teal-50 rounded-md transition-colors font-medium flex items-center justify-between group" onClick={() => setIsMobileMenuOpen(false)}>
+                                        Baby Care
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-gray-300 group-hover:text-teal-500"><path d="m9 18 6-6-6-6" /></svg>
+                                    </Link>
+                                </div>
+                            </div>
 
-                            <div className="font-semibold text-gray-900 border-b pb-2 pt-2">Hair Care</div>
-                            <Link href="/shop?category=shampoo" className="block pl-4 text-sm text-gray-600" onClick={() => setIsMobileMenuOpen(false)}>Shampoos</Link>
-                            <Link href="/shop?category=conditioner" className="block pl-4 text-sm text-gray-600" onClick={() => setIsMobileMenuOpen(false)}>Conditioners</Link>
-
-                            <div className="border-t pt-2">
-                                <Link href="/shop?category=baby-care" className="block py-2 font-medium" onClick={() => setIsMobileMenuOpen(false)}>Baby Care</Link>
-                                <Link href="/shop" className="block py-2 font-medium" onClick={() => setIsMobileMenuOpen(false)}>Shop All Products</Link>
+                            {/* Brands Grid */}
+                            <div className="space-y-3">
+                                <h3 className="font-bold text-gray-900 text-base uppercase tracking-wider text-xs border-b pb-2">
+                                    Popular Brands
+                                </h3>
+                                <div className="grid grid-cols-2 gap-2">
+                                    <Link href="/shop?brand=cerave" className="py-2.5 px-3 bg-gray-50 hover:bg-teal-50 border border-transparent hover:border-teal-100 rounded text-sm text-center text-gray-700 font-medium transition-all" onClick={() => setIsMobileMenuOpen(false)}>CeraVe</Link>
+                                    <Link href="/shop?brand=cetaphil" className="py-2.5 px-3 bg-gray-50 hover:bg-teal-50 border border-transparent hover:border-teal-100 rounded text-sm text-center text-gray-700 font-medium transition-all" onClick={() => setIsMobileMenuOpen(false)}>Cetaphil</Link>
+                                    <Link href="/shop?brand=bioderma" className="py-2.5 px-3 bg-gray-50 hover:bg-teal-50 border border-transparent hover:border-teal-100 rounded text-sm text-center text-gray-700 font-medium transition-all" onClick={() => setIsMobileMenuOpen(false)}>Bioderma</Link>
+                                    <Link href="/shop?brand=the%20derma%20co" className="py-2.5 px-3 bg-gray-50 hover:bg-teal-50 border border-transparent hover:border-teal-100 rounded text-sm text-center text-gray-700 font-medium transition-all" onClick={() => setIsMobileMenuOpen(false)}>Derma Co</Link>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -421,3 +437,5 @@ function DropdownMenu({ title, children }: { title: string, children: React.Reac
         </div>
     )
 }
+
+

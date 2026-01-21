@@ -23,7 +23,26 @@ router.get('/', async (req, res) => {
         console.log(`GET /products REQUEST QUERY:`, req.query); // DEBUG
 
         let query = {};
-        if (category && category !== 'all') query.category = category;
+        if (category && category !== 'all') {
+            const skincareSub = ['cleansers', 'moisturizers', 'sunscreens', 'creams', 'serums', 'skincare'];
+            const haircareSub = ['shampoo', 'conditioner', 'hair oil', 'mask', 'haircare', 'shampoos', 'conditioners'];
+
+            if (category.toLowerCase() === 'skincare') {
+                query.category = { $in: skincareSub.map(c => c.toLowerCase()).concat(skincareSub) }; // Case insensitivity handling if exact match needed, though Regex is clearer but $in is faster for specific list
+                // To be safe against casing in DB, maybe use Regex for each or just many variants. 
+                // DB usually has lowercase if controlled, but let's be safe:
+                query.category = { $in: [...skincareSub, ...skincareSub.map(s => s.charAt(0).toUpperCase() + s.slice(1))] };
+                // Actually, let's use $regex for broader match if possible, or just strict list.
+                // Let's stick to the list from Navbar + variations.
+                query.category = { $in: ['cleansers', 'moisturizers', 'sunscreens', 'skincare', 'Cleanse', 'Cleanser', 'Moisturizer', 'Sunscreen'] };
+                // Creating a regex for these is better:
+                query.category = { $regex: new RegExp('skincare|cleanser|moisturizer|sunscreen|cream|serum', 'i') };
+            } else if (category.toLowerCase() === 'haircare') {
+                query.category = { $regex: new RegExp('haircare|shampoo|conditioner|hair', 'i') };
+            } else {
+                query.category = category;
+            }
+        }
         if (brand) {
             query.brand = { $regex: new RegExp(brand, 'i') }; // Flexible "Contains" match
             console.log(`Applying Brand Filter: ${brand} -> Regex: ${query.brand}`);
