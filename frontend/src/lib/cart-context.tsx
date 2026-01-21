@@ -65,6 +65,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
 
     const addItem = (product: Product, quantity: number = 1) => {
         setItems((prev) => {
+            // Check if exact item (same ID, implying same variant) exists
             const existing = prev.find((item) => item.id === product.id)
             const stockLimit = product.stockQuantity || 999;
 
@@ -77,6 +78,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
                     return item;
                 })
             }
+            // If not found (different ID = different variant or product), add as new
             return [...prev, { ...product, quantity: Math.min(stockLimit, quantity) }]
         })
         // setIsOpen(true)

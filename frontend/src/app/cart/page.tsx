@@ -15,7 +15,7 @@ import { useAuth } from "@/lib/auth-context"
 
 export default function CartPage() {
     const { items, removeItem, updateQuantity, subtotal, total, coupon, applyCoupon, removeCoupon, refreshCart } = useCart()
-    const { addToWishlist } = useWishlist()
+    const { addToWishlist, isInWishlist } = useWishlist()
     const { user } = useAuth()
     const [couponCode, setCouponCode] = useState("")
     const [couponError, setCouponError] = useState("")
@@ -306,13 +306,21 @@ export default function CartPage() {
                                             </button>
                                             <button
                                                 onClick={() => {
-                                                    addToWishlist(item);
-                                                    removeItem(item.id);
+                                                    import("sonner").then(mod => {
+                                                        if (isInWishlist(item.id)) {
+                                                            mod.toast.info(`${item.name} is already in your wishlist.`);
+                                                        } else {
+                                                            addToWishlist(item);
+                                                            mod.toast.success("Moved to Wishlist");
+                                                        }
+                                                        // Always remove from cart when "Saving for Later"
+                                                        removeItem(item.id);
+                                                    });
                                                 }}
                                                 className="flex items-center gap-1 text-sm text-gray-500 hover:text-blue-600 transition-colors"
                                                 title="Move to Wishlist"
                                             >
-                                                <Heart className="w-4 h-4" />
+                                                <Heart className={`w-4 h-4 ${isInWishlist(item.id) ? 'fill-red-500 text-red-500' : ''}`} />
                                                 <span className="hidden sm:inline">Save for Later</span>
                                             </button>
                                         </div>

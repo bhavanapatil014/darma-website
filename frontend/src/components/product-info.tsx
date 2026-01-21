@@ -58,12 +58,13 @@ export function ProductDetails({ product }: { product: Product }) {
         }
     }, [product]);
 
-    useEffect(() => {
-        if (showSuccessModal) {
-            const timer = setTimeout(() => setShowSuccessModal(false), 3500)
-            return () => clearTimeout(timer)
-        }
-    }, [showSuccessModal])
+    // Auto-close removed
+    // useEffect(() => {
+    //     if (showSuccessModal) {
+    //         const timer = setTimeout(() => setShowSuccessModal(false), 3500)
+    //         return () => clearTimeout(timer)
+    //     }
+    // }, [showSuccessModal])
 
     const [quantity, setQuantity] = useState(1);
 
