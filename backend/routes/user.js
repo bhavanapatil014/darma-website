@@ -2,14 +2,14 @@ const express = require('express');
 const router = express.Router();
 const User = require('../models/User');
 const Product = require('../models/Product');
-const { protect } = require('../middleware/authMiddleware');
+const { verifyToken } = require('../middleware/authMiddleware');
 
 // --- Cart Routes ---
 
 // Get Cart
-router.get('/cart', protect, async (req, res) => {
+router.get('/cart', verifyToken, async (req, res) => {
     try {
-        const user = await User.findById(req.user._id).populate('cart.productId');
+        const user = await User.findById(req.userId).populate('cart.productId');
         if (!user) return res.status(404).json({ message: 'User not found' });
 
         // Filter out items where product might have been deleted
@@ -78,7 +78,7 @@ router.get('/cart', protect, async (req, res) => {
 });
 
 // Update Cart (Sync)
-router.put('/cart', protect, async (req, res) => {
+router.put('/cart', verifyToken, async (req, res) => {
     try {
         const { items } = req.body; // Expects array of frontend items
 
@@ -90,7 +90,6 @@ router.put('/cart', protect, async (req, res) => {
             // But for safety, reliable way is: item._id (if present) is the Mongo Product ID. 
             // If item.id is composite, split it? 
             // Actually, frontend item object *extends* Product. So item._id should be there?
-            // Let's check `cart-context`. Yup, it stores `Product` which has `_id` (sometimes `id` is mapped to `_id`).
             // In `data.ts`, `Product` interface has `id: string`. 
 
             // Critical: We need the Mongo `_id` of the *base* product to store in `productId`.
@@ -108,7 +107,7 @@ router.put('/cart', protect, async (req, res) => {
             };
         });
 
-        const user = await User.findById(req.user._id);
+        const user = await User.findById(req.userId);
         if (!user) return res.status(404).json({ message: 'User not found' });
 
         user.cart = cartItems;
@@ -124,9 +123,9 @@ router.put('/cart', protect, async (req, res) => {
 
 // --- Wishlist Routes ---
 
-router.get('/wishlist', protect, async (req, res) => {
+router.get('/wishlist', verifyToken, async (req, res) => {
     try {
-        const user = await User.findById(req.user._id).populate('wishlist.productId');
+        const user = await User.findById(req.userId).populate('wishlist.productId');
         if (!user) return res.status(404).json({ message: 'User not found' });
 
         const validWishlist = user.wishlist.filter(item => item.productId);
@@ -173,7 +172,7 @@ router.get('/wishlist', protect, async (req, res) => {
     }
 });
 
-router.put('/wishlist', protect, async (req, res) => {
+router.put('/wishlist', verifyToken, async (req, res) => {
     try {
         const { items } = req.body;
 
@@ -189,7 +188,7 @@ router.put('/wishlist', protect, async (req, res) => {
             };
         });
 
-        const user = await User.findById(req.user._id);
+        const user = await User.findById(req.userId);
         if (!user) return res.status(404).json({ message: 'User not found' });
 
         user.wishlist = wishlistItems;
