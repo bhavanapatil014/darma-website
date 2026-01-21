@@ -133,7 +133,11 @@ export function ProductCard({ product, isWishlist = false }: ProductCardProps) {
                                 let itemToAdd = { ...product };
                                 let effectiveStock = product.stockQuantity;
 
-                                if (product.variants && product.variants.length > 0) {
+                                // Only attempt to resolve variant if we don't already have a variant ID (heuristically check for '-')
+                                // If from Wishlist (Variant), ID is already '123-Small'. If Shop, ID is '123'.
+                                const isAlreadyVariant = product.id.includes('-');
+
+                                if (!isAlreadyVariant && product.variants && product.variants.length > 0) {
                                     // Construct unified list to find default
                                     const unifiedVariants = [
                                         ...(product.netContent && !product.variants.some(v => v.size === product.netContent)
