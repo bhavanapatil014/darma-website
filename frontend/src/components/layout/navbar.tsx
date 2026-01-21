@@ -362,6 +362,17 @@ export function Navbar() {
                     </div>
                 </div>
 
+                {/* Mobile Tab Navigation (Standard View) */}
+                <div className="md:hidden w-full overflow-x-auto bg-white border-t border-gray-100 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
+                    <div className="flex items-center px-4 h-12 gap-6 text-sm font-medium text-gray-600 whitespace-nowrap">
+                        <Link href="/shop" className="flex flex-col justify-center h-full border-b-2 border-transparent hover:text-teal-600 hover:border-teal-600 transition-all">Shop All</Link>
+                        <Link href="/shop?category=cleansers" className="flex flex-col justify-center h-full border-b-2 border-transparent hover:text-teal-600 hover:border-teal-600 transition-all">Skin Care</Link>
+                        <Link href="/shop?category=shampoo" className="flex flex-col justify-center h-full border-b-2 border-transparent hover:text-teal-600 hover:border-teal-600 transition-all">Hair Care</Link>
+                        <Link href="/shop?brand=cerave" className="flex flex-col justify-center h-full border-b-2 border-transparent hover:text-teal-600 hover:border-teal-600 transition-all">Brands</Link>
+                        <Link href="/shop?category=baby-care" className="flex flex-col justify-center h-full border-b-2 border-transparent hover:text-teal-600 hover:border-teal-600 transition-all">Baby Care</Link>
+                    </div>
+                </div>
+
                 {/* Mobile Menu Overlay */}
                 {isMobileMenuOpen && (
                     <div className="md:hidden absolute top-full left-0 w-full bg-white border-t border-gray-100 shadow-lg py-4 px-4 flex flex-col gap-4 animate-in slide-in-from-top-2">
