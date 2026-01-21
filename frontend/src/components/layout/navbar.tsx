@@ -55,10 +55,17 @@ export function Navbar() {
     return (
         <div className="flex flex-col w-full z-50 fixed top-0">
             {/* Top Bar - Marketing/Contact (Blue Background) */}
-            <div className="bg-blue-600 text-white text-xs py-2 px-4 transition-colors">
-                <div className="container mx-auto flex justify-between items-center overflow-hidden">
-                    {/* Simple scrolling text effect or static repeated text */}
-                    <div className="flex gap-12 animate-marquee whitespace-nowrap font-medium tracking-wide w-full justify-center">
+            <div className="bg-blue-600 text-white text-[10px] sm:text-xs py-2 px-4 transition-colors">
+                <div className="container mx-auto flex justify-center items-center overflow-hidden">
+                    {/* Mobile: Static condensed text to prevent truncation on 320px screens */}
+                    <div className="md:hidden flex items-center gap-3 whitespace-nowrap font-medium">
+                        <span>Free Delivery &gt; ₹599</span>
+                        <span className="opacity-60">|</span>
+                        <span>COD Available</span>
+                    </div>
+
+                    {/* Desktop: Scrolling text effect */}
+                    <div className="hidden md:flex gap-12 animate-marquee whitespace-nowrap font-medium tracking-wide w-full justify-center">
                         <span>Free Delivery on Orders Above ₹599</span>
                         <span>COD Available</span>
                         <span>Free Delivery on Orders Above ₹599</span>
