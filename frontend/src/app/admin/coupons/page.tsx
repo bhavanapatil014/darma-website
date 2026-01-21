@@ -507,7 +507,86 @@ export default function CouponsPage() {
                     </button>
                 </div>
 
-                <div className="overflow-x-auto">
+                {/* Mobile View: Cards */}
+                <div className="md:hidden">
+                    {displayedCoupons.map(coupon => {
+                        const isExpired = coupon.expirationDate && new Date() > new Date(coupon.expirationDate);
+                        const isUsed = activeTab === 'negotiation' && coupon.usedCount && coupon.usageLimit && coupon.usedCount >= coupon.usageLimit;
+                        const negotiationDetails = activeTab === 'negotiation'
+                            ? negotiations.find(n => n.couponCode === coupon.code)
+                            : null;
+
+                        return (
+                            <div key={coupon._id} className={`p-4 border-b border-gray-100 flex flex-col gap-3 ${isExpired ? 'bg-gray-50 opacity-70' : ''}`}>
+                                <div className="flex justify-between items-start">
+                                    <div>
+                                        <div className="font-mono font-bold text-lg text-gray-900">{coupon.code}</div>
+                                        <div className="text-xs text-gray-400 mt-0.5">
+                                            {coupon.expirationDate ? `Expires: ${new Date(coupon.expirationDate).toLocaleDateString()}` : 'No Expiry'}
+                                        </div>
+                                    </div>
+                                    <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-bold ${activeTab === 'expired' || isUsed ? 'bg-gray-100 text-gray-600' : 'bg-green-100 text-green-700'}`}>
+                                        {coupon.type === 'percentage' ? `${coupon.value}% OFF` : `₹${coupon.value} OFF`}
+                                    </span>
+                                </div>
+
+                                {/* Negotiation Details / Applicability */}
+                                <div className="text-sm text-gray-600 bg-gray-50 p-2 rounded">
+                                    {activeTab === 'negotiation' ? (
+                                        <div className="space-y-1">
+                                            {negotiationDetails ? (
+                                                <>
+                                                    <div className="font-semibold">{negotiationDetails.user?.name}</div>
+                                                    <div className="text-xs text-gray-500 mb-1">{negotiationDetails.user?.email}</div>
+                                                    {negotiationDetails.product && (
+                                                        <div className="text-xs text-indigo-600 font-medium">
+                                                            Product: {negotiationDetails.product.name}
+                                                        </div>
+                                                    )}
+                                                </>
+                                            ) : (
+                                                <span className="italic text-gray-400">User details not found</span>
+                                            )}
+                                        </div>
+                                    ) : (
+                                        <>
+                                            {(!coupon.applicableProducts?.length && !coupon.applicableCategories?.length && !coupon.applicableBrands?.length) ? (
+                                                <span className="text-gray-500 italic">Valid Storewide</span>
+                                            ) : (
+                                                <div className="space-y-1">
+                                                    {(coupon.applicableBrands?.length || 0) > 0 && <div><span className="font-semibold text-xs uppercase">Brands:</span> {coupon.applicableBrands.join(', ')}</div>}
+                                                    {(coupon.applicableCategories?.length || 0) > 0 && <div><span className="font-semibold text-xs uppercase">Categories:</span> {coupon.applicableCategories.join(', ')}</div>}
+                                                    {(coupon.applicableProducts?.length || 0) > 0 && <div><span className="font-semibold text-xs uppercase">Products:</span> {coupon.applicableProducts.length} items</div>}
+                                                </div>
+                                            )}
+                                        </>
+                                    )}
+                                </div>
+
+                                <div className="flex gap-2 pt-2">
+                                    <Button size="sm" variant="outline" className="flex-1 text-sky-600 border-sky-200"
+                                        onClick={() => {
+                                            handleEdit(coupon);
+                                            setShowForm(true);
+                                        }}>
+                                        Edit
+                                    </Button>
+                                    <Button size="sm" variant="outline" className="flex-1 text-red-600 border-red-200 hover:bg-red-50" onClick={() => handleDelete(coupon._id)}>
+                                        Delete
+                                    </Button>
+                                </div>
+                            </div>
+                        )
+                    })}
+                    {displayedCoupons.length === 0 && (
+                        <div className="py-12 text-center text-gray-400">
+                            No coupons found
+                        </div>
+                    )}
+                </div>
+
+                {/* Desktop View: Table */}
+                <div className="hidden md:block overflow-x-auto">
                     <table className="w-full text-left min-w-[900px]">
                         <thead>
                             <tr className="bg-gray-50 border-b border-gray-200 text-xs font-bold uppercase tracking-wider text-gray-500">
