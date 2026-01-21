@@ -105,15 +105,26 @@ export default function OrdersPage() {
 
         // 3. Text Search (ID, Customer Name, Product Name/ID)
         if (searchQuery.trim()) {
-            const query = searchQuery.toLowerCase()
-            const matchesId = order._id.toLowerCase().includes(query)
-            const matchesCustomer = order.customerName.toLowerCase().includes(query) || order.email.toLowerCase().includes(query)
-            const matchesProduct = order.products?.some(p =>
-                p.name.toLowerCase().includes(query) || p.product.toLowerCase().includes(query)
-            )
+            const query = searchQuery.toLowerCase().trim()
+
+            // Safe accessors with fallbacks to empty string to prevent crashes
+            const orderId = order._id ? order._id.toString().toLowerCase() : ''
+            const customerName = order.customerName ? order.customerName.toString().toLowerCase() : ''
+            const customerEmail = order.email ? order.email.toString().toLowerCase() : ''
+
+            const matchesId = orderId.includes(query)
+            const matchesCustomer = customerName.includes(query) || customerEmail.includes(query)
+
+            // Safe product check
+            const matchesProduct = Array.isArray(order.products) && order.products.some(p => {
+                const pName = p.name ? p.name.toString().toLowerCase() : ''
+                const pId = p.product ? p.product.toString().toLowerCase() : ''
+                return pName.includes(query) || pId.includes(query)
+            })
 
             return matchesId || matchesCustomer || matchesProduct
         }
+
 
         return true
     })
@@ -140,10 +151,10 @@ export default function OrdersPage() {
             </div>
 
             {/* Search & Filters */}
-            <div className="bg-white p-4 rounded-xl border shadow-sm flex flex-col md:flex-row gap-4 items-center justify-between">
-                <div className="flex flex-1 gap-4 w-full md:w-auto">
+            <div className="bg-white p-4 rounded-xl border shadow-sm flex flex-col gap-4">
+                <div className="flex flex-col md:flex-row gap-4 w-full">
                     {/* Search Input */}
-                    <div className="relative flex-1 max-w-md">
+                    <div className="relative flex-1 w-full">
                         <svg className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
                         <input
                             type="text"
@@ -155,7 +166,7 @@ export default function OrdersPage() {
                     </div>
 
                     {/* Date Picker with Icon */}
-                    <div className="relative">
+                    <div className="relative w-full md:w-auto">
                         <svg className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500 pointer-events-none" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect width="18" height="18" x="3" y="4" rx="2" ry="2" /><line x1="16" x2="16" y1="2" y2="6" /><line x1="8" x2="8" y1="2" y2="6" /><line x1="3" x2="21" y1="10" y2="10" /></svg>
                         <input
                             type="date"
@@ -166,7 +177,7 @@ export default function OrdersPage() {
                     </div>
 
                     {(searchQuery || searchDate) && (
-                        <Button variant="ghost" onClick={() => { setSearchQuery(""); setSearchDate(""); setCurrentPage(1); }} className="text-xs text-red-500">
+                        <Button variant="ghost" onClick={() => { setSearchQuery(""); setSearchDate(""); setCurrentPage(1); }} className="text-xs text-red-500 md:w-auto w-full">
                             Clear
                         </Button>
                     )}
