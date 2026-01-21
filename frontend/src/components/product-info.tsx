@@ -239,7 +239,8 @@ export function ProductDetails({ product }: { product: Product }) {
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <Button
                         size="lg"
-                        className="w-full h-12 text-base font-semibold bg-blue-600 hover:bg-blue-700 text-white rounded-full shadow-sm hover:shadow transition-all"
+                        style={{ backgroundColor: '#2563eb', color: '#ffffff' }}
+                        className="w-full h-12 text-base font-semibold rounded-full shadow-sm hover:shadow transition-all"
                         disabled={(currentStock || 0) <= 0}
                         onClick={() => {
                             addItem({
