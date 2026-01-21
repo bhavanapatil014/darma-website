@@ -137,17 +137,17 @@ export default function AdminNegotiations() {
 
     // Chat View
     return (
-        <div className="bg-white rounded-lg shadow border flex flex-col h-[600px]">
-            <div className="bg-gray-100 p-4 border-b flex justify-between items-center">
-                <div>
-                    <h3 className="font-bold">{chatData?.product?.name}</h3>
-                    <span className="text-xs text-gray-500">with {chatData?.user?.name} (₹{chatData?.product?.price})</span>
+        <div className="bg-white rounded-lg shadow border flex flex-col h-[85vh]">
+            <div className="bg-gray-100 p-4 border-b flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
+                <div className="w-full sm:w-auto">
+                    <h3 className="font-bold truncate">{chatData?.product?.name}</h3>
+                    <span className="text-xs text-gray-500 block truncate">with {chatData?.user?.name} (₹{chatData?.product?.price})</span>
                 </div>
-                <div className="flex items-center gap-3">
+                <div className="flex items-center gap-3 w-full sm:w-auto justify-between sm:justify-end">
                     <select
-                        className={`text-xs p-1.5 rounded border font-medium outline-none cursor-pointer ${chatData?.status === 'deal_reached' ? 'bg-green-100 text-green-700 border-green-200' :
-                                chatData?.status === 'closed' ? 'bg-gray-100 text-gray-600 border-gray-200' :
-                                    'bg-blue-50 text-blue-600 border-blue-200'
+                        className={`text-xs p-1.5 rounded border font-medium outline-none cursor-pointer flex-1 sm:flex-none ${chatData?.status === 'deal_reached' ? 'bg-green-100 text-green-700 border-green-200' :
+                            chatData?.status === 'closed' ? 'bg-gray-100 text-gray-600 border-gray-200' :
+                                'bg-blue-50 text-blue-600 border-blue-200'
                             }`}
                         value={chatData?.status || 'active'}
                         onChange={async (e) => {
@@ -175,10 +175,10 @@ export default function AdminNegotiations() {
             <div ref={scrollRef} className="flex-1 overflow-y-auto p-4 space-y-4 bg-slate-50">
                 {chatData?.messages.map((m: any, i: number) => (
                     <div key={i} className={`flex ${m.sender === 'admin' ? 'justify-end' : 'justify-start'}`}>
-                        <div className={`max-w-[80%] p-3 rounded-lg text-sm ${m.sender === 'admin' ? 'bg-blue-600 text-white rounded-tr-none' : 'bg-white border rounded-tl-none'
+                        <div className={`max-w-[85%] sm:max-w-[70%] p-3 rounded-lg text-sm ${m.sender === 'admin' ? 'bg-blue-600 text-white rounded-tr-none' : 'bg-white border rounded-tl-none'
                             }`}>
                             {m.image && <img src={m.image} alt="attachment" className="w-full rounded mb-2 max-h-40 object-cover" />}
-                            {m.text && <p>{m.text}</p>}
+                            {m.text && <p className="break-words">{m.text}</p>}
                             <div className={`text-[10px] opacity-70 text-right mt-1 ${m.sender === 'admin' ? 'text-blue-100' : 'text-gray-400'}`}>
                                 {new Date(m.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                             </div>
@@ -195,7 +195,7 @@ export default function AdminNegotiations() {
                             <button onClick={() => setShowCouponInput(false)} className="text-gray-400 hover:text-gray-600"><span className="sr-only">Close</span>✕</button>
                         </div>
                         <div className="space-y-3 mb-2 px-1">
-                            <div className="flex gap-3">
+                            <div className="flex flex-col sm:flex-row gap-2 sm:gap-4">
                                 <label className="flex items-center gap-1.5 cursor-pointer text-xs text-green-900 font-medium">
                                     <input
                                         type="radio"

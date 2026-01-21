@@ -93,7 +93,7 @@ export default function AccountPage() {
 
                 <div className="grid md:grid-cols-3 gap-8 items-start">
                     {/* Profile Card */}
-                    <div className="md:col-span-1 h-fit sticky top-24">
+                    <div className="md:col-span-1 h-fit md:sticky md:top-24">
                         <div className="bg-white p-6 rounded-xl border shadow-sm mb-4">
                             <div className="flex items-center gap-4 mb-6">
                                 <div className="h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold text-xl">

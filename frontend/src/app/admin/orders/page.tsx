@@ -187,7 +187,7 @@ export default function OrdersPage() {
 
             <div className="bg-white rounded-xl shadow-sm border overflow-hidden">
                 <div className="overflow-x-auto">
-                    <table className="w-full text-left">
+                    <table className="w-full text-left min-w-[900px]">
                         <thead className="bg-gray-50/50">
                             <tr className="border-b">
                                 <th className="px-6 py-4 font-semibold text-gray-700 w-[15%]">Order ID</th>
@@ -276,8 +276,8 @@ export default function OrdersPage() {
                                     key={i + 1}
                                     onClick={() => paginate(i + 1)}
                                     className={`w-8 h-8 flex items-center justify-center rounded-md text-sm font-medium transition-colors ${currentPage === i + 1
-                                            ? 'bg-gray-900 text-white'
-                                            : 'bg-white border text-gray-600 hover:bg-gray-100'
+                                        ? 'bg-gray-900 text-white'
+                                        : 'bg-white border text-gray-600 hover:bg-gray-100'
                                         }`}
                                 >
                                     {i + 1}

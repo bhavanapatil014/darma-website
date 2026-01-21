@@ -508,7 +508,7 @@ export default function CouponsPage() {
                 </div>
 
                 <div className="overflow-x-auto">
-                    <table className="w-full text-left">
+                    <table className="w-full text-left min-w-[900px]">
                         <thead>
                             <tr className="bg-gray-50 border-b border-gray-200 text-xs font-bold uppercase tracking-wider text-gray-500">
                                 <th className="py-4 px-6 w-[20%]">Code</th>

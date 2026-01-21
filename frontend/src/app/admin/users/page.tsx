@@ -131,8 +131,8 @@ export default function UsersPage() {
                 </div>
 
                 {/* Table */}
-                <div className="bg-white rounded-lg border shadow-sm overflow-hidden">
-                    <table className="w-full text-left text-sm">
+                <div className="bg-white rounded-lg border shadow-sm overflow-hidden overflow-x-auto">
+                    <table className="w-full text-left text-sm min-w-[800px]">
                         <thead className="bg-gray-50 text-gray-600 border-b">
                             <tr>
                                 <th className="p-4 font-semibold">Name</th>
