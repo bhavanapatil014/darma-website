@@ -154,13 +154,16 @@ export default function OrdersPage() {
                         />
                     </div>
 
-                    {/* Date Picker */}
-                    <input
-                        type="date"
-                        className="p-2 border rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-none w-full md:w-auto min-w-[150px]"
-                        value={searchDate}
-                        onChange={(e) => { setSearchDate(e.target.value); setCurrentPage(1); }}
-                    />
+                    {/* Date Picker with Icon */}
+                    <div className="relative">
+                        <svg className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500 pointer-events-none" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect width="18" height="18" x="3" y="4" rx="2" ry="2" /><line x1="16" x2="16" y1="2" y2="6" /><line x1="8" x2="8" y1="2" y2="6" /><line x1="3" x2="21" y1="10" y2="10" /></svg>
+                        <input
+                            type="date"
+                            className="pl-10 p-2 border rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-none w-full md:w-auto min-w-[150px] bg-white text-gray-700"
+                            value={searchDate}
+                            onChange={(e) => { setSearchDate(e.target.value); setCurrentPage(1); }}
+                        />
+                    </div>
 
                     {(searchQuery || searchDate) && (
                         <Button variant="ghost" onClick={() => { setSearchQuery(""); setSearchDate(""); setCurrentPage(1); }} className="text-xs text-red-500">
@@ -185,49 +188,42 @@ export default function OrdersPage() {
                 </div>
             </div>
 
-            {/* Mobile View: Cards */}
-            <div className="md:hidden space-y-4">
+            {/* Mobile View: Clean List */}
+            <div className="md:hidden flex flex-col gap-3">
                 {currentOrders.map((order) => (
-                    <div key={order._id} className="bg-white p-4 rounded-xl border shadow-sm space-y-3">
-                        <div className="flex justify-between items-start">
-                            <div>
-                                <span className="font-mono text-xs text-gray-500">#{order._id.slice(-6)}</span>
-                                <div className="font-medium text-gray-900 mt-1">{order.customerName}</div>
-                                <div className="text-xs text-gray-400">{order.email}</div>
-                            </div>
-                            <span className={`inline-flex items-center px-2 py-1 rounded text-xs font-bold capitalize border ${order.status === 'delivered' ? 'bg-green-50 text-green-700 border-green-200' :
-                                order.status === 'cancelled' ? 'bg-red-50 text-red-700 border-red-200' :
-                                    order.status === 'shipped' ? 'bg-blue-50 text-blue-700 border-blue-200' :
-                                        'bg-yellow-50 text-yellow-700 border-yellow-200'
+                    <div key={order._id} className="bg-white p-4 rounded-lg border border-gray-100 shadow-sm flex flex-col gap-3 active:scale-[0.99] transition-transform">
+                        {/* Top: ID and Status */}
+                        <div className="flex justify-between items-center">
+                            <span className="font-mono text-sm font-bold text-gray-900">#{order._id.slice(-6)}</span>
+                            <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wide border ${order.status === 'delivered' ? 'bg-green-100 text-green-700 border-green-200' :
+                                order.status === 'cancelled' ? 'bg-red-100 text-red-700 border-red-200' :
+                                    order.status === 'shipped' ? 'bg-blue-100 text-blue-700 border-blue-200' :
+                                        'bg-yellow-100 text-yellow-700 border-yellow-200'
                                 }`}>
                                 {order.status}
                             </span>
                         </div>
 
-                        <div className="bg-gray-50 p-3 rounded-lg text-sm space-y-1">
-                            <div className="flex justify-between text-gray-600">
-                                <span>Date:</span>
-                                <span>{new Date(order.createdAt).toLocaleDateString()}</span>
+                        {/* Middle: Details */}
+                        <div className="flex justify-between items-end border-b border-dashed border-gray-100 pb-3">
+                            <div>
+                                <div className="text-sm font-semibold text-gray-900">{order.customerName}</div>
+                                <div className="text-xs text-gray-400">{new Date(order.createdAt).toLocaleDateString()}</div>
                             </div>
-                            <div className="flex justify-between font-medium text-gray-900">
-                                <span>Total:</span>
-                                <span>₹{order.totalAmount.toLocaleString()}</span>
+                            <div className="text-right">
+                                <div className="text-sm font-bold text-gray-900">₹{order.totalAmount.toLocaleString()}</div>
+                                <div className="text-xs text-gray-400">{order.products?.length || 0} items</div>
                             </div>
                         </div>
 
-                        <div className="pt-2 border-t flex justify-between items-center">
-                            <div className="text-xs text-gray-500">
-                                {order.products?.length || 0} items
-                            </div>
-                            <Button
-                                variant="outline"
-                                size="sm"
-                                onClick={() => openUpdateModal(order)}
-                                className="w-full sm:w-auto"
-                            >
-                                Manage Order
-                            </Button>
-                        </div>
+                        {/* Bottom: Action */}
+                        <button
+                            onClick={() => openUpdateModal(order)}
+                            className="w-full py-2 text-xs font-bold text-gray-600 bg-gray-50 hover:bg-gray-100 rounded-md transition-colors flex items-center justify-center gap-2"
+                        >
+                            View & Manage
+                            <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7"></path></svg>
+                        </button>
                     </div>
                 ))}
             </div>
