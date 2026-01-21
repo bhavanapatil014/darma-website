@@ -285,7 +285,7 @@ export default function CouponsPage() {
 
 
     return (
-        <div className="space-y-8 max-w-[1400px] mx-auto p-6">
+        <div className="space-y-4 md:space-y-8 max-w-[1400px] mx-auto p-2 md:p-6">
             <div className="flex items-center justify-between">
                 <div>
                     <h1 className="text-3xl font-bold tracking-tight text-gray-900">Coupons</h1>
