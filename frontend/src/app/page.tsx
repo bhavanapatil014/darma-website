@@ -68,7 +68,7 @@ export default async function Home() {
               <Button size="lg" className="rounded-full px-8 bg-white text-teal-900 hover:bg-gray-100 font-bold" asChild>
                 <Link href="/shop">Shop Now</Link>
               </Button>
-              <Button size="lg" variant="outline" className="rounded-full px-8 bg-transparent text-white border-white hover:bg-white/20 hover:text-white" asChild>
+              <Button size="lg" className="rounded-full px-8 bg-white text-teal-900 hover:bg-gray-100 font-bold" asChild>
                 <Link href="/shop?category=cleansers">Explore Cleansers</Link>
               </Button>
             </div>
