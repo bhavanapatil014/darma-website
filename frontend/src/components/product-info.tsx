@@ -5,11 +5,12 @@ import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { useCart } from "@/lib/cart-context"
 import { Product } from "@/lib/data"
-import { ShoppingCart } from "lucide-react"
+import { ShoppingCart, Check } from "lucide-react"
 
 export function ProductDetails({ product }: { product: Product }) {
     const { addItem } = useCart()
     const router = useRouter()
+    const [showSuccessModal, setShowSuccessModal] = useState(false)
 
     // unifiedVariants: Combine explicit variants with the base product (if it has a size)
     // This ensures "30ml" (Base) shows up alongside "100ml" (Variant)
@@ -247,6 +248,7 @@ export function ProductDetails({ product }: { product: Product }) {
                                 name: selectedVariant ? `${product.name} (${selectedVariant.size})` : product.name,
                                 id: selectedVariant ? `${product.id}-${selectedVariant.size}` : product.id
                             }, quantity)
+                            setShowSuccessModal(true);
                         }}
                     >
                         Add to Cart
@@ -274,6 +276,42 @@ export function ProductDetails({ product }: { product: Product }) {
                     </Button>
                 </div>
             </div>
+
+            {/* Success Modal */}
+            {showSuccessModal && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
+                    <div className="bg-white rounded-2xl shadow-2xl w-full max-w-sm overflow-hidden animate-in zoom-in-95 duration-200">
+                        <div className="p-6 text-center space-y-4">
+                            <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-2">
+                                <Check className="w-8 h-8 text-green-600" />
+                            </div>
+
+                            <div>
+                                <h3 className="text-xl font-bold text-gray-900">Added to Cart!</h3>
+                                <p className="text-gray-500 mt-1 text-sm">
+                                    <span className="font-semibold text-gray-800">{quantity}x</span> {product.name} {selectedVariant ? `(${selectedVariant.size})` : ''}
+                                </p>
+                            </div>
+
+                            <div className="grid grid-cols-1 gap-3 mt-6">
+                                <Button
+                                    onClick={() => router.push('/cart')}
+                                    className="w-full bg-blue-600 hover:bg-blue-700 text-white h-11"
+                                >
+                                    View Cart & Checkout
+                                </Button>
+                                <Button
+                                    variant="outline"
+                                    onClick={() => setShowSuccessModal(false)}
+                                    className="w-full border-gray-200 hover:bg-gray-50 h-11"
+                                >
+                                    Continue Shopping
+                                </Button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div >
     )
 }
