@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button"
 import { useCart } from "@/lib/cart-context"
 import { Product } from "@/lib/data"
 import { ShoppingCart, Check, X } from "lucide-react"
+import { WishlistButton } from "@/components/wishlist-button"
 
 export function ProductDetails({ product }: { product: Product }) {
     const { addItem } = useCart()
@@ -254,6 +255,7 @@ export function ProductDetails({ product }: { product: Product }) {
                             addItem({
                                 ...product,
                                 price: currentPrice,
+                                mrp: currentMrp || product.mrp,
                                 name: selectedVariant ? `${product.name} (${selectedVariant.size})` : product.name,
                                 id: selectedVariant ? `${product.id}-${selectedVariant.size}` : product.id
                             }, quantity)
@@ -283,6 +285,18 @@ export function ProductDetails({ product }: { product: Product }) {
                     >
                         Buy It Now
                     </Button>
+                </div>
+
+                <div className="flex justify-center pt-2">
+                    <WishlistButton product={{
+                        ...product,
+                        // Ensure we pass the VARIANT SPECIFIC ID and details so wishlist treats it uniquely
+                        id: selectedVariant ? `${product.id}-${selectedVariant.size}` : product.id,
+                        name: selectedVariant ? `${product.name} (${selectedVariant.size})` : product.name,
+                        price: currentPrice,
+                        mrp: currentMrp || product.mrp,
+                        // We keep the main image or variant image if we had one
+                    }} />
                 </div>
             </div>
 

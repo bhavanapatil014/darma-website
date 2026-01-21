@@ -57,7 +57,7 @@ export default async function ProductPage(props: {
                                 <NegotiationChat product={product} />
 
                                 <div className="flex items-center justify-center gap-8 text-sm text-gray-500 pt-4">
-                                    <WishlistButton product={product} />
+                                    {/* <WishlistButton product={product} /> Moved to ProductDetails for variant handling */}
                                     <ShareButton title={product.name} text={product.description} />
                                 </div>
                             </div>
