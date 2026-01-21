@@ -196,8 +196,8 @@ export default function CouponsPage() {
 
     function handleEdit(coupon: Coupon) {
         console.log("Handle Edit Triggered for:", coupon);
-        console.log("Coupon Brands from DB:", coupon.applicableBrands);
-
+        // Ensure form is open state-wise
+        setShowForm(true);
         setIsEditing(true);
         setEditId(coupon._id);
 
@@ -219,8 +219,15 @@ export default function CouponsPage() {
             applicableBrands: safeBrands
         });
 
-        console.log("FormData set with brands:", safeBrands);
-        window.scrollTo({ top: 0, behavior: 'smooth' });
+        // Scroll to the form section with a slight delay to allow for rendering
+        setTimeout(() => {
+            const formSection = document.getElementById('coupon-form-section');
+            if (formSection) {
+                formSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            } else {
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            }
+        }, 100);
     }
 
 
@@ -293,7 +300,7 @@ export default function CouponsPage() {
 
             {/* Form Section (Collapsible) */}
             {showForm && (
-                <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-200 animate-in slide-in-from-top-4 fade-in duration-200">
+                <div id="coupon-form-section" className="bg-white p-6 rounded-xl shadow-sm border border-gray-200 animate-in slide-in-from-top-4 fade-in duration-200">
                     <div className="flex items-center justify-between mb-6 border-b pb-4">
                         <h2 className="text-xl font-semibold text-gray-800">
                             {isEditing ? 'Edit Coupon' : 'Create New Coupon'}
@@ -565,10 +572,7 @@ export default function CouponsPage() {
 
                                 <div className="flex gap-2 pt-2">
                                     <Button size="sm" variant="outline" className="flex-1 text-sky-600 border-sky-200"
-                                        onClick={() => {
-                                            handleEdit(coupon);
-                                            setShowForm(true);
-                                        }}>
+                                        onClick={() => handleEdit(coupon)}>
                                         Edit
                                     </Button>
                                     <Button size="sm" variant="outline" className="flex-1 text-red-600 border-red-200 hover:bg-red-50" onClick={() => handleDelete(coupon._id)}>
@@ -664,10 +668,7 @@ export default function CouponsPage() {
                                         <td className="py-4 px-6 text-right">
                                             <div className="flex justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
                                                 <Button size="sm" variant="outline" className="h-8 text-sky-600 border-sky-200 hover:bg-sky-50"
-                                                    onClick={() => {
-                                                        handleEdit(coupon);
-                                                        setShowForm(true); // Open Form
-                                                    }}>
+                                                    onClick={() => handleEdit(coupon)}>
                                                     Edit
                                                 </Button>
                                                 <Button size="sm" variant="ghost" className="h-8 text-red-500 hover:bg-red-50 hover:text-red-700" onClick={() => handleDelete(coupon._id)}>Delete</Button>
