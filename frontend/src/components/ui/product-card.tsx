@@ -23,12 +23,13 @@ export function ProductCard({ product, isWishlist = false }: ProductCardProps) {
     const { addToWishlist, removeFromWishlist, isInWishlist } = useWishlist();
     const [showSuccessPopup, setShowSuccessPopup] = useState(false);
 
-    useEffect(() => {
-        if (showSuccessPopup) {
-            const timer = setTimeout(() => setShowSuccessPopup(false), 3500);
-            return () => clearTimeout(timer);
-        }
-    }, [showSuccessPopup]);
+    // Auto-close removed to allow user to choose action
+    // useEffect(() => {
+    //     if (showSuccessPopup) {
+    //         const timer = setTimeout(() => setShowSuccessPopup(false), 3500);
+    //         return () => clearTimeout(timer);
+    //     }
+    // }, [showSuccessPopup]);
 
     return (
         <>

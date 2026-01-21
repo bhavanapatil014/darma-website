@@ -139,13 +139,13 @@ export default function AdminNegotiations() {
     return (
         <div className="bg-white rounded-lg shadow border flex flex-col h-[85vh]">
             <div className="bg-gray-100 p-4 border-b flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
-                <div className="w-full sm:w-auto">
-                    <h3 className="font-bold truncate">{chatData?.product?.name}</h3>
+                <div className="w-full sm:flex-1 min-w-0">
+                    <h3 className="font-bold truncate text-base text-gray-900" title={chatData?.product?.name}>{chatData?.product?.name}</h3>
                     <span className="text-xs text-gray-500 block truncate">with {chatData?.user?.name} (₹{chatData?.product?.price})</span>
                 </div>
-                <div className="flex items-center gap-3 w-full sm:w-auto justify-between sm:justify-end">
+                <div className="flex items-center gap-2 w-full sm:w-auto justify-between sm:justify-end shrink-0">
                     <select
-                        className={`text-xs p-1.5 rounded border font-medium outline-none cursor-pointer flex-1 sm:flex-none ${chatData?.status === 'deal_reached' ? 'bg-green-100 text-green-700 border-green-200' :
+                        className={`text-xs p-1.5 rounded border font-medium outline-none cursor-pointer flex-1 sm:flex-none max-w-[140px] ${chatData?.status === 'deal_reached' ? 'bg-green-100 text-green-700 border-green-200' :
                             chatData?.status === 'closed' ? 'bg-gray-100 text-gray-600 border-gray-200' :
                                 'bg-blue-50 text-blue-600 border-blue-200'
                             }`}
@@ -168,7 +168,7 @@ export default function AdminNegotiations() {
                         <option value="deal_reached">Deal Reached</option>
                         <option value="closed">Closed</option>
                     </select>
-                    <Button variant="ghost" size="sm" onClick={() => setSelectedId(null)}>Back</Button>
+                    <Button variant="ghost" size="sm" onClick={() => setSelectedId(null)} className="shrink-0">Back</Button>
                 </div>
             </div>
 
