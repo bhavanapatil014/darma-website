@@ -157,7 +157,7 @@ export default function OrdersPage() {
                     {/* Date Picker */}
                     <input
                         type="date"
-                        className="p-2 border rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-none"
+                        className="p-2 border rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-none w-full md:w-auto min-w-[150px]"
                         value={searchDate}
                         onChange={(e) => { setSearchDate(e.target.value); setCurrentPage(1); }}
                     />
@@ -185,7 +185,55 @@ export default function OrdersPage() {
                 </div>
             </div>
 
-            <div className="bg-white rounded-xl shadow-sm border overflow-hidden">
+            {/* Mobile View: Cards */}
+            <div className="md:hidden space-y-4">
+                {currentOrders.map((order) => (
+                    <div key={order._id} className="bg-white p-4 rounded-xl border shadow-sm space-y-3">
+                        <div className="flex justify-between items-start">
+                            <div>
+                                <span className="font-mono text-xs text-gray-500">#{order._id.slice(-6)}</span>
+                                <div className="font-medium text-gray-900 mt-1">{order.customerName}</div>
+                                <div className="text-xs text-gray-400">{order.email}</div>
+                            </div>
+                            <span className={`inline-flex items-center px-2 py-1 rounded text-xs font-bold capitalize border ${order.status === 'delivered' ? 'bg-green-50 text-green-700 border-green-200' :
+                                order.status === 'cancelled' ? 'bg-red-50 text-red-700 border-red-200' :
+                                    order.status === 'shipped' ? 'bg-blue-50 text-blue-700 border-blue-200' :
+                                        'bg-yellow-50 text-yellow-700 border-yellow-200'
+                                }`}>
+                                {order.status}
+                            </span>
+                        </div>
+
+                        <div className="bg-gray-50 p-3 rounded-lg text-sm space-y-1">
+                            <div className="flex justify-between text-gray-600">
+                                <span>Date:</span>
+                                <span>{new Date(order.createdAt).toLocaleDateString()}</span>
+                            </div>
+                            <div className="flex justify-between font-medium text-gray-900">
+                                <span>Total:</span>
+                                <span>₹{order.totalAmount.toLocaleString()}</span>
+                            </div>
+                        </div>
+
+                        <div className="pt-2 border-t flex justify-between items-center">
+                            <div className="text-xs text-gray-500">
+                                {order.products?.length || 0} items
+                            </div>
+                            <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => openUpdateModal(order)}
+                                className="w-full sm:w-auto"
+                            >
+                                Manage Order
+                            </Button>
+                        </div>
+                    </div>
+                ))}
+            </div>
+
+            {/* Desktop View: Table */}
+            <div className="hidden md:block bg-white rounded-xl shadow-sm border overflow-hidden">
                 <div className="overflow-x-auto">
                     <table className="w-full text-left min-w-[900px]">
                         <thead className="bg-gray-50/50">
@@ -255,22 +303,30 @@ export default function OrdersPage() {
                         </tbody>
                     </table>
                 </div>
+            </div>
 
-                {/* Pagination Controls */}
-                {totalPages > 1 && (
-                    <div className="flex items-center justify-between p-4 border-t bg-gray-50">
-                        <div className="text-sm text-gray-500">
-                            Showing {indexOfFirstItem + 1}-{Math.min(indexOfLastItem, filteredOrders.length)} of {filteredOrders.length}
-                        </div>
-                        <div className="flex gap-2">
-                            <Button
-                                variant="outline"
-                                size="sm"
-                                onClick={() => paginate(currentPage - 1)}
-                                disabled={currentPage === 1}
-                            >
-                                Previous
-                            </Button>
+            {/* Pagination Controls */}
+            {totalPages > 1 && (
+                <div className="flex items-center justify-between p-4 border-t bg-gray-50 rounded-b-xl border border-gray-200">
+                    <div className="text-sm text-gray-500 hidden sm:block">
+                        Showing {indexOfFirstItem + 1}-{Math.min(indexOfLastItem, filteredOrders.length)} of {filteredOrders.length}
+                    </div>
+                    {/* Mobile Page Indicator */}
+                    <div className="text-sm font-medium text-gray-700 sm:hidden">
+                        Page {currentPage} of {totalPages}
+                    </div>
+
+                    <div className="flex gap-2">
+                        <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => paginate(currentPage - 1)}
+                            disabled={currentPage === 1}
+                        >
+                            Previous
+                        </Button>
+                        {/* Desktop: Show all pages */}
+                        <div className="hidden sm:flex gap-1">
                             {Array.from({ length: totalPages }, (_, i) => (
                                 <button
                                     key={i + 1}
@@ -283,18 +339,18 @@ export default function OrdersPage() {
                                     {i + 1}
                                 </button>
                             ))}
-                            <Button
-                                variant="outline"
-                                size="sm"
-                                onClick={() => paginate(currentPage + 1)}
-                                disabled={currentPage === totalPages}
-                            >
-                                Next
-                            </Button>
                         </div>
+                        <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => paginate(currentPage + 1)}
+                            disabled={currentPage === totalPages}
+                        >
+                            Next
+                        </Button>
                     </div>
-                )}
-            </div>
+                </div>
+            )}
 
             {/* Manage Order Modal */}
             {isModalOpen && selectedOrder && (
