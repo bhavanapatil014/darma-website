@@ -1,0 +1,43 @@
+Implemented Vercel Speed Insights for Next.js
+===============================================
+
+Successfully installed and configured Vercel Speed Insights for the Next.js 16.1.0 application with App Router.
+
+Changes Made:
+-------------
+
+1. **Installed @vercel/speed-insights package**
+   - Used npm to install @vercel/speed-insights
+   - Package added to dependencies in package.json
+   - package-lock.json updated with new dependency tree
+
+2. **Updated Root Layout (src/app/layout.tsx)**
+   - Added import: `import { SpeedInsights } from "@vercel/speed-insights/next"`
+   - Added <SpeedInsights /> component inside the <body> tag
+   - Placed after the <Providers> component and before the Razorpay script
+   - This ensures Speed Insights tracks all page navigations and interactions
+
+Implementation Details:
+-----------------------
+
+- **Next.js Version**: 16.1.0 (supports App Router, version > 13.5)
+- **Router Type**: App Router (modern Next.js setup)
+- **Package Manager**: npm
+- **Integration Type**: Used '@vercel/speed-insights/next' for optimal App Router support
+- **Component Placement**: Inside <body> tag in root layout for application-wide tracking
+
+Testing & Verification:
+-----------------------
+
+✓ Build completed successfully (npm run build)
+✓ No new linting errors introduced
+✓ Dependencies properly installed and lock file updated
+✓ All changes staged with git
+
+The SpeedInsights component will now automatically track Core Web Vitals and performance metrics when the application is deployed to Vercel. No additional configuration is required - the component works out of the box with Vercel's infrastructure.
+
+Files Modified:
+---------------
+- frontend/package.json (added @vercel/speed-insights dependency)
+- frontend/package-lock.json (updated with new dependency tree)
+- frontend/src/app/layout.tsx (added SpeedInsights import and component)
