@@ -23,16 +23,17 @@ router.get('/my-orders', verifyToken, async (req, res) => {
             return res.status(404).json({ message: "User not found" });
         }
 
-        console.log("Fetching orders for user:", user.email, "and ID:", req.userId);
+        console.log(`Fetching orders - UserID: ${req.userId}, Email: ${user.email}`);
 
-        // Find orders where EITHER the email matches OR the userId matches
+        // Robust Query: Match userId string OR case-insensitive email
         const orders = await Order.find({
             $or: [
-                { email: user.email },
-                { userId: req.userId }
+                { userId: req.userId.toString() }, // Ensure string match
+                { email: { $regex: new RegExp(`^${user.email}$`, 'i') } } // Case-insensitive email match
             ]
         }).sort({ createdAt: -1 });
 
+        console.log(`Found ${orders.length} orders for user.`);
         res.json(orders);
     } catch (error) {
         console.error("Error fetching my orders:", error);
