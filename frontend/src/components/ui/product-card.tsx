@@ -11,6 +11,7 @@ import { useWishlist } from "@/lib/wishlist-context";
 interface ProductCardProps {
     product: Product;
     isWishlist?: boolean;
+    priority?: boolean;
 }
 
 import { useState, useEffect } from "react";
@@ -18,7 +19,7 @@ import { Check, X } from "lucide-react";
 
 // ... imports
 
-export function ProductCard({ product, isWishlist = false }: ProductCardProps) {
+export function ProductCard({ product, isWishlist = false, priority = false }: ProductCardProps) {
     const { addItem } = useCart();
     const router = useRouter();
     const { addToWishlist, removeFromWishlist, isInWishlist } = useWishlist();
@@ -44,6 +45,7 @@ export function ProductCard({ product, isWishlist = false }: ProductCardProps) {
                                 src={product.image || product.images![0]}
                                 alt={product.name}
                                 fill
+                                priority={priority}
                                 sizes="(max-width: 768px) 50vw, (max-width: 1200px) 33vw, 20vw"
                                 className="object-cover group-hover:scale-105 transition-transform duration-700"
                             />
