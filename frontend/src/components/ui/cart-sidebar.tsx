@@ -52,7 +52,7 @@ export function CartSidebar() {
             )}>
                 <div className="flex items-center justify-between p-4 border-b">
                     <h2 className="text-lg font-semibold">Your Cart</h2>
-                    <Button variant="ghost" size="icon" onClick={() => setIsOpen(false)}>
+                    <Button variant="ghost" size="icon" onClick={() => setIsOpen(false)} aria-label="Close cart">
                         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 6 6 18" /><path d="m6 6 12 12" /></svg>
                     </Button>
                 </div>
@@ -164,6 +164,7 @@ export function CartSidebar() {
                                     </div>
                                     <button
                                         onClick={() => removeItem(item.id)}
+                                        aria-label="Remove item"
                                         className="text-gray-400 hover:text-red-500 h-fit"
                                     >
                                         <span className="sr-only">Remove</span>
