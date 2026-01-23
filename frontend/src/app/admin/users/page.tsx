@@ -131,7 +131,7 @@ export default function UsersPage() {
                 </div>
 
                 {/* Table */}
-                <div className="bg-white rounded-lg border shadow-sm overflow-hidden overflow-x-auto">
+                <div className="bg-white rounded-lg border shadow-sm overflow-hidden overflow-x-auto min-h-[500px]">
                     <table className="w-full text-left text-sm min-w-[800px]">
                         <thead className="bg-gray-50 text-gray-600 border-b">
                             <tr>
@@ -144,47 +144,60 @@ export default function UsersPage() {
                             </tr>
                         </thead>
                         <tbody className="divide-y">
-                            {(activeTab === 'admins' ? admins : customers).map(u => (
-                                <tr key={u._id} className={`hover:bg-gray-50 transition-colors ${u.isDeleted ? 'bg-red-50/50 opacity-75' : ''}`}>
-                                    <td className="p-4 font-medium">{u.name}</td>
-                                    <td className="p-4 text-gray-600 space-y-1">
-                                        <div>{u.originalEmail || u.email}</div>
-                                        {u.phoneNumber && <div className="text-xs text-gray-400">{u.phoneNumber}</div>}
-                                    </td>
-                                    <td className="p-4">
-                                        <span className={`px-2 py-1 rounded-full text-xs font-medium ${u.role === 'superadmin' ? 'bg-purple-100 text-purple-700' : u.role === 'admin' ? 'bg-teal-100 text-teal-700' : 'bg-blue-50 text-blue-600'}`}>
-                                            {u.role.toUpperCase()}
-                                        </span>
-                                    </td>
-                                    <td className="p-4 text-gray-500">{new Date(u.createdAt).toLocaleDateString()}</td>
-                                    <td className="p-4">
-                                        {u.isDeleted ? (
-                                            <div className="flex flex-col gap-1">
-                                                <span className={`inline-flex items-center px-2 py-1 rounded text-xs font-bold ${u.deletedBy === 'admin' ? 'bg-red-100 text-red-700' : 'bg-orange-100 text-orange-700'}`}>
-                                                    {u.deletedBy === 'admin' ? 'ADMIN REMOVED' : 'USER DELETED'}
-                                                </span>
-                                                {u.deletedAt && <span className="text-[10px] text-gray-400">on {new Date(u.deletedAt).toLocaleDateString()}</span>}
-                                            </div>
-                                        ) : (
-                                            <span className="inline-flex items-center px-2 py-1 rounded text-xs font-medium bg-green-100 text-green-700">
-                                                ACTIVE
+                            {loading ? (
+                                // Skeleton Loader Rows
+                                Array.from({ length: 5 }).map((_, i) => (
+                                    <tr key={i} className="animate-pulse">
+                                        <td className="p-4"><div className="h-4 bg-gray-200 rounded w-24"></div></td>
+                                        <td className="p-4"><div className="h-4 bg-gray-200 rounded w-48"></div></td>
+                                        <td className="p-4"><div className="h-6 bg-gray-200 rounded-full w-16"></div></td>
+                                        <td className="p-4"><div className="h-4 bg-gray-200 rounded w-20"></div></td>
+                                        <td className="p-4"><div className="h-6 bg-gray-200 rounded w-16"></div></td>
+                                        <td className="p-4"></td>
+                                    </tr>
+                                ))
+                            ) : (
+                                (activeTab === 'admins' ? admins : customers).map(u => (
+                                    <tr key={u._id} className={`hover:bg-gray-50 transition-colors ${u.isDeleted ? 'bg-red-50/50 opacity-75' : ''}`}>
+                                        <td className="p-4 font-medium">{u.name}</td>
+                                        <td className="p-4 text-gray-600 space-y-1">
+                                            <div>{u.originalEmail || u.email}</div>
+                                            {u.phoneNumber && <div className="text-xs text-gray-400">{u.phoneNumber}</div>}
+                                        </td>
+                                        <td className="p-4">
+                                            <span className={`px-2 py-1 rounded-full text-xs font-medium ${u.role === 'superadmin' ? 'bg-purple-100 text-purple-700' : u.role === 'admin' ? 'bg-teal-100 text-teal-700' : 'bg-blue-50 text-blue-600'}`}>
+                                                {u.role.toUpperCase()}
                                             </span>
-                                        )}
-                                    </td>
-                                    <td className="p-4 text-right">
-                                        {!u.isDeleted && u._id !== user?.id && (
-                                            <button
-                                                onClick={() => deleteUser(u._id)}
-                                                className="p-2 text-red-500 hover:bg-red-50 rounded-full transition-colors"
-                                                title="Delete User"
-                                            >
-                                                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 6h18" /><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6" /><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2" /><line x1="10" y1="11" x2="10" y2="17" /><line x1="14" y1="11" x2="14" y2="17" /></svg>
-                                            </button>
-                                        )}
-                                    </td>
-                                </tr>
-                            ))}
-                            {(activeTab === 'admins' ? admins : customers).length === 0 && (
+                                        </td>
+                                        <td className="p-4 text-gray-500">{new Date(u.createdAt).toLocaleDateString()}</td>
+                                        <td className="p-4">
+                                            {u.isDeleted ? (
+                                                <div className="flex flex-col gap-1">
+                                                    <span className={`inline-flex items-center px-2 py-1 rounded text-xs font-bold ${u.deletedBy === 'admin' ? 'bg-red-100 text-red-700' : 'bg-orange-100 text-orange-700'}`}>
+                                                        {u.deletedBy === 'admin' ? 'ADMIN REMOVED' : 'USER DELETED'}
+                                                    </span>
+                                                    {u.deletedAt && <span className="text-[10px] text-gray-400">on {new Date(u.deletedAt).toLocaleDateString()}</span>}
+                                                </div>
+                                            ) : (
+                                                <span className="inline-flex items-center px-2 py-1 rounded text-xs font-medium bg-green-100 text-green-700">
+                                                    ACTIVE
+                                                </span>
+                                            )}
+                                        </td>
+                                        <td className="p-4 text-right">
+                                            {!u.isDeleted && u._id !== user?.id && (
+                                                <button
+                                                    onClick={() => deleteUser(u._id)}
+                                                    className="p-2 text-red-500 hover:bg-red-50 rounded-full transition-colors"
+                                                    title="Delete User"
+                                                >
+                                                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 6h18" /><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6" /><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2" /><line x1="10" y1="11" x2="10" y2="17" /><line x1="14" y1="11" x2="14" y2="17" /></svg>
+                                                </button>
+                                            )}
+                                        </td>
+                                    </tr>
+                                )))}
+                            {(!loading && (activeTab === 'admins' ? admins : customers).length === 0) && (
                                 <tr>
                                     <td colSpan={5} className="p-8 text-center text-muted-foreground">No users found in this category.</td>
                                 </tr>
