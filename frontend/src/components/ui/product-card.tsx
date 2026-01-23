@@ -112,8 +112,8 @@ export function ProductCard({ product, isWishlist = false }: ProductCardProps) {
                             <span className="font-bold text-sm text-gray-900">₹{product.price}</span>
                             {product.mrp && product.mrp > product.price && (
                                 <>
-                                    <span className="text-xs text-gray-400 line-through decoration-gray-400">₹{product.mrp}</span>
-                                    <span className="text-[10px] font-bold text-orange-500 truncate">
+                                    <span className="text-xs text-gray-500 line-through decoration-gray-500">₹{product.mrp}</span>
+                                    <span className="text-[10px] font-bold text-orange-700 truncate">
                                         ({Math.round(((product.mrp - product.price) / product.mrp) * 100)}% OFF)
                                     </span>
                                 </>
