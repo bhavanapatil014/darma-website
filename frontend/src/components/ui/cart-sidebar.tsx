@@ -46,10 +46,13 @@ export function CartSidebar() {
 
     return (
         <>
-            <div className={cn(
-                "fixed inset-y-0 right-0 w-full md:w-[400px] bg-white shadow-lg transform transition-transform ease-in-out duration-300 z-50 flex flex-col",
-                isOpen ? "translate-x-0" : "translate-x-full"
-            )}>
+            <div
+                aria-hidden={!isOpen}
+                className={cn(
+                    "fixed inset-y-0 right-0 w-full md:w-[400px] bg-white shadow-lg transform transition-all ease-in-out duration-300 z-50 flex flex-col",
+                    isOpen ? "translate-x-0 visible" : "translate-x-full invisible"
+                )}
+            >
                 <div className="flex items-center justify-between p-4 border-b">
                     <h2 className="text-lg font-semibold">Your Cart</h2>
                     <Button variant="ghost" size="icon" onClick={() => setIsOpen(false)} aria-label="Close cart">
