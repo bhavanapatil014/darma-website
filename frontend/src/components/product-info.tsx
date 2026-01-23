@@ -100,7 +100,7 @@ export function ProductDetails({ product }: { product: Product }) {
                         )}
                         <p className="text-3xl font-bold text-gray-900">₹{currentPrice.toFixed(2)}</p>
                         {currentMrp && currentMrp > currentPrice && (
-                            <p className="text-lg font-bold text-red-500 mb-1">
+                            <p className="text-lg font-bold text-red-700 mb-1">
                                 {Math.round(((currentMrp - currentPrice) / currentMrp) * 100)}% off
                             </p>
                         )}
@@ -165,7 +165,7 @@ export function ProductDetails({ product }: { product: Product }) {
                                     <div className="mt-auto flex flex-col items-start w-full">
                                         <div className="flex flex-wrap items-baseline gap-x-1.5 w-full">
                                             {v.mrp && v.mrp > v.price && (
-                                                <span className="text-xs text-gray-400 line-through">₹{v.mrp}</span>
+                                                <span className="text-xs text-gray-500 line-through">₹{v.mrp}</span>
                                             )}
                                             <span className="font-bold text-gray-900">₹{v.price}</span>
                                         </div>
