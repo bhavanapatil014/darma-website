@@ -1,5 +1,6 @@
 "use client"
 import Link from "next/link"
+import Image from "next/image";
 import NegotiationBtn from "./negotiation-btn";
 import { useRouter } from "next/navigation";
 import { Button } from "./button";
@@ -39,10 +40,12 @@ export function ProductCard({ product, isWishlist = false }: ProductCardProps) {
                     {/* ... image logic ... */}
                     <div className="absolute inset-0 bg-gray-50 flex items-center justify-center">
                         {product.image || (product.images && product.images.length > 0) ? (
-                            <img
+                            <Image
                                 src={product.image || product.images![0]}
                                 alt={product.name}
-                                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
+                                fill
+                                sizes="(max-width: 768px) 50vw, (max-width: 1200px) 33vw, 20vw"
+                                className="object-cover group-hover:scale-105 transition-transform duration-700"
                             />
                         ) : (
                             <div className="text-gray-400 font-medium">No Image</div>
