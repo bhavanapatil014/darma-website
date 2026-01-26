@@ -15,6 +15,7 @@ const geistMono = Geist_Mono({
 import { Shell } from "@/components/layout/shell";
 import { Providers } from "@/components/providers";
 import { Toaster } from "sonner";
+import { SpeedInsights } from "@vercel/speed-insights/next";
 
 export const metadata: Metadata = {
   title: "Venkata Derma - Premium Skincare & Dermatology",
@@ -52,6 +53,7 @@ export default function RootLayout({
           </Shell>
           <Toaster position="top-center" richColors />
         </Providers>
+        <SpeedInsights />
         <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
       </body>
     </html>
