@@ -112,14 +112,28 @@ const CheckoutContent = () => {
             return;
         }
 
+        const formData = new FormData(e.target as HTMLFormElement);
+        const firstName = formData.get('firstName') as string;
+        const lastName = formData.get('lastName') as string;
+        const email = formData.get('email') as string;
+        const address = formData.get('address') as string;
+        const city = formData.get('city') as string;
+        const zipCode = formData.get('zipCode') as string;
+        const phone = formData.get('phone') as string;
+
+        if (!firstName || !lastName || !email || !address || !city || !zipCode || !phone) {
+            alert("Please fill in all mandatory fields.");
+            return;
+        }
+
+
         setIsLoading(true);
 
-        const formData = new FormData(e.target as HTMLFormElement);
         const customerData = {
-            name: `${formData.get('firstName')} ${formData.get('lastName')}`,
-            email: (user?.email || formData.get('email')) as string,
-            address: `${formData.get('address')}, ${formData.get('city')} ${formData.get('zipCode')}`,
-            phone: formData.get('phone') as string || "9999999999",
+            name: `${firstName} ${lastName}`,
+            email: user?.email || email,
+            address: `${address}, ${city} ${zipCode}`,
+            phone: phone || "9999999999",
         }
 
         try {
