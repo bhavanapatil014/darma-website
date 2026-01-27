@@ -27,11 +27,18 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         '/login',
         '/register',
         '/cart',
+        '/about',
+        '/contact',
+        '/faq',
+        '/terms',
+        '/privacy-policy',
+        '/refund-policy',
+        '/shipping-policy',
     ].map((route) => ({
         url: `${baseUrl}${route}`,
         lastModified: new Date(),
         changeFrequency: 'daily' as const,
-        priority: 1,
+        priority: route === '' ? 1 : 0.8,
     }))
 
     // 2. Dynamic Product Routes

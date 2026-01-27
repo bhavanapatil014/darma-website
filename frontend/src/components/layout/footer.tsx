@@ -45,6 +45,9 @@ export function Footer() {
                             <li><Link href="/contact" className="hover:text-primary">Contact</Link></li>
                             <li><Link href="/faq" className="hover:text-primary">FAQ</Link></li>
                             <li><Link href="/terms" className="hover:text-primary">Terms & Conditions</Link></li>
+                            <li><Link href="/privacy-policy" className="hover:text-primary">Privacy Policy</Link></li>
+                            <li><Link href="/refund-policy" className="hover:text-primary">Refund Policy</Link></li>
+                            <li><Link href="/shipping-policy" className="hover:text-primary">Shipping Policy</Link></li>
                         </ul>
                     </div>
 

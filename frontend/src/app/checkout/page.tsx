@@ -31,6 +31,39 @@ const CheckoutContent = () => {
     const [orderId, setOrderId] = useState<string>("");
     const [isLoading, setIsLoading] = useState(false);
     const [paymentMethod, setPaymentMethod] = useState("card");
+    const [shippingCost, setShippingCost] = useState(0);
+    const [pincodeStatus, setPincodeStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
+
+    // Calculate Shipping
+    useEffect(() => {
+        if (total > 0 && total < 499) {
+            setShippingCost(50);
+        } else {
+            setShippingCost(0);
+        }
+    }, [total]);
+
+    const finalTotal = total + shippingCost;
+
+    const checkPincode = async (code: string) => {
+        if (code.length !== 6) return;
+        setPincodeStatus('loading');
+        // Simulated API Delay
+        await new Promise(resolve => setTimeout(resolve, 800));
+
+        // Mock Validation: Allow all 6 digit codes for now
+        if (/^[1-9][0-9]{5}$/.test(code)) {
+            setPincodeStatus('success');
+        } else {
+            setPincodeStatus('error');
+        }
+    };
+
+    const handleZipChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const val = e.target.value;
+        if (val.length === 6) checkPincode(val);
+        else setPincodeStatus('idle');
+    }
 
     // Fetch Buy Now Item Details
     useEffect(() => {
@@ -73,6 +106,12 @@ const CheckoutContent = () => {
 
     const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
+
+        if (pincodeStatus !== 'success') {
+            alert("Please provide a valid serviceable pincode.");
+            return;
+        }
+
         setIsLoading(true);
 
         const formData = new FormData(e.target as HTMLFormElement);
@@ -91,7 +130,7 @@ const CheckoutContent = () => {
                 const orderRes = await fetch('https://darma-website.onrender.com/api/payment/create-order', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ amount: total })
+                    body: JSON.stringify({ amount: finalTotal })
                 });
 
                 if (!orderRes.ok) throw new Error("Failed to initiate payment");
@@ -177,7 +216,7 @@ const CheckoutContent = () => {
                 quantity: item.quantity,
                 priceAtPurchase: item.price
             })),
-            totalAmount: total,
+            totalAmount: finalTotal,
             status: 'pending',
             paymentMethod: method,
             paymentStatus: paymentStatus
@@ -281,7 +320,19 @@ const CheckoutContent = () => {
                             </div>
                             <div className="space-y-2">
                                 <label className="text-sm font-medium">Zip Code</label>
-                                <input name="zipCode" required className="w-full p-2 border rounded-md" placeholder="10001" />
+                                <div className="relative">
+                                    <input
+                                        name="zipCode"
+                                        required
+                                        className={`w-full p-2 border rounded-md ${pincodeStatus === 'success' ? 'border-green-500 bg-green-50' : pincodeStatus === 'error' ? 'border-red-500 bg-red-50' : ''}`}
+                                        placeholder="10001"
+                                        maxLength={6}
+                                        onChange={handleZipChange}
+                                    />
+                                    {pincodeStatus === 'loading' && <span className="absolute right-2 top-2 text-xs text-gray-500">Checking...</span>}
+                                    {pincodeStatus === 'success' && <span className="absolute right-2 top-2 text-xs text-green-600">✓ Serviceable</span>}
+                                    {pincodeStatus === 'error' && <span className="absolute right-2 top-2 text-xs text-red-600">✗ Not Serviceable</span>}
+                                </div>
                             </div>
                         </div>
                         <div className="space-y-2">
@@ -356,9 +407,9 @@ const CheckoutContent = () => {
                             type="submit"
                             style={{ backgroundColor: '#0f172a', color: '#ffffff' }}
                             className="w-full mt-6 py-4 text-lg font-bold rounded-md hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed"
-                            disabled={isLoading || items.reduce((sum, item) => sum + item.quantity, 0) > 10}
+                            disabled={isLoading || items.reduce((sum, item) => sum + item.quantity, 0) > 10 || pincodeStatus !== 'success'}
                         >
-                            {isLoading ? "Processing..." : `Place Order - ₹${total.toFixed(2)}`}
+                            {isLoading ? "Processing..." : `Place Order - ₹${finalTotal.toFixed(2)}`}
                         </button>
                         {items.reduce((sum, item) => sum + item.quantity, 0) > 10 && (
                             <p className="text-red-500 text-sm mt-2 text-center">
@@ -389,11 +440,18 @@ const CheckoutContent = () => {
                         </div>
                         <div className="flex justify-between text-sm text-gray-500">
                             <span>Shipping</span>
-                            <span>Free</span>
+                            <span className={shippingCost === 0 ? "text-green-600 font-medium" : "text-black"}>
+                                {shippingCost === 0 ? "Free" : `₹${shippingCost}`}
+                            </span>
                         </div>
+                        {shippingCost > 0 && (
+                            <div className="text-xs text-blue-500 text-right">
+                                Add items worth ₹{(499 - total).toFixed(2)} more for free delivery
+                            </div>
+                        )}
                         <div className="flex justify-between font-bold text-lg pt-2 border-t">
                             <span>Total</span>
-                            <span>₹{total.toFixed(2)}</span>
+                            <span>₹{finalTotal.toFixed(2)}</span>
                         </div>
                     </div>
                 </div>

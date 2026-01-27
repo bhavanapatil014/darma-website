@@ -16,6 +16,11 @@ const nextConfig: NextConfig = {
         port: '',
         pathname: '/uploads/**',
       },
+      { protocol: 'https', hostname: 'images.unsplash.com' },
+      { protocol: 'https', hostname: 'logos-world.net' },
+      { protocol: 'https', hostname: 'upload.wikimedia.org' },
+      { protocol: 'https', hostname: 'companieslogo.com' },
+      { protocol: 'https', hostname: '1000logos.net' },
     ],
   },
   // @ts-ignore
