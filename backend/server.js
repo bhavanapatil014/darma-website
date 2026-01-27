@@ -84,6 +84,7 @@ app.use('/api/reviews', require('./routes/reviews'));
 app.use('/api/settings', require('./routes/settings'));
 app.use('/api/negotiate', require('./routes/negotiation'));
 app.use('/api/brands', require('./routes/brands'));
+app.use('/api/pincode', require('./routes/pincode'));
 
 // JSON 404 Handler for unknown API routes
 app.use('/api/*', (req, res) => {

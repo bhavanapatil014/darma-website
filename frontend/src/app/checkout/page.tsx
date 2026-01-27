@@ -34,6 +34,8 @@ const CheckoutContent = () => {
     const [shippingCost, setShippingCost] = useState(0);
     const [pincodeStatus, setPincodeStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
 
+    const [city, setCity] = useState("");
+
     // Calculate Shipping
     useEffect(() => {
         if (total > 0 && total < 499) {
@@ -48,19 +50,31 @@ const CheckoutContent = () => {
     const checkPincode = async (code: string) => {
         if (code.length !== 6) return;
         setPincodeStatus('loading');
-        // Simulated API Delay
-        await new Promise(resolve => setTimeout(resolve, 800));
 
-        // Mock Validation: Allow all 6 digit codes for now
-        if (/^[1-9][0-9]{5}$/.test(code)) {
-            setPincodeStatus('success');
-        } else {
+        try {
+            const res = await fetch(`https://darma-website.onrender.com/api/pincode/${code}`);
+            const data = await res.json();
+
+            if (data && data[0] && data[0].Status === 'Success') {
+                const district = data[0].PostOffice[0].District;
+                // const state = data[0].PostOffice[0].State;
+                setCity(district);
+                setPincodeStatus('success');
+                // Clear related errors
+                setErrors(prev => ({ ...prev, city: '', zipCode: '' }));
+            } else {
+                setPincodeStatus('error');
+                setErrors(prev => ({ ...prev, zipCode: 'Invalid Pincode' }));
+            }
+        } catch (err) {
+            console.error("Pincode check failed", err);
             setPincodeStatus('error');
         }
     };
 
     const handleZipChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const val = e.target.value;
+        const val = e.target.value.replace(/\D/g, ''); // Ensure only numbers
+        e.target.value = val; // Update input value visually
         if (val.length === 6) checkPincode(val);
         else setPincodeStatus('idle');
     }
@@ -369,7 +383,13 @@ const CheckoutContent = () => {
                         <div className="grid grid-cols-2 gap-4">
                             <div className="space-y-2">
                                 <label className="text-sm font-medium">City</label>
-                                <input name="city" className="w-full p-2 border rounded-md" placeholder="New York" />
+                                <input
+                                    name="city"
+                                    value={city}
+                                    onChange={(e) => setCity(e.target.value)}
+                                    className="w-full p-2 border rounded-md"
+                                    placeholder="New York"
+                                />
                                 {errors.city && <span className="text-xs text-red-500">{errors.city}</span>}
                             </div>
                             <div className="space-y-2">
