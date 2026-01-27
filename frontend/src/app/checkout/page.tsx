@@ -53,6 +53,8 @@ const CheckoutContent = () => {
 
         try {
             const res = await fetch(`https://darma-website.onrender.com/api/pincode/${code}`);
+            if (!res.ok) throw new Error(`API Error: ${res.status}`);
+
             const data = await res.json();
 
             if (data && data[0] && data[0].Status === 'Success') {
@@ -62,13 +64,15 @@ const CheckoutContent = () => {
                 setPincodeStatus('success');
                 // Clear related errors
                 setErrors(prev => ({ ...prev, city: '', zipCode: '' }));
+                console.log(`Auto-filled city: ${district}`);
             } else {
                 setPincodeStatus('error');
                 setErrors(prev => ({ ...prev, zipCode: 'Invalid Pincode' }));
             }
         } catch (err) {
-            console.error("Pincode check failed", err);
+            console.error("Pincode check failed:", err);
             setPincodeStatus('error');
+            setErrors(prev => ({ ...prev, zipCode: 'Could not verify Pincode. Please try again.' }));
         }
     };
 
