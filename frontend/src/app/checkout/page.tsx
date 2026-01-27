@@ -228,8 +228,20 @@ const CheckoutContent = () => {
 
 
 
+                // Sanitize Key
+                let keyId = process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID || "";
+                keyId = keyId.replace(/['"]/g, '').trim(); // Remove quotes if somehow present
+
+                console.log("Using Razorpay Key:", keyId); // Debugging
+
+                if (!keyId.startsWith("rzp_")) {
+                    alert("Invalid Razorpay Key Configuration. Please checking settings.");
+                    setIsLoading(false);
+                    return;
+                }
+
                 const options = {
-                    key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID,
+                    key: keyId,
                     amount: orderData.amount,
                     currency: "INR",
                     name: "Venkata",
