@@ -104,13 +104,40 @@ const CheckoutContent = () => {
         }
     }, [isBuyNow, searchParams]);
 
+    const [errors, setErrors] = useState<Record<string, string>>({});
+
+    const validate = (data: any) => {
+        const newErrors: Record<string, string> = {};
+
+        if (!data.firstName) newErrors.firstName = "First name is required";
+        if (!data.lastName) newErrors.lastName = "Last name is required";
+
+        if (!data.email) {
+            newErrors.email = "Email is required";
+        } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(data.email)) {
+            newErrors.email = "Invalid email format";
+        }
+
+        if (!data.address) newErrors.address = "Address is required";
+        if (!data.city) newErrors.city = "City is required";
+
+        if (!data.zipCode) {
+            newErrors.zipCode = "Zip code is required";
+        } else if (!/^\d{6}$/.test(data.zipCode)) {
+            newErrors.zipCode = "Zip code must be exactly 6 digits";
+        }
+
+        if (!data.phone) {
+            newErrors.phone = "Phone number is required";
+        } else if (!/^\d{10}$/.test(data.phone.replace(/\D/g, ''))) {
+            newErrors.phone = "Phone number must be exactly 10 digits";
+        }
+
+        return newErrors;
+    };
+
     const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
-
-        if (pincodeStatus !== 'success') {
-            alert("Please provide a valid serviceable pincode.");
-            return;
-        }
 
         const formData = new FormData(e.target as HTMLFormElement);
         const firstName = formData.get('firstName') as string;
@@ -121,11 +148,19 @@ const CheckoutContent = () => {
         const zipCode = formData.get('zipCode') as string;
         const phone = formData.get('phone') as string;
 
-        if (!firstName || !lastName || !email || !address || !city || !zipCode || !phone) {
-            alert("Please fill in all mandatory fields.");
+        const validationErrors = validate({ firstName, lastName, email, address, city, zipCode, phone });
+
+        setErrors(validationErrors);
+
+        if (Object.keys(validationErrors).length > 0) {
+            // Optional: scroll to first error
             return;
         }
 
+        if (pincodeStatus !== 'success') {
+            setErrors(prev => ({ ...prev, zipCode: "Please verify zip code before proceeding" }));
+            return;
+        }
 
         setIsLoading(true);
 
@@ -135,6 +170,7 @@ const CheckoutContent = () => {
             address: `${address}, ${city} ${zipCode}`,
             phone: phone || "9999999999",
         }
+
 
         try {
             if (paymentMethod === 'cod') {
@@ -304,40 +340,43 @@ const CheckoutContent = () => {
                         <div className="grid grid-cols-2 gap-4">
                             <div className="space-y-2">
                                 <label className="text-sm font-medium">First Name</label>
-                                <input name="firstName" required className="w-full p-2 border rounded-md" placeholder="John" />
+                                <input name="firstName" className="w-full p-2 border rounded-md" placeholder="John" />
+                                {errors.firstName && <span className="text-xs text-red-500">{errors.firstName}</span>}
                             </div>
                             <div className="space-y-2">
                                 <label className="text-sm font-medium">Last Name</label>
-                                <input name="lastName" required className="w-full p-2 border rounded-md" placeholder="Doe" />
+                                <input name="lastName" className="w-full p-2 border rounded-md" placeholder="Doe" />
+                                {errors.lastName && <span className="text-xs text-red-500">{errors.lastName}</span>}
                             </div>
                         </div>
                         <div className="space-y-2">
                             <label className="text-sm font-medium">Email</label>
                             <input
                                 name="email"
-                                required
                                 type="email"
                                 className={`w-full p-2 border rounded-md ${user ? 'bg-gray-100 text-gray-500' : ''}`}
                                 placeholder="john@example.com"
                                 defaultValue={user?.email || ''}
                                 readOnly={!!user}
                             />
+                            {errors.email && <span className="text-xs text-red-500">{errors.email}</span>}
                         </div>
                         <div className="space-y-2">
                             <label className="text-sm font-medium">Address</label>
-                            <input name="address" required className="w-full p-2 border rounded-md" placeholder="123 Main St" />
+                            <input name="address" className="w-full p-2 border rounded-md" placeholder="123 Main St" />
+                            {errors.address && <span className="text-xs text-red-500">{errors.address}</span>}
                         </div>
                         <div className="grid grid-cols-2 gap-4">
                             <div className="space-y-2">
                                 <label className="text-sm font-medium">City</label>
-                                <input name="city" required className="w-full p-2 border rounded-md" placeholder="New York" />
+                                <input name="city" className="w-full p-2 border rounded-md" placeholder="New York" />
+                                {errors.city && <span className="text-xs text-red-500">{errors.city}</span>}
                             </div>
                             <div className="space-y-2">
                                 <label className="text-sm font-medium">Zip Code</label>
                                 <div className="relative">
                                     <input
                                         name="zipCode"
-                                        required
                                         className={`w-full p-2 border rounded-md ${pincodeStatus === 'success' ? 'border-green-500 bg-green-50' : pincodeStatus === 'error' ? 'border-red-500 bg-red-50' : ''}`}
                                         placeholder="10001"
                                         maxLength={6}
@@ -347,11 +386,13 @@ const CheckoutContent = () => {
                                     {pincodeStatus === 'success' && <span className="absolute right-2 top-2 text-xs text-green-600">✓ Serviceable</span>}
                                     {pincodeStatus === 'error' && <span className="absolute right-2 top-2 text-xs text-red-600">✗ Not Serviceable</span>}
                                 </div>
+                                {errors.zipCode && <span className="text-xs text-red-500">{errors.zipCode}</span>}
                             </div>
                         </div>
                         <div className="space-y-2">
                             <label className="text-sm font-medium">Phone Number</label>
-                            <input name="phone" required type="tel" className="w-full p-2 border rounded-md" placeholder="9876543210" />
+                            <input name="phone" type="tel" className="w-full p-2 border rounded-md" placeholder="9876543210" />
+                            {errors.phone && <span className="text-xs text-red-500">{errors.phone}</span>}
                         </div>
 
                         <h2 className="text-xl font-semibold mt-8 mb-4">Payment Method</h2>
