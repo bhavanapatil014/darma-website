@@ -32,7 +32,10 @@ router.post('/create-order', async (req, res) => {
             receipt: "order_rcptid_" + Date.now(),
         };
         const order = await instance.orders.create(options);
-        res.json(order);
+        res.json({
+            ...order,
+            key: process.env.RAZORPAY_KEY_ID // Send the key used to create this order
+        });
     } catch (error) {
         console.error("Razorpay Error:", error);
         res.status(500).send(error);
