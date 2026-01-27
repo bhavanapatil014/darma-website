@@ -462,7 +462,7 @@ const CheckoutContent = () => {
                             type="submit"
                             style={{ backgroundColor: '#0f172a', color: '#ffffff' }}
                             className="w-full mt-6 py-4 text-lg font-bold rounded-md hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed"
-                            disabled={isLoading || items.reduce((sum, item) => sum + item.quantity, 0) > 10 || pincodeStatus !== 'success'}
+                            disabled={isLoading || items.reduce((sum, item) => sum + item.quantity, 0) > 10}
                         >
                             {isLoading ? "Processing..." : `Place Order - ₹${finalTotal.toFixed(2)}`}
                         </button>
