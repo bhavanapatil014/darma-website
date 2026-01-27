@@ -232,7 +232,7 @@ const CheckoutContent = () => {
                 let keyId = orderData.key || process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID || "";
                 keyId = keyId.toString().replace(/['"]/g, '').trim();
 
-                console.log("Using Razorpay Key from:", orderData.key ? "Backend" : "Frontend Env", "| Key:", keyId);
+
 
                 if (!keyId.startsWith("rzp_")) {
                     alert("Invalid Razorpay Key Configuration. Please checking settings.");
