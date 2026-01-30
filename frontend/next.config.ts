@@ -3,6 +3,10 @@ import type { NextConfig } from "next";
 const nextConfig: NextConfig = {
   // @ts-ignore
   devIndicators: false,
+  experimental: {
+    // @ts-ignore
+    allowedDevOrigins: ["192.168.120.14", "192.168.120.14:3000"],
+  },
   // Force rebuild timestamp: 2026-01-07 14:45
 
   typescript: {
@@ -22,10 +26,6 @@ const nextConfig: NextConfig = {
       { protocol: 'https', hostname: 'companieslogo.com' },
       { protocol: 'https', hostname: '1000logos.net' },
     ],
-  },
-  // @ts-ignore
-  eslint: {
-    ignoreDuringBuilds: true,
   },
 };
 

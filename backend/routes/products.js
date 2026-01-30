@@ -85,7 +85,7 @@ router.get('/', async (req, res) => {
 
         // Use lean() for plain JS objects
         const collation = { locale: "en_US", numericOrdering: true };
-        const products = await Product.find(query)
+        const products = await Product.find(query, { images: { $slice: 1 } })
             .sort(sortOption)
             .collation(collation)
             .skip(skip)

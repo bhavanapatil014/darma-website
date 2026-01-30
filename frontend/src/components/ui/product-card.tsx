@@ -33,19 +33,19 @@ export function ProductCard({ product, isWishlist = false, priority = false }: P
     let displayStock = product.stockQuantity;
     let displaySize = product.netContent; // Default to netContent if no variants
 
-    if (!isAlreadyVariant && product.variants && product.variants.length > 0) {
-        const unifiedVariants = [
-            ...(product.netContent && !product.variants.some(v => v.size === product.netContent)
-                ? [{
-                    size: product.netContent,
-                    price: product.price,
-                    mrp: product.mrp,
-                    stock: product.stockQuantity
-                }]
-                : []),
-            ...product.variants
-        ];
+    const unifiedVariants = (!isAlreadyVariant && product.variants && product.variants.length > 0) ? [
+        ...(product.netContent && !product.variants.some(v => v.size === product.netContent)
+            ? [{
+                size: product.netContent,
+                price: product.price,
+                mrp: product.mrp,
+                stock: product.stockQuantity
+            }]
+            : []),
+        ...product.variants
+    ] : [];
 
+    if (unifiedVariants.length > 0) {
         // Pick first in-stock variant, or just first
         defaultVariant = unifiedVariants.find(v => (v.stock || 0) > 0) || unifiedVariants[0];
 
@@ -134,11 +134,15 @@ export function ProductCard({ product, isWishlist = false, priority = false }: P
                         </p>
 
                         {/* Option Display (e.g. Size) */}
-                        {displaySize && (
-                            <div className="mb-2">
-                                <span className="inline-block bg-gray-100 text-gray-600 text-[10px] px-1.5 py-0.5 rounded font-medium border border-gray-200">
-                                    {displaySize}
-                                </span>
+                        {/* Option Display (e.g. Size) - Only visible on hover, no reserved space */}
+                        {(unifiedVariants.length > 0 || displaySize) && (
+                            <div className="hidden group-hover:block mb-2 animate-in fade-in slide-in-from-top-1 duration-200">
+                                <p className="text-xs text-gray-500 truncate">
+                                    <span className="text-gray-400">Size: </span>
+                                    <span className="font-medium text-gray-700">
+                                        {displaySize}
+                                    </span>
+                                </p>
                             </div>
                         )}
 
