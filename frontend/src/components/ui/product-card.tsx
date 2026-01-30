@@ -17,28 +17,51 @@ interface ProductCardProps {
 import { useState, useEffect } from "react";
 import { Check, X } from "lucide-react";
 
-// ... imports
-
 export function ProductCard({ product, isWishlist = false, priority = false }: ProductCardProps) {
     const { addItem } = useCart();
     const router = useRouter();
     const { addToWishlist, removeFromWishlist, isInWishlist } = useWishlist();
     const [showSuccessPopup, setShowSuccessPopup] = useState(false);
 
-    // Auto-close removed to allow user to choose action
-    // useEffect(() => {
-    //     if (showSuccessPopup) {
-    //         const timer = setTimeout(() => setShowSuccessPopup(false), 3500);
-    //         return () => clearTimeout(timer);
-    //     }
-    // }, [showSuccessPopup]);
+    // --- Variant / Display Logic ---
+    const isAlreadyVariant = product.id.includes('-');
+
+    // Determine the default variant to display and add
+    let defaultVariant = null;
+    let displayPrice = product.price;
+    let displayMrp = product.mrp;
+    let displayStock = product.stockQuantity;
+    let displaySize = product.netContent; // Default to netContent if no variants
+
+    if (!isAlreadyVariant && product.variants && product.variants.length > 0) {
+        const unifiedVariants = [
+            ...(product.netContent && !product.variants.some(v => v.size === product.netContent)
+                ? [{
+                    size: product.netContent,
+                    price: product.price,
+                    mrp: product.mrp,
+                    stock: product.stockQuantity
+                }]
+                : []),
+            ...product.variants
+        ];
+
+        // Pick first in-stock variant, or just first
+        defaultVariant = unifiedVariants.find(v => (v.stock || 0) > 0) || unifiedVariants[0];
+
+        if (defaultVariant) {
+            displayPrice = defaultVariant.price;
+            displayMrp = defaultVariant.mrp || product.mrp;
+            displayStock = defaultVariant.stock;
+            displaySize = defaultVariant.size;
+        }
+    }
 
     return (
         <>
             <div className="group relative bg-white transition-all duration-300 flex flex-col h-full hover:shadow-lg rounded-lg overflow-hidden border border-transparent hover:border-gray-100">
-                {/* ... existing card content ... */}
+                {/* Image Section */}
                 <Link href={`/product/${product.id}`} className="block relative aspect-[4/5] bg-gray-100 overflow-hidden">
-                    {/* ... image logic ... */}
                     <div className="absolute inset-0 bg-gray-50 flex items-center justify-center">
                         {product.image || (product.images && product.images.length > 0) ? (
                             <Image
@@ -61,7 +84,7 @@ export function ProductCard({ product, isWishlist = false, priority = false }: P
                         </span>
                     )}
 
-                    {/* Rating Pill - Bottom Left of Image */}
+                    {/* Rating Pill */}
                     {product.rating > 0 && (
                         <div className="absolute bottom-2 left-2 bg-white/90 backdrop-blur px-2 py-1 rounded-sm text-[10px] font-semibold flex items-center gap-1 shadow-sm z-10">
                             <span>{product.rating.toFixed(1)}</span>
@@ -106,17 +129,27 @@ export function ProductCard({ product, isWishlist = false, priority = false }: P
                             {product.name}
                         </h3>
                         {/* Description - Lighter/Smaller */}
-                        <p className="text-xs text-gray-500 truncate mb-2">
+                        <p className="text-xs text-gray-500 truncate mb-1">
                             {product.description}
                         </p>
+
+                        {/* Option Display (e.g. Size) */}
+                        {displaySize && (
+                            <div className="mb-2">
+                                <span className="inline-block bg-gray-100 text-gray-600 text-[10px] px-1.5 py-0.5 rounded font-medium border border-gray-200">
+                                    {displaySize}
+                                </span>
+                            </div>
+                        )}
+
                         {/* Price Row */}
                         <div className="flex items-baseline gap-1.5 mb-3 whitespace-nowrap overflow-hidden text-ellipsis">
-                            <span className="font-bold text-sm text-gray-900">₹{product.price}</span>
-                            {product.mrp && product.mrp > product.price && (
+                            <span className="font-bold text-sm text-gray-900">₹{displayPrice}</span>
+                            {displayMrp && displayMrp > displayPrice && (
                                 <>
-                                    <span className="text-xs text-gray-500 line-through decoration-gray-500">₹{product.mrp}</span>
+                                    <span className="text-xs text-gray-500 line-through decoration-gray-500">₹{displayMrp}</span>
                                     <span className="text-[10px] font-bold text-orange-700 truncate">
-                                        ({Math.round(((product.mrp - product.price) / product.mrp) * 100)}% OFF)
+                                        ({Math.round(((displayMrp - displayPrice) / displayMrp) * 100)}% OFF)
                                     </span>
                                 </>
                             )}
@@ -128,52 +161,33 @@ export function ProductCard({ product, isWishlist = false, priority = false }: P
                         <button
                             style={{ backgroundColor: '#2563eb', color: '#ffffff' }}
                             className="w-full shadow-sm font-bold uppercase tracking-wide text-xs h-9 rounded-md flex items-center justify-center transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                            disabled={!product.stockQuantity || product.stockQuantity <= 0}
+                            disabled={!displayStock || displayStock <= 0}
                             onClick={(e) => {
                                 e.preventDefault();
                                 e.stopPropagation();
 
-                                // Determine Unity Variant Logic (Same as product-info.tsx)
-                                // This ensures we pick the default/first variant ID effectively so it merges with Detail Page additions.
                                 let itemToAdd = { ...product };
-                                let effectiveStock = product.stockQuantity;
 
-                                // Only attempt to resolve variant if we don't already have a variant ID (heuristically check for '-')
-                                // If from Wishlist (Variant), ID is already '123-Small'. If Shop, ID is '123'.
-                                const isAlreadyVariant = product.id.includes('-');
-
-                                if (!isAlreadyVariant && product.variants && product.variants.length > 0) {
-                                    // Construct unified list to find default
-                                    const unifiedVariants = [
-                                        ...(product.netContent && !product.variants.some(v => v.size === product.netContent)
-                                            ? [{
-                                                size: product.netContent,
-                                                price: product.price,
-                                                mrp: product.mrp,
-                                                stock: product.stockQuantity
-                                            }]
-                                            : []),
-                                        ...product.variants
-                                    ];
-
-                                    // Pick first in-stock variant, or just first
-                                    const defaultVariant = unifiedVariants.find(v => (v.stock || 0) > 0) || unifiedVariants[0];
-
-                                    if (defaultVariant) {
-                                        itemToAdd = {
-                                            ...product,
-                                            price: defaultVariant.price,
-                                            mrp: defaultVariant.mrp || product.mrp,
-                                            name: `${product.name} (${defaultVariant.size})`,
-                                            id: `${product.id}-${defaultVariant.size}`,
-                                            stockQuantity: defaultVariant.stock
-                                        };
-                                        effectiveStock = defaultVariant.stock;
+                                if (!isAlreadyVariant && defaultVariant) {
+                                    itemToAdd = {
+                                        ...product,
+                                        price: defaultVariant.price,
+                                        mrp: defaultVariant.mrp || product.mrp,
+                                        name: `${product.name} (${defaultVariant.size})`,
+                                        id: `${product.id}-${defaultVariant.size}`,
+                                        stockQuantity: defaultVariant.stock
+                                    };
+                                } else {
+                                    // Even if no variant found (simple product), explicit properties
+                                    itemToAdd = {
+                                        ...product,
+                                        price: displayPrice,
+                                        mrp: displayMrp,
+                                        stockQuantity: displayStock
                                     }
                                 }
 
-
-                                if (effectiveStock && effectiveStock > 0) {
+                                if (displayStock && displayStock > 0) {
                                     addItem(itemToAdd);
                                     if (isWishlist) {
                                         removeFromWishlist(product.id);
@@ -182,7 +196,7 @@ export function ProductCard({ product, isWishlist = false, priority = false }: P
                                 }
                             }}
                         >
-                            {(!product.stockQuantity || product.stockQuantity <= 0) ? "Out of Stock" : "Add to Cart"}
+                            {(!displayStock || displayStock <= 0) ? "Out of Stock" : "Add to Cart"}
                         </button>
                     </div>
                 </div>
@@ -207,6 +221,7 @@ export function ProductCard({ product, isWishlist = false, priority = false }: P
                                 <h3 className="text-xl font-bold text-gray-900">Added to Cart!</h3>
                                 <p className="text-gray-500 mt-1 text-sm">
                                     <span className="font-semibold text-gray-800">1x</span> {product.name}
+                                    {displaySize && <span className="text-gray-500"> ({displaySize})</span>}
                                 </p>
                             </div>
 
@@ -214,11 +229,11 @@ export function ProductCard({ product, isWishlist = false, priority = false }: P
                                 <Button
                                     onClick={(e) => {
                                         e.preventDefault();
-                                        e.stopPropagation(); // Ensure click doesn't bubble
-                                        setShowSuccessPopup(false); // Close modal first
+                                        e.stopPropagation();
+                                        setShowSuccessPopup(false);
                                         router.push('/cart');
                                     }}
-                                    style={{ backgroundColor: '#2563eb', color: '#ffffff' }} // Force styles
+                                    style={{ backgroundColor: '#2563eb', color: '#ffffff' }}
                                     className="w-full bg-blue-600 hover:bg-blue-700 text-white h-11"
                                 >
                                     Go to Cart
