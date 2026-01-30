@@ -102,12 +102,25 @@ router.post('/', async (req, res) => {
                 query = { name: item.name };
             }
 
-            const product = await Product.findOne(query);
+            let product = await Product.findOne(query);
+
+            // Fallback: If not found and ID looks like a variant (e.g. "prod123-Size"), try base ID
+            if (!product && typeof itemId === 'string' && itemId.includes('-')) {
+                const baseId = itemId.split('-')[0];
+                const cleanQuery = {
+                    $or: [
+                        { id: baseId },
+                        { _id: isValidObjectId(baseId) ? baseId : null }
+                    ]
+                };
+                product = await Product.findOne(cleanQuery);
+            }
 
             if (!product) throw new Error(`Product not found: ${item.name} (ID: ${itemId})`);
 
             // Check Stock
-            if (product.stockQuantity < item.quantity) {
+            if (typeof product.stockQuantity === 'number' && product.stockQuantity < item.quantity) {
+                console.warn(`Stock low for ${item.name}. Reqd: ${item.quantity}, Avail: ${product.stockQuantity}`);
                 throw new Error(`Insufficient stock for: ${item.name} (Only ${product.stockQuantity} left)`);
             }
 

@@ -87,12 +87,15 @@ const formatOrderEmail = (order) => {
         <p>Thank you for your order, ${order.customerName}!</p>
         <p><strong>Order ID:</strong> ${order._id}</p>
         <p><strong>Total Amount:</strong> ₹${order.totalAmount.toFixed(2)}</p>
+        <p><strong>Payment Method:</strong> ${order.paymentMethod.toUpperCase()}</p>
         
         <h3>Items:</h3>
         <ul>${itemsList}</ul>
         
         <h3>Shipping Address:</h3>
         <p>${order.address}</p>
+
+        <p><strong>Status:</strong> ${order.status}</p>
         
         <p>We will notify you when your order is shipped.</p>
     `;
@@ -117,10 +120,7 @@ const formatAdminEmail = (order, customer) => {
         <h3>Shipping Address:</h3>
         <p>${order.address}</p>
 
-        <h3>Status:</h3>
-        <p>${order.status} (Payment: ${order.paymentStatus})</p>
-        
-        <a href="${process.env.FRONTEND_URL || 'https://venkataderma.com'}/admin/orders">View in Admin Panel</a>
+        <p><strong>Status:</strong> ${order.status} (Payment: ${order.paymentStatus})</p>
     `;
 };
 

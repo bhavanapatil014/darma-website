@@ -55,7 +55,8 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
             try {
                 const token = localStorage.getItem('token');
                 // 1. Fetch Server Cart
-                const res = await fetch('https://darma-website.onrender.com/api/user/cart', {
+                const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000';
+                const res = await fetch(`${apiUrl}/api/user/cart`, {
                     headers: { 'Authorization': `Bearer ${token}` }
                 });
                 if (res.ok) {
@@ -90,7 +91,8 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
                         localStorage.removeItem('darma-cart-guest');
 
                         // Push merged to server immediately
-                        await fetch('https://darma-website.onrender.com/api/user/cart', {
+                        const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000';
+                        await fetch(`${apiUrl}/api/user/cart`, {
                             method: 'PUT',
                             headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
                             body: JSON.stringify({ items: merged })

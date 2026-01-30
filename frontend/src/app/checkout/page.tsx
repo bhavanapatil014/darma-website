@@ -279,7 +279,7 @@ const CheckoutContent = () => {
             }
         } catch (error) {
             console.error(error);
-            alert(`Failed to process order. Debug Key: ${process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID?.substring(0, 15)}...`);
+            alert(`Order Failed: ${(error as Error).message}`);
             setIsLoading(false);
         }
     };
@@ -290,7 +290,7 @@ const CheckoutContent = () => {
             email: customer.email,
             address: customer.address,
             products: items.map(item => ({
-                product: item.id || item._id, // Handle mismatch if any
+                product: (item as any)._id || item.id, // Handle mismatch if any
                 name: item.name,
                 image: item.image,
                 quantity: item.quantity,
@@ -302,13 +302,17 @@ const CheckoutContent = () => {
             paymentStatus: paymentStatus
         };
 
-        const res = await fetch('https://darma-website.onrender.com/api/orders', {
+        const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000';
+        const res = await fetch(`${apiUrl}/api/orders`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(orderData)
         });
 
-        if (!res.ok) throw new Error("Order creation failed");
+        if (!res.ok) {
+            const errorData = await res.json();
+            throw new Error(errorData.message || "Order creation failed");
+        }
 
         const data = await res.json();
         setOrderId(data._id);
