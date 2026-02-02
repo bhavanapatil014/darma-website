@@ -121,9 +121,10 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
         // 2. Save Server (Debounce could be good, but direct for now)
         if (user && isInitialized) {
             const token = localStorage.getItem('token');
+            const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000';
             // We ignore errors here to prevent blocking UI, maybe retry?
             // Use simple fire-and-forget for UX speed, but ideally use queue.
-            fetch('https://darma-website.onrender.com/api/user/cart', {
+            fetch(`${apiUrl}/api/user/cart`, {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
                 body: JSON.stringify({ items })
@@ -190,8 +191,9 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
 
         if (coupon) {
             const currentSubtotal = items.reduce((sum, item) => sum + item.price * item.quantity, 0);
+            const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000';
 
-            fetch(`https://darma-website.onrender.com/api/coupons/verify`, {
+            fetch(`${apiUrl}/api/coupons/verify`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ code: coupon.code, cartTotal: currentSubtotal, cartItems: items })
@@ -223,6 +225,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
         if (items.length === 0) return;
 
         try {
+            const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000';
             const updatedItems = await Promise.all(items.map(async (item) => {
                 try {
                     // Handle Variant IDs (format: productId-size)
@@ -231,7 +234,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
                     const variantSize = isVariant ? item.id.split('-').slice(1).join('-') : null;
 
                     // Add timestamp to force bypass browser cache + Next.js cache option
-                    const res = await fetch(`https://darma-website.onrender.com/api/products/${realProductId}?t=${Date.now()}`, {
+                    const res = await fetch(`${apiUrl}/api/products/${realProductId}?t=${Date.now()}`, {
                         cache: 'no-store',
                         headers: { 'Pragma': 'no-cache' }
                     });

@@ -135,7 +135,7 @@ router.post('/register', async (req, res) => {
         // Send Login Notification (REMOVED as per user request)
         // await sendLoginNotification(user, "Registration Auto-Login");
 
-        const token = jwt.sign({ id: user._id, role: user.role }, process.env.JWT_SECRET || 'secretkey', { expiresIn: '24h' });
+        const token = jwt.sign({ id: user._id, role: user.role }, process.env.JWT_SECRET || 'secretkey', { expiresIn: '30d' });
 
         res.status(201).json({ auth: true, token, user: { id: user._id, name: user.name, email: user.email, role: user.role } });
     } catch (error) {
@@ -249,7 +249,7 @@ router.post('/verify-otp', async (req, res) => {
         user.otpExpires = undefined;
         await user.save();
 
-        const token = jwt.sign({ id: user._id, role: user.role }, process.env.JWT_SECRET || 'secretkey', { expiresIn: '24h' });
+        const token = jwt.sign({ id: user._id, role: user.role }, process.env.JWT_SECRET || 'secretkey', { expiresIn: '30d' });
 
         res.json({ auth: true, token, user: { id: user._id, name: user.name, email: user.email, role: user.role } });
 
@@ -289,7 +289,7 @@ router.post('/login-with-phone', async (req, res) => {
 
         if (user.isDeleted) return res.status(403).json({ message: "Account deleted." });
 
-        const token = jwt.sign({ id: user._id, role: user.role }, process.env.JWT_SECRET || 'secretkey', { expiresIn: '7d' });
+        const token = jwt.sign({ id: user._id, role: user.role }, process.env.JWT_SECRET || 'secretkey', { expiresIn: '30d' });
 
         res.json({
             auth: true,
@@ -359,7 +359,7 @@ router.post('/login', async (req, res) => {
             const passwordIsValid = await bcrypt.compare(password, user.password);
             if (!passwordIsValid) return res.status(401).json({ auth: false, token: null, message: 'Invalid password' });
 
-            const token = jwt.sign({ id: user._id, role: user.role }, process.env.JWT_SECRET || 'secretkey', { expiresIn: '7d' });
+            const token = jwt.sign({ id: user._id, role: user.role }, process.env.JWT_SECRET || 'secretkey', { expiresIn: '30d' });
 
             // Send Login Notification (REMOVED as per user request)
 

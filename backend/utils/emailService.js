@@ -78,16 +78,19 @@ const getTransporter = async () => {
 
 // Template for Order Confirmation (User)
 const formatOrderEmail = (order) => {
-    const itemsList = order.products.map(item =>
-        `<li>${item.name} x ${item.quantity} - ₹${item.priceAtPurchase.toFixed(2)}</li>`
-    ).join('');
+    const itemsList = order.products.map(item => {
+        const price = typeof item.priceAtPurchase === 'number' ? item.priceAtPurchase : 0;
+        return `<li>${item.name} x ${item.quantity || 1} - ₹${price.toFixed(2)}</li>`
+    }).join('');
+
+    const total = typeof order.totalAmount === 'number' ? order.totalAmount : 0;
 
     return `
         <h1>Order Confirmation</h1>
         <p>Thank you for your order, ${order.customerName}!</p>
         <p><strong>Order ID:</strong> ${order._id}</p>
-        <p><strong>Total Amount:</strong> ₹${order.totalAmount.toFixed(2)}</p>
-        <p><strong>Payment Method:</strong> ${order.paymentMethod.toUpperCase()}</p>
+        <p><strong>Total Amount:</strong> ₹${total.toFixed(2)}</p>
+        <p><strong>Payment Method:</strong> ${(order.paymentMethod || 'Unknown').toUpperCase()}</p>
         
         <h3>Items:</h3>
         <ul>${itemsList}</ul>
@@ -103,16 +106,19 @@ const formatOrderEmail = (order) => {
 
 // Template for Admin Notification
 const formatAdminEmail = (order, customer) => {
-    const itemsList = order.products.map(item =>
-        `<li>${item.name} x ${item.quantity} - ₹${item.priceAtPurchase.toFixed(2)}</li>`
-    ).join('');
+    const itemsList = order.products.map(item => {
+        const price = typeof item.priceAtPurchase === 'number' ? item.priceAtPurchase : 0;
+        return `<li>${item.name} x ${item.quantity || 1} - ₹${price.toFixed(2)}</li>`
+    }).join('');
+
+    const total = typeof order.totalAmount === 'number' ? order.totalAmount : 0;
 
     return `
         <h1>New Order Received</h1>
         <p><strong>Customer:</strong> ${order.customerName} (${order.email})</p>
         <p><strong>Order ID:</strong> ${order._id}</p>
-        <p><strong>Amount:</strong> ₹${order.totalAmount.toFixed(2)}</p>
-        <p><strong>Payment Method:</strong> ${order.paymentMethod}</p>
+        <p><strong>Amount:</strong> ₹${total.toFixed(2)}</p>
+        <p><strong>Payment Method:</strong> ${order.paymentMethod || 'N/A'}</p>
         
         <h3>Items Ordered:</h3>
         <ul>${itemsList}</ul>
