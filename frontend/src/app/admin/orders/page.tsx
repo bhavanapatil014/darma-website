@@ -393,13 +393,13 @@ export default function OrdersPage() {
             {/* Manage Order Modal */}
             {isModalOpen && selectedOrder && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-in fade-in duration-200">
-                    <div className="bg-white rounded-xl shadow-xl w-full max-w-md overflow-hidden animate-in zoom-in-95 duration-200">
-                        <div className="p-6 border-b">
+                    <div className="bg-white rounded-xl shadow-xl w-full max-w-xl max-h-[90vh] flex flex-col overflow-hidden animate-in zoom-in-95 duration-200">
+                        <div className="p-6 border-b shrink-0">
                             <h2 className="text-xl font-semibold">Manage Order #{selectedOrder._id.slice(-6)}</h2>
                             <p className="text-sm text-gray-500 mt-1">Update status and delivery details.</p>
                         </div>
 
-                        <div className="p-6 space-y-4">
+                        <div className="p-6 space-y-4 flex-1 overflow-y-auto">
                             <div className="space-y-2">
                                 <label className="text-sm font-medium text-gray-700">Order Status</label>
                                 <select
