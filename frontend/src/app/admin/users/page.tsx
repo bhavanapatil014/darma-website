@@ -6,8 +6,8 @@ import { Button } from "@/components/ui/button"
 export default function UsersPage() {
     const { user } = useAuth()
     const [users, setUsers] = useState<any[]>([])
-    const [activeTab, setActiveTab] = useState<'admins' | 'customers'>('admins')
-    const [formData, setFormData] = useState({ name: '', email: '', password: '' })
+    const [activeTab, setActiveTab] = useState<'admins' | 'customers' | 'delivery'>('admins')
+    const [formData, setFormData] = useState({ name: '', email: '', password: '', role: 'admin' })
     const [loading, setLoading] = useState(true)
 
     // Fetch Users
@@ -20,7 +20,8 @@ export default function UsersPage() {
     const fetchUsers = async () => {
         try {
             const token = localStorage.getItem('token')
-            const res = await fetch(`https://darma-website.onrender.com/api/auth/users?_t=${Date.now()}`, {
+            const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000';
+            const res = await fetch(`${apiUrl}/api/auth/users?_t=${Date.now()}`, {
                 headers: { 'Authorization': `Bearer ${token}` }
             })
             if (res.ok) {
@@ -38,28 +39,40 @@ export default function UsersPage() {
         return <div className="p-8">Access Denied. Super Admin only.</div>
     }
 
-    async function createAdmin(e: React.FormEvent) {
+    async function createUser(e: React.FormEvent) {
         e.preventDefault()
         try {
             const token = localStorage.getItem('token')
-            const res = await fetch('https://darma-website.onrender.com/api/auth/create-admin', {
+            const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000';
+
+            // 1. Create User via Register (Generic)
+            const res = await fetch(`${apiUrl}/api/auth/register`, {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}`
-                },
-                body: JSON.stringify(formData)
-            })
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ ...formData })
+            });
+
             if (res.ok) {
-                alert("Admin user created!")
-                setFormData({ name: '', email: '', password: '' })
-                fetchUsers() // Refresh list
+                const data = await res.json();
+
+                // 2. If role is not user, promote them immediately
+                if (formData.role !== 'user') {
+                    await fetch(`${apiUrl}/api/auth/users/${data.user.id}/role`, {
+                        method: 'PUT',
+                        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                        body: JSON.stringify({ role: formData.role })
+                    });
+                }
+
+                alert(`User created successfully as ${formData.role}!`)
+                setFormData({ name: '', email: '', password: '', role: 'user' })
+                fetchUsers()
             } else {
                 const err = await res.json()
                 alert(err.message)
             }
         } catch (error) {
-            alert("Failed to create admin")
+            alert("Failed to create user")
         }
     }
 
@@ -67,7 +80,8 @@ export default function UsersPage() {
         if (!confirm("Are you sure you want to delete this user? This will soft-delete their account.")) return;
         try {
             const token = localStorage.getItem('token')
-            const res = await fetch(`https://darma-website.onrender.com/api/auth/users/${userId}`, {
+            const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000';
+            const res = await fetch(`${apiUrl}/api/auth/users/${userId}`, {
                 method: 'DELETE',
                 headers: { 'Authorization': `Bearer ${token}` }
             })
@@ -83,17 +97,38 @@ export default function UsersPage() {
         }
     }
 
+
+    async function updateUserRole(userId: string, newRole: string) {
+        try {
+            const token = localStorage.getItem('token')
+            const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000';
+            const res = await fetch(`${apiUrl}/api/auth/users/${userId}/role`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                body: JSON.stringify({ role: newRole })
+            })
+            if (res.ok) {
+                fetchUsers()
+            } else {
+                alert("Failed to update role")
+            }
+        } catch (error) {
+            console.error(error)
+        }
+    }
+
     const admins = users.filter(u => u.role === 'admin' || u.role === 'superadmin')
     const customers = users.filter(u => u.role === 'user')
+    const deliveryPartners = users.filter(u => u.role === 'delivery_partner')
 
     return (
         <div className="max-w-5xl mx-auto space-y-8">
             <h1 className="text-3xl font-bold">User Management</h1>
 
-            {/* Create Admin Form */}
+            {/* Create User Form */}
             <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-100">
-                <h2 className="text-xl font-semibold mb-4 text-teal-700">Add New Administrator</h2>
-                <form onSubmit={createAdmin} className="grid grid-cols-1 md:grid-cols-4 gap-4 items-end">
+                <h2 className="text-xl font-semibold mb-4 text-teal-700">Add New User / Partner</h2>
+                <form onSubmit={createUser} className="grid grid-cols-1 md:grid-cols-5 gap-4 items-end">
                     <div>
                         <label className="block text-sm font-medium mb-1">Name</label>
                         <input className="w-full p-2 border rounded text-sm" required
@@ -109,7 +144,16 @@ export default function UsersPage() {
                         <input type="password" className="w-full p-2 border rounded text-sm" required
                             value={formData.password} onChange={e => setFormData({ ...formData, password: e.target.value })} />
                     </div>
-                    <Button type="submit" className="w-full bg-teal-600 hover:bg-teal-700">Create Admin</Button>
+                    <div>
+                        <label className="block text-sm font-medium mb-1">Role</label>
+                        <select className="w-full p-2 border rounded text-sm bg-gray-50"
+                            value={formData.role} onChange={e => setFormData({ ...formData, role: e.target.value })} >
+                            <option value="user">Customer</option>
+                            <option value="delivery_partner">Delivery Partner</option>
+                            <option value="admin">Admin</option>
+                        </select>
+                    </div>
+                    <Button type="submit" className="w-full bg-teal-600 hover:bg-teal-700">Create</Button>
                 </form>
             </div>
 
@@ -127,6 +171,12 @@ export default function UsersPage() {
                         onClick={() => setActiveTab('customers')}
                     >
                         Customers ({customers.length})
+                    </button>
+                    <button
+                        className={`px-6 py-3 font-medium transition-colors border-b-2 ${activeTab === 'delivery' ? 'border-teal-600 text-teal-700' : 'border-transparent text-gray-500 hover:text-gray-700'}`}
+                        onClick={() => setActiveTab('delivery')}
+                    >
+                        Delivery Partners ({deliveryPartners.length})
                     </button>
                 </div>
 
@@ -157,7 +207,7 @@ export default function UsersPage() {
                                     </tr>
                                 ))
                             ) : (
-                                (activeTab === 'admins' ? admins : customers).map(u => (
+                                (activeTab === 'admins' ? admins : activeTab === 'delivery' ? deliveryPartners : customers).map(u => (
                                     <tr key={u._id} className={`hover:bg-gray-50 transition-colors ${u.isDeleted ? 'bg-red-50/50 opacity-75' : ''}`}>
                                         <td className="p-4 font-medium">{u.name}</td>
                                         <td className="p-4 text-gray-600 space-y-1">
@@ -165,9 +215,21 @@ export default function UsersPage() {
                                             {u.phoneNumber && <div className="text-xs text-gray-400">{u.phoneNumber}</div>}
                                         </td>
                                         <td className="p-4">
-                                            <span className={`px-2 py-1 rounded-full text-xs font-medium ${u.role === 'superadmin' ? 'bg-purple-100 text-purple-700' : u.role === 'admin' ? 'bg-teal-100 text-teal-700' : 'bg-blue-50 text-blue-600'}`}>
-                                                {u.role.toUpperCase()}
-                                            </span>
+                                            <select
+                                                className={`px-2 py-1 rounded-md text-xs font-medium border ${u.role === 'superadmin' ? 'bg-purple-50 text-purple-700 border-purple-200' :
+                                                    u.role === 'admin' ? 'bg-teal-50 text-teal-700 border-teal-200' :
+                                                        u.role === 'delivery_partner' ? 'bg-yellow-50 text-yellow-700 border-yellow-200' :
+                                                            'bg-blue-50 text-blue-600 border-blue-200'
+                                                    }`}
+                                                value={u.role}
+                                                onChange={(e) => updateUserRole(u._id, e.target.value)}
+                                                disabled={u.role === 'superadmin' || u._id === user?.id}
+                                            >
+                                                <option value="user">User</option>
+                                                <option value="delivery_partner">Delivery Partner</option>
+                                                <option value="admin">Admin</option>
+                                                <option value="superadmin">Super Admin</option>
+                                            </select>
                                         </td>
                                         <td className="p-4 text-gray-500">{new Date(u.createdAt).toLocaleDateString()}</td>
                                         <td className="p-4">
@@ -197,7 +259,7 @@ export default function UsersPage() {
                                         </td>
                                     </tr>
                                 )))}
-                            {(!loading && (activeTab === 'admins' ? admins : customers).length === 0) && (
+                            {(!loading && (activeTab === 'admins' ? admins : activeTab === 'delivery' ? deliveryPartners : customers).length === 0) && (
                                 <tr>
                                     <td colSpan={5} className="p-8 text-center text-muted-foreground">No users found in this category.</td>
                                 </tr>

@@ -4,6 +4,19 @@ const User = require('../models/User');
 const Product = require('../models/Product');
 const { verifyToken } = require('../middleware/authMiddleware');
 
+// --- User Management Routes ---
+router.get('/delivery-partners', verifyToken, async (req, res) => {
+    try {
+        if (req.userRole !== 'admin' && req.userRole !== 'superadmin') {
+            return res.status(403).json({ message: 'Access denied' });
+        }
+        const partners = await User.find({ role: 'delivery_partner' }).select('name email phoneNumber _id');
+        res.json(partners);
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+});
+
 // --- Cart Routes ---
 
 // Get Cart

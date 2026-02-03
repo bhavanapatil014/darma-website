@@ -207,11 +207,12 @@ router.post('/', async (req, res) => {
 // PUT Update Order Status (Admin)
 router.put('/:id', async (req, res) => {
     try {
-        const { status, trackingNumber, courierName } = req.body;
+        const { status, trackingNumber, courierName, deliveryAgentId } = req.body;
 
         const updateData = { status };
         if (trackingNumber) updateData.trackingNumber = trackingNumber;
         if (courierName) updateData.courierName = courierName;
+        if (deliveryAgentId) updateData.deliveryAgentId = deliveryAgentId;
 
         if (status === 'shipped') {
             updateData.shippedAt = Date.now();

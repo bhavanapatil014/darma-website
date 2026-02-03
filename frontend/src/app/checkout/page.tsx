@@ -362,6 +362,68 @@ const CheckoutContent = () => {
         )
     }
 
+
+    const handleLocationClick = () => {
+        if (!navigator.geolocation) {
+            alert("Geolocation is not supported by your browser");
+            return;
+        }
+
+        setIsLoading(true);
+        navigator.geolocation.getCurrentPosition(async (position) => {
+            const { latitude, longitude } = position.coords;
+            try {
+                // Using OpenStreetMap Nominatim API (Free, no key required for testing)
+                const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}`);
+                const data = await res.json();
+
+                if (data && data.address) {
+                    const addr = data.address;
+                    setCity(addr.city || addr.town || addr.village || "");
+
+                    // Auto-fill Pincode if available
+                    if (addr.postcode) {
+                        const pin = addr.postcode.replace(/\D/g, ''); // Clean logic
+                        // Only set if valid 6 digit (India)
+                        if (pin.length === 6) {
+                            // Locate the input explicitly or rely on state if I bind it (currently uncontrolled mostly)
+                            // We need to update the input fields manually since they are uncontrolled
+                            const zipInput = document.querySelector('input[name="zipCode"]') as HTMLInputElement;
+                            if (zipInput) {
+                                zipInput.value = pin;
+                                checkPincode(pin); // Trigger validation
+                            }
+                        }
+                    }
+
+                    // Construct Address Line
+                    const parts = [
+                        addr.road,
+                        addr.suburb,
+                        addr.neighbourhood,
+                        addr.city_district
+                    ].filter(Boolean).join(', ');
+
+                    const addrInput = document.querySelector('input[name="address"]') as HTMLInputElement;
+                    if (addrInput) addrInput.value = parts;
+
+                    // Also fill state/city input if needed (city is controlled state)
+                    setCity(addr.city || addr.town || addr.village || "");
+
+                }
+            } catch (error) {
+                console.error("Location fetch failed", error);
+                alert("Could not fetch address details.");
+            } finally {
+                setIsLoading(false);
+            }
+        }, (error) => {
+            console.error("Geolocation denied/error", error);
+            alert("Location access denied or unavailable.");
+            setIsLoading(false);
+        });
+    };
+
     return (
         <div className="container mx-auto px-4 py-12">
             <h1 className="text-3xl font-bold mb-8">Checkout</h1>
@@ -369,7 +431,19 @@ const CheckoutContent = () => {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
                 {/* Form */}
                 <div>
-                    <h2 className="text-xl font-semibold mb-6">Shipping Information</h2>
+                    <div className="flex justify-between items-center mb-6">
+                        <h2 className="text-xl font-semibold">Shipping Information</h2>
+                        <Button
+                            type="button"
+                            variant="outline"
+                            size="sm"
+                            onClick={handleLocationClick}
+                            className="flex items-center gap-2"
+                        >
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10" /><path d="M12 2a7 7 0 1 0 10 10" /></svg>
+                            Use current Location
+                        </Button>
+                    </div>
                     <form className="space-y-4" onSubmit={handleSubmit}>
                         <div className="grid grid-cols-2 gap-4">
                             <div className="space-y-2">

@@ -59,13 +59,20 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
                 const res = await fetch(`${apiUrl}/api/user/cart`, {
                     headers: { 'Authorization': `Bearer ${token}` }
                 });
+                if (res.status === 401) {
+                    console.warn("Cart Sync Unauthorized (401). clearing invalid token.");
+                    // Do NOT clear user here directly as AuthContext handles that, keeping logic separate.
+                    // Just stop attempting to sync this invalid session.
+                    localStorage.removeItem('token');
+                    setIsInitialized(true);
+                    return;
+                }
+
                 if (res.ok) {
                     const serverCart = await res.json();
 
                     // 2. Check for Guest Items to Merge (from immediate context or local)
-                    // Because this effect runs when 'user' changes (e.g. login), 'items' might still hold guest items
-                    // BUT 'items' usually gets cleared or reset. 
-                    // Best strategy: check the 'guest' local storage directly.
+                    // ... (keep merge logic)
                     const guestStr = localStorage.getItem('darma-cart-guest');
                     let guestItems: CartItem[] = [];
                     if (guestStr) {

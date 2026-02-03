@@ -104,7 +104,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             const data = await res.json();
             setUser(data.user);
             localStorage.setItem('token', data.token);
-            router.push(redirectPath || "/account");
+            if (data.user.role === 'delivery_partner') {
+                router.push("/delivery/dashboard");
+            } else {
+                router.push(redirectPath || "/account");
+            }
         } catch (error: any) {
             console.error(error);
             toast.error(error.message || "Login failed.");
@@ -185,7 +189,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             const data = await res.json();
             setUser(data.user);
             localStorage.setItem('token', data.token);
-            router.push(redirectPath || "/account");
+            if (data.user.role === 'delivery_partner') {
+                router.push("/delivery/dashboard");
+            } else {
+                router.push(redirectPath || "/account");
+            }
         } catch (error: any) {
             console.error(error);
             toast.error(error.message || "Verification failed.");

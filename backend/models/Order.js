@@ -15,11 +15,13 @@ const orderSchema = new mongoose.Schema({
     totalAmount: { type: Number, required: true },
     status: {
         type: String,
-        enum: ['pending', 'processing', 'shipped', 'delivered', 'cancelled'],
+        enum: ['pending', 'processing', 'shipped', 'out_for_delivery', 'delivered', 'cancelled'],
         default: 'pending'
     },
     trackingNumber: { type: String },
     courierName: { type: String },
+    deliveryAgentId: { type: mongoose.Schema.Types.ObjectId, ref: 'User' }, // Assigned Delivery Partner
+    deliveryOtp: { type: String }, // OTP for marking as delivered
     shippedAt: { type: Date },
     deliveredAt: { type: Date },
     paymentMethod: {

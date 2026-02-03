@@ -400,6 +400,30 @@ router.post('/create-admin', verifyToken, async (req, res) => {
         res.status(500).json({ message: 'Failed to create admin', error: error.message });
     }
 });
+// PUT /api/auth/users/:id/role (Super Admin Only)
+router.put('/users/:id/role', verifyToken, async (req, res) => {
+    if (req.userRole !== 'superadmin') {
+        return res.status(403).json({ message: 'Require Super Admin Role' });
+    }
+
+    try {
+        const { role } = req.body;
+        if (!['user', 'admin', 'superadmin', 'delivery_partner'].includes(role)) {
+            return res.status(400).json({ message: 'Invalid role' });
+        }
+
+        const user = await User.findById(req.params.id);
+        if (!user) return res.status(404).json({ message: 'User not found' });
+
+        user.role = role;
+        await user.save();
+
+        res.json({ message: 'Role updated successfully', user });
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+});
+
 // DELETE /api/auth/users/:id (Super Admin Only)
 router.delete('/users/:id', verifyToken, async (req, res) => {
     console.log(`DELETE User Request: ID ${req.params.id} by ${req.userId} (Role: ${req.userRole})`);

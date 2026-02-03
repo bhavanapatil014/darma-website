@@ -19,6 +19,13 @@ interface Order {
         quantity: number
         priceAtPurchase: number
     }>
+    deliveryAgentId?: string
+}
+
+interface User {
+    _id: string
+    name: string
+    email: string
 }
 
 export default function OrdersPage() {
@@ -39,9 +46,28 @@ export default function OrdersPage() {
     const [trackingNumber, setTrackingNumber] = useState("")
     const [courierName, setCourierName] = useState("")
 
+    const [deliveryPartners, setDeliveryPartners] = useState<User[]>([])
+    const [selectedPartner, setSelectedPartner] = useState("")
+
     useEffect(() => {
         loadOrders()
+        loadPartners()
     }, [])
+
+    async function loadPartners() {
+        try {
+            const token = localStorage.getItem('token')
+            const res = await fetch('https://darma-website.onrender.com/api/user/delivery-partners', {
+                headers: { 'Authorization': `Bearer ${token}` }
+            })
+            if (res.ok) {
+                const data = await res.json()
+                setDeliveryPartners(data)
+            }
+        } catch (error) {
+            console.error(error)
+        }
+    }
 
     async function loadOrders() {
         setLoading(true)
@@ -60,6 +86,7 @@ export default function OrdersPage() {
         setNewStatus(order.status)
         setTrackingNumber(order.trackingNumber || "")
         setCourierName(order.courierName || "")
+        setSelectedPartner(order.deliveryAgentId || "")
         setIsModalOpen(true)
     }
 
@@ -76,6 +103,7 @@ export default function OrdersPage() {
                 status: newStatus,
                 trackingNumber: newStatus === 'shipped' ? trackingNumber : undefined,
                 courierName: newStatus === 'shipped' ? courierName : undefined,
+                deliveryAgentId: selectedPartner || undefined
             }
 
             await fetch(`https://darma-website.onrender.com/api/orders/${selectedOrder._id}`, {
@@ -384,15 +412,31 @@ export default function OrdersPage() {
                                 </select>
                             </div>
 
+                            {/* Assign Delivery Partner (Always Visible) */}
+                            <div className="space-y-2 pt-2 border-t mt-4">
+                                <label className="text-sm font-medium text-gray-700">Assign Delivery Partner</label>
+                                <select
+                                    className="w-full p-2 border rounded-md"
+                                    value={selectedPartner}
+                                    onChange={(e) => setSelectedPartner(e.target.value)}
+                                >
+                                    <option value="">-- Select Partner --</option>
+                                    {deliveryPartners.map(p => (
+                                        <option key={p._id} value={p._id}>{p.name} ({p.email})</option>
+                                    ))}
+                                </select>
+                            </div>
+
                             {/* Show Delivery Fields ONLY when status is SHIPPED */}
                             {newStatus === 'shipped' && (
-                                <div className="space-y-4 pt-2 border-t mt-4">
+                                <div className="space-y-4 pt-2 border-t mt-2">
+                                    <p className="text-xs text-gray-500 font-semibold uppercase">External Courier Details (Optional)</p>
                                     <div className="space-y-2">
                                         <label className="text-sm font-medium text-gray-700">Courier Name</label>
                                         <input
                                             type="text"
                                             className="w-full p-2 border rounded-md"
-                                            placeholder="e.g. FedEx, DHL, Local Courier"
+                                            placeholder="e.g. FedEx, DHL"
                                             value={courierName}
                                             onChange={(e) => setCourierName(e.target.value)}
                                         />

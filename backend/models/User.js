@@ -8,7 +8,7 @@ const userSchema = new mongoose.Schema({
     phoneNumber: { type: String },
     role: {
         type: String,
-        enum: ['user', 'admin', 'superadmin'],
+        enum: ['user', 'admin', 'superadmin', 'delivery_partner'],
         default: 'user'
     },
     otp: { type: String },
