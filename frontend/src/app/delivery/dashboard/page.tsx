@@ -15,6 +15,8 @@ interface Order {
     phoneNumber?: string; // If we add phone to user
     paymentMethod: string;
     paymentStatus: string;
+    deliveryAttempts?: { timestamp: string, reason: string }[];
+    codCollected?: boolean;
 }
 
 export default function DeliveryDashboard() {
@@ -23,6 +25,8 @@ export default function DeliveryDashboard() {
     const [activeOrders, setActiveOrders] = useState<Order[]>([]);
     const [completedOrders, setCompletedOrders] = useState<Order[]>([]);
     const [otpInputs, setOtpInputs] = useState<Record<string, string>>({});
+    const [failModalOpen, setFailModalOpen] = useState<string | null>(null);
+    const [failReason, setFailReason] = useState<string>('');
 
     useEffect(() => {
         if (!authLoading) {
@@ -34,6 +38,33 @@ export default function DeliveryDashboard() {
             fetchDashboardData();
         }
     }, [user, authLoading]);
+
+    const handleFailDelivery = async (orderId: string) => {
+        if (!failReason) return;
+        try {
+            const token = localStorage.getItem('token');
+            const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000';
+            const res = await fetch(`${apiUrl}/api/delivery/${orderId}/fail`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify({ reason: failReason })
+            });
+            const data = await res.json();
+            if (res.ok) {
+                toast.success("Delivery Failure Recorded");
+                setFailModalOpen(null);
+                setFailReason('');
+                fetchDashboardData();
+            } else {
+                toast.error(data.message || "Failed to update status");
+            }
+        } catch (error) {
+            toast.error("Network error");
+        }
+    };
 
     const fetchDashboardData = async () => {
         try {
@@ -148,33 +179,93 @@ export default function DeliveryDashboard() {
                                         </Button>
                                     )}
 
+                                    {/* Attempt Counter */}
+                                    {/* @ts-ignore */}
+                                    {order.deliveryAttempts && order.deliveryAttempts.length > 0 && (
+                                        <div className="mb-2 text-xs font-semibold text-orange-600 bg-orange-50 p-1 rounded inline-block">
+                                            Attempt {order.deliveryAttempts.length + 1}/3
+                                        </div>
+                                    )}
+
                                     {order.status === 'out_for_delivery' && (
-                                        <div className="bg-gray-50 p-3 rounded mt-2">
+                                        <div className="bg-gray-50 p-3 rounded mt-2 space-y-3">
                                             {/* SIMULATION HELPER: SHOW OTP */}
                                             {/* @ts-ignore */}
                                             {order.deliveryOtp && (
-                                                <div className="mb-2 p-2 bg-yellow-100 border border-yellow-300 text-yellow-800 text-center rounded font-mono font-bold">
-                                                    🔑 SIMULATION OTP: {order.deliveryOtp}
+                                                <div className="p-2 bg-yellow-100 border border-yellow-300 text-yellow-800 text-center rounded font-mono font-bold text-sm">
+                                                    KEY: {order.deliveryOtp}
                                                 </div>
                                             )}
 
-                                            <label className="text-xs font-bold text-gray-500 block mb-1">ENTER CUSTOMER OTP</label>
-                                            <div className="flex gap-2">
-                                                <input
-                                                    type="number"
-                                                    placeholder="XXXX"
-                                                    className="border rounded p-2 w-full text-center text-lg tracking-widest"
-                                                    onChange={(e) => setOtpInputs(prev => ({ ...prev, [order._id]: e.target.value }))}
-                                                />
-                                                <Button onClick={() => handleCompleteDelivery(order._id)} className="bg-green-600">
-                                                    Verify
-                                                </Button>
-                                            </div>
+                                            {/* COD Cash Collection - Highlighted */}
                                             {order.paymentMethod === 'cod' && order.paymentStatus === 'pending' && (
-                                                <div className="mt-2 text-red-600 font-bold text-center border border-red-200 bg-red-50 p-1 rounded">
-                                                    Collect Cash: ₹{order.totalAmount}
+                                                <div className="bg-red-50 border-l-4 border-red-500 p-3 shadow-sm rounded-r">
+                                                    <div className="text-xs font-bold text-red-500 uppercase">Cash to Collect</div>
+                                                    <div className="text-2xl font-black text-red-700">₹{order.totalAmount.toLocaleString()}</div>
+                                                    <div className="text-[10px] text-red-400 mt-1">Do not deliver without cash.</div>
                                                 </div>
                                             )}
+
+                                            <div>
+                                                <label className="text-xs font-bold text-gray-500 block mb-1">CUSTOMER OTP Verification</label>
+                                                <div className="flex gap-2">
+                                                    <input
+                                                        type="number"
+                                                        placeholder="XXXX"
+                                                        className="border rounded p-2 w-full text-center text-lg tracking-widest font-mono"
+                                                        onChange={(e) => setOtpInputs(prev => ({ ...prev, [order._id]: e.target.value }))}
+                                                    />
+                                                    <Button onClick={() => handleCompleteDelivery(order._id)} className="bg-green-600 hover:bg-green-700 min-w-[80px]">
+                                                        Verify
+                                                    </Button>
+                                                </div>
+                                            </div>
+
+                                            {/* Fail / Report Issue Section */}
+                                            <div className="pt-2 border-t mt-2">
+                                                {failModalOpen === order._id ? (
+                                                    <div className="space-y-2 bg-white p-2 rounded border border-red-100 animate-in fade-in slide-in-from-top-1">
+                                                        <label className="text-xs font-bold text-red-600 block">Why did delivery fail?</label>
+                                                        <select
+                                                            className="w-full text-sm border rounded p-1.5 bg-white"
+                                                            onChange={(e) => setFailReason(e.target.value)}
+                                                            value={failReason}
+                                                        >
+                                                            <option value="">Select Reason</option>
+                                                            <option value="Customer Unavailable">Customer Unavailable</option>
+                                                            <option value="Wrong Address">Wrong Address/Location</option>
+                                                            <option value="Customer Refused">Customer Refused Order</option>
+                                                            <option value="Payment Issue">Payment Issue (No Cash)</option>
+                                                            <option value="Shop Closed">Shop/Office Closed</option>
+                                                        </select>
+                                                        <div className="flex gap-2">
+                                                            <Button
+                                                                size="sm"
+                                                                variant="destructive"
+                                                                className="flex-1"
+                                                                onClick={() => handleFailDelivery(order._id)}
+                                                                disabled={!failReason}
+                                                            >
+                                                                Confirm Failure
+                                                            </Button>
+                                                            <Button
+                                                                size="sm"
+                                                                variant="ghost"
+                                                                onClick={() => { setFailModalOpen(null); setFailReason(''); }}
+                                                            >
+                                                                Cancel
+                                                            </Button>
+                                                        </div>
+                                                    </div>
+                                                ) : (
+                                                    <button
+                                                        onClick={() => setFailModalOpen(order._id)}
+                                                        className="text-xs text-red-500 hover:text-red-700 hover:underline font-medium w-full text-center py-1"
+                                                    >
+                                                        Report Delivery Issue / Fail
+                                                    </button>
+                                                )}
+                                            </div>
                                         </div>
                                     )}
                                 </div>

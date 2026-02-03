@@ -10,8 +10,25 @@ router.get('/delivery-partners', verifyToken, async (req, res) => {
         if (req.userRole !== 'admin' && req.userRole !== 'superadmin') {
             return res.status(403).json({ message: 'Access denied' });
         }
-        const partners = await User.find({ role: 'delivery_partner' }).select('name email phoneNumber _id');
+        const partners = await User.find({ role: 'delivery_partner' }).select('name email phoneNumber _id agentProfile');
         res.json(partners);
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+});
+
+// Settle Cash for Delivery Partner
+router.put('/delivery-partners/:id/settle', verifyToken, async (req, res) => {
+    try {
+        if (req.userRole !== 'admin' && req.userRole !== 'superadmin') {
+            return res.status(403).json({ message: 'Access denied' });
+        }
+
+        await User.findByIdAndUpdate(req.params.id, {
+            $set: { 'agentProfile.currentCashBalance': 0 }
+        });
+
+        res.json({ message: 'Settlement Successful. Wallet reset to ₹0.' });
     } catch (error) {
         res.status(500).json({ message: error.message });
     }

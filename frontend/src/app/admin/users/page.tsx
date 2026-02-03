@@ -117,6 +117,31 @@ export default function UsersPage() {
         }
     }
 
+    async function handleSettleCash(userId: string, currentBalance: number) {
+        if (!confirm(`Confirm receiving ₹${currentBalance} from this agent? This will reset their wallet to 0.`)) return;
+
+        try {
+            const token = localStorage.getItem('token');
+            const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000';
+
+            // Note: Route is in 'user.js' mounted at /api/user
+            const res = await fetch(`${apiUrl}/api/user/delivery-partners/${userId}/settle`, {
+                method: 'PUT',
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+
+            if (res.ok) {
+                alert("Settlement Successful!");
+                fetchUsers();
+            } else {
+                const data = await res.json();
+                alert(data.message || "Settlement Failed");
+            }
+        } catch (error) {
+            alert("Network Error during settlement");
+        }
+    }
+
     const admins = users.filter(u => u.role === 'admin' || u.role === 'superadmin')
     const customers = users.filter(u => u.role === 'user')
     const deliveryPartners = users.filter(u => u.role === 'delivery_partner')
@@ -188,7 +213,14 @@ export default function UsersPage() {
                                 <th className="p-4 font-semibold">Name</th>
                                 <th className="p-4 font-semibold">Email</th>
                                 <th className="p-4 font-semibold">Role</th>
-                                <th className="p-4 font-semibold">Joined Date</th>
+                                {activeTab === 'delivery' ? (
+                                    <>
+                                        <th className="p-4 font-semibold">Wallet Balance</th>
+                                        <th className="p-4 font-semibold">Settlement</th>
+                                    </>
+                                ) : (
+                                    <th className="p-4 font-semibold">Joined Date</th>
+                                )}
                                 <th className="p-4 font-semibold">Status</th>
                                 <th className="p-4 font-semibold text-right">Actions</th>
                             </tr>
@@ -209,7 +241,15 @@ export default function UsersPage() {
                             ) : (
                                 (activeTab === 'admins' ? admins : activeTab === 'delivery' ? deliveryPartners : customers).map(u => (
                                     <tr key={u._id} className={`hover:bg-gray-50 transition-colors ${u.isDeleted ? 'bg-red-50/50 opacity-75' : ''}`}>
-                                        <td className="p-4 font-medium">{u.name}</td>
+                                        <td className="p-4 font-medium">
+                                            {u.name}
+                                            {activeTab === 'delivery' && (
+                                                <div className="text-xs text-blue-600 font-medium mt-1">
+                                                    {/* @ts-ignore */}
+                                                    {u.agentProfile?.vehicleType?.toUpperCase() || 'NO VEHICLE'}
+                                                </div>
+                                            )}
+                                        </td>
                                         <td className="p-4 text-gray-600 space-y-1">
                                             <div>{u.originalEmail || u.email}</div>
                                             {u.phoneNumber && <div className="text-xs text-gray-400">{u.phoneNumber}</div>}
@@ -231,7 +271,33 @@ export default function UsersPage() {
                                                 <option value="superadmin">Super Admin</option>
                                             </select>
                                         </td>
-                                        <td className="p-4 text-gray-500">{new Date(u.createdAt).toLocaleDateString()}</td>
+
+                                        {/* Dynamic Columns based on Role */}
+                                        {activeTab === 'delivery' ? (
+                                            <>
+                                                <td className="p-4">
+                                                    {/* @ts-ignore */}
+                                                    <div className="font-bold text-gray-800">₹{u.agentProfile?.currentCashBalance?.toLocaleString() || 0}</div>
+                                                    <div className="text-[10px] text-gray-400">Cash in Hand</div>
+                                                </td>
+                                                <td className="p-4">
+                                                    {/* @ts-ignore */}
+                                                    {(u.agentProfile?.currentCashBalance || 0) > 0 ? (
+                                                        <Button size="sm" variant="outline" className="border-green-200 bg-green-50 text-green-700 hover:bg-green-100 h-7 text-xs"
+                                                            /* @ts-ignore */
+                                                            onClick={() => handleSettleCash(u._id, u.agentProfile?.currentCashBalance || 0)}
+                                                        >
+                                                            Settle Cash
+                                                        </Button>
+                                                    ) : (
+                                                        <span className="text-xs text-gray-400 italic">Settled</span>
+                                                    )}
+                                                </td>
+                                            </>
+                                        ) : (
+                                            <td className="p-4 text-gray-500">{new Date(u.createdAt).toLocaleDateString()}</td>
+                                        )}
+
                                         <td className="p-4">
                                             {u.isDeleted ? (
                                                 <div className="flex flex-col gap-1">
