@@ -23,6 +23,8 @@ interface Order {
     deliveryOtp?: string
     deliveryAttempts?: { timestamp: string, reason: string, status: string }[]
 
+}
+
 interface User {
     _id: string
     name: string
