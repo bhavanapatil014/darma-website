@@ -63,6 +63,12 @@ export default function DeliveryDashboard() {
             const data = await res.json();
             if (res.ok) {
                 toast.success("Delivery Started! OTP sent to customer.");
+
+                // SIMULATION ONLY: Show OTP to driver for testing
+                if (data.simulationOtp) {
+                    alert(`[SIMULATION MODE]\n\nThe OTP is: ${data.simulationOtp}\n\n(In production, this is sent via SMS)`);
+                }
+
                 fetchDashboardData();
             } else {
                 toast.error(data.message || "Failed to start delivery");
@@ -144,6 +150,14 @@ export default function DeliveryDashboard() {
 
                                     {order.status === 'out_for_delivery' && (
                                         <div className="bg-gray-50 p-3 rounded mt-2">
+                                            {/* SIMULATION HELPER: SHOW OTP */}
+                                            {/* @ts-ignore */}
+                                            {order.deliveryOtp && (
+                                                <div className="mb-2 p-2 bg-yellow-100 border border-yellow-300 text-yellow-800 text-center rounded font-mono font-bold">
+                                                    🔑 SIMULATION OTP: {order.deliveryOtp}
+                                                </div>
+                                            )}
+
                                             <label className="text-xs font-bold text-gray-500 block mb-1">ENTER CUSTOMER OTP</label>
                                             <div className="flex gap-2">
                                                 <input

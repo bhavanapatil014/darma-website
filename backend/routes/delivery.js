@@ -58,7 +58,7 @@ router.put('/:id/start', verifyToken, verifyDeliveryPartner, async (req, res) =>
 
         // TODO: Send Actual OTP SMS here 
 
-        res.json({ message: 'Order marked Out for Delivery', order });
+        res.json({ message: 'Order marked Out for Delivery', order, simulationOtp: otp });
     } catch (error) {
         res.status(500).json({ message: error.message });
     }
