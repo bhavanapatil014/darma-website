@@ -10,7 +10,7 @@ router.get('/delivery-partners', verifyToken, async (req, res) => {
         if (req.userRole !== 'admin' && req.userRole !== 'superadmin') {
             return res.status(403).json({ message: 'Access denied' });
         }
-        const partners = await User.find({ role: 'delivery_partner' }).select('name email phoneNumber _id agentProfile');
+        const partners = await User.find({ role: { $in: ['delivery_partner', 'admin', 'superadmin'] } }).select('name email phoneNumber _id agentProfile');
         res.json(partners);
     } catch (error) {
         res.status(500).json({ message: error.message });
