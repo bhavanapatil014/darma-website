@@ -51,13 +51,9 @@ router.put('/:id/start', verifyToken, verifyDeliveryPartner, async (req, res) =>
 
         await order.save();
 
-        // Send OTP to Customer via SMS/Email (Using existing email service)
-        const { sendEmailWrapper } = require('../utils/emailService'); // Assuming export, if not we might need to expose it
-        // Or basically send a custom email/sms using utils logic
-        // For now, logging it and maybe sending simple email
-        console.log(`Delivery OTP for Order ${order._id}: ${otp}`);
-
-        // TODO: Send Actual OTP SMS here 
+        // Notify Customer
+        const { sendDeliveryUpdateEmail } = require('../utils/emailService');
+        await sendDeliveryUpdateEmail(order, 'out_for_delivery');
 
         res.json({ message: 'Order marked Out for Delivery', order, simulationOtp: otp });
     } catch (error) {
@@ -98,6 +94,11 @@ router.put('/:id/complete', verifyToken, verifyDeliveryPartner, async (req, res)
         }
 
         await order.save();
+
+        // Notify Customer
+        const { sendDeliveryUpdateEmail } = require('../utils/emailService');
+        await sendDeliveryUpdateEmail(order, 'delivered');
+
         res.json({ message: 'Order Delivered Successfully', order });
     } catch (error) {
         res.status(500).json({ message: error.message });
@@ -139,6 +140,11 @@ router.put('/:id/fail', verifyToken, verifyDeliveryPartner, async (req, res) => 
         }
 
         await order.save();
+
+        // Notify Customer
+        const { sendDeliveryUpdateEmail } = require('../utils/emailService');
+        await sendDeliveryUpdateEmail(order, 'failed');
+
         res.json({ message: 'Delivery Marked as Failed', order });
     } catch (error) {
         res.status(500).json({ message: error.message });
