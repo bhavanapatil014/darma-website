@@ -216,6 +216,9 @@ router.put('/:id', async (req, res) => {
 
         if (status === 'shipped') {
             updateData.shippedAt = Date.now();
+        } else if (status === 'out_for_delivery') {
+            // Auto-generate OTP if moving to Out for Delivery (for Agent App compatibility)
+            updateData.deliveryOtp = Math.floor(1000 + Math.random() * 9000).toString();
         } else if (status === 'delivered') {
             updateData.deliveredAt = Date.now();
         }

@@ -26,6 +26,7 @@ export function AdminSidebar() {
         { href: "/admin/orders", label: "Orders" },
         { href: "/admin/coupons", label: "Coupons" },
         { href: "/admin/negotiations", label: "Negotiations" },
+        { href: "/delivery/dashboard", label: "Delivery Panel" },
         { href: "/admin/settings", label: "Settings" },
     ]
 
