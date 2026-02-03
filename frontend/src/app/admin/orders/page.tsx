@@ -455,37 +455,38 @@ export default function OrdersPage() {
                                         />
                                     </div>
                                 </div>
-                                </div>
+
                             )}
 
-                        {/* Delivery Timeline & OTP */}
-                        <div className="pt-4 border-t mt-4">
-                            <h3 className="text-sm font-semibold text-gray-900 mb-2">Delivery Details</h3>
+                            {/* Delivery Timeline & OTP */}
+                            <div className="pt-4 border-t mt-4">
+                                <h3 className="text-sm font-semibold text-gray-900 mb-2">Delivery Details</h3>
 
-                            {selectedOrder.status === 'out_for_delivery' && selectedOrder.deliveryOtp && (
-                                <div className="bg-yellow-50 border border-yellow-200 p-3 rounded-md mb-3 flex justify-between items-center">
-                                    <span className="text-sm text-yellow-800 font-medium">Current OTP</span>
-                                    <span className="text-xl font-bold text-yellow-900 tracking-widest">{selectedOrder.deliveryOtp}</span>
-                                </div>
-                            )}
+                                {selectedOrder.status === 'out_for_delivery' && selectedOrder.deliveryOtp && (
+                                    <div className="bg-yellow-50 border border-yellow-200 p-3 rounded-md mb-3 flex justify-between items-center">
+                                        <span className="text-sm text-yellow-800 font-medium">Current OTP</span>
+                                        <span className="text-xl font-bold text-yellow-900 tracking-widest">{selectedOrder.deliveryOtp}</span>
+                                    </div>
+                                )}
 
-                            {selectedOrder.deliveryAttempts && selectedOrder.deliveryAttempts.length > 0 ? (
-                                <div className="space-y-3">
-                                    {selectedOrder.deliveryAttempts.map((attempt, index) => (
-                                        <div key={index} className="flex gap-3 text-sm border-l-2 border-red-200 pl-3">
-                                            <div className="flex-1">
-                                                <div className="font-medium text-red-600 capitalize">{attempt.status} Attempt</div>
-                                                <div className="text-gray-600">{attempt.reason || 'No reason provided'}</div>
-                                                <div className="text-xs text-gray-400 mt-1">{new Date(attempt.timestamp).toLocaleString()}</div>
+                                {selectedOrder.deliveryAttempts && selectedOrder.deliveryAttempts.length > 0 ? (
+                                    <div className="space-y-3">
+                                        {selectedOrder.deliveryAttempts.map((attempt, index) => (
+                                            <div key={index} className="flex gap-3 text-sm border-l-2 border-red-200 pl-3">
+                                                <div className="flex-1">
+                                                    <div className="font-medium text-red-600 capitalize">{attempt.status} Attempt</div>
+                                                    <div className="text-gray-600">{attempt.reason || 'No reason provided'}</div>
+                                                    <div className="text-xs text-gray-400 mt-1">{new Date(attempt.timestamp).toLocaleString()}</div>
+                                                </div>
                                             </div>
-                                        </div>
-                                    ))}
-                                </div>
-                            ) : (
-                                <p className="text-xs text-gray-400 italic">No delivery attempts recorded yet.</p>
-                            )}
-                        </div>
+                                        ))}
+                                    </div>
+                                ) : (
+                                    <p className="text-xs text-gray-400 italic">No delivery attempts recorded yet.</p>
+                                )}
+                            </div>
 
+                        </div>
                         <div className="p-6 border-t bg-gray-50 flex justify-end gap-3">
                             <Button variant="outline" onClick={closeUpdateModal}>Cancel</Button>
                             <Button onClick={handleUpdateStatus}>Save Changes</Button>
