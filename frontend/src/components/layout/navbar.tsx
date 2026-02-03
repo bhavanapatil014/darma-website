@@ -18,6 +18,7 @@ export function Navbar() {
     const pathname = usePathname();
     const { wishlistCount } = useWishlist();
     const cartCount = items.reduce((acc, item) => acc + item.quantity, 0);
+    const isDeliveryPage = pathname?.startsWith('/delivery');
 
     const [settings, setSettings] = React.useState({ siteName: 'VENKATA', logoUrl: '/images/venkata-logo.png' });
 
@@ -55,24 +56,27 @@ export function Navbar() {
     return (
         <div className="flex flex-col w-full z-50 fixed top-0">
             {/* Top Bar - Marketing/Contact (Blue Background) */}
-            <div className="bg-blue-600 text-white text-[10px] sm:text-xs py-2 px-4 transition-colors">
-                <div className="container mx-auto flex justify-center items-center overflow-hidden">
-                    {/* Mobile: Static condensed text to prevent truncation on 320px screens */}
-                    <div className="md:hidden flex items-center gap-3 whitespace-nowrap font-medium">
-                        <span>Free Delivery &gt; ₹599</span>
-                        <span className="opacity-60">|</span>
-                        <span>COD Available</span>
-                    </div>
+            {/* Top Bar - Marketing/Contact (Blue Background) - Hidden on Delivery Page */}
+            {!isDeliveryPage && (
+                <div className="bg-blue-600 text-white text-[10px] sm:text-xs py-2 px-4 transition-colors">
+                    <div className="container mx-auto flex justify-center items-center overflow-hidden">
+                        {/* Mobile: Static condensed text to prevent truncation on 320px screens */}
+                        <div className="md:hidden flex items-center gap-3 whitespace-nowrap font-medium">
+                            <span>Free Delivery &gt; ₹599</span>
+                            <span className="opacity-60">|</span>
+                            <span>COD Available</span>
+                        </div>
 
-                    {/* Desktop: Scrolling text effect */}
-                    <div className="hidden md:flex gap-12 animate-marquee whitespace-nowrap font-medium tracking-wide w-full justify-center">
-                        <span>Free Delivery on Orders Above ₹599</span>
-                        <span>COD Available</span>
-                        <span>Free Delivery on Orders Above ₹599</span>
-                        <span>COD Available</span>
+                        {/* Desktop: Scrolling text effect */}
+                        <div className="hidden md:flex gap-12 animate-marquee whitespace-nowrap font-medium tracking-wide w-full justify-center">
+                            <span>Free Delivery on Orders Above ₹599</span>
+                            <span>COD Available</span>
+                            <span>Free Delivery on Orders Above ₹599</span>
+                            <span>COD Available</span>
+                        </div>
                     </div>
                 </div>
-            </div>
+            )}
 
             {/* Main Navbar */}
             <header className={cn(
@@ -91,27 +95,30 @@ export function Navbar() {
                     </Link>
 
                     {/* Center: Navigation Links (Inline) - Hidden when search is open on mobile? */}
-                    <nav className={`hidden md:flex items-center gap-6 text-sm font-medium text-gray-700 transition-opacity duration-200 ${isSearchOpen ? 'opacity-0 pointer-events-none' : 'opacity-100'}`}>
-                        <DropdownMenu title="Brands">
-                            <Link href="/shop?brand=cerave" className="block px-4 py-2 hover:bg-teal-50 hover:text-teal-700">CeraVe</Link>
-                            <Link href="/shop?brand=cetaphil" className="block px-4 py-2 hover:bg-teal-50 hover:text-teal-700">Cetaphil</Link>
-                            <Link href="/shop?brand=bioderma" className="block px-4 py-2 hover:bg-teal-50 hover:text-teal-700">Bioderma</Link>
-                        </DropdownMenu>
+                    {/* Center: Navigation Links (Inline) - Hidden on delivery pages */}
+                    {!isDeliveryPage && (
+                        <nav className={`hidden md:flex items-center gap-6 text-sm font-medium text-gray-700 transition-opacity duration-200 ${isSearchOpen ? 'opacity-0 pointer-events-none' : 'opacity-100'}`}>
+                            <DropdownMenu title="Brands">
+                                <Link href="/shop?brand=cerave" className="block px-4 py-2 hover:bg-teal-50 hover:text-teal-700">CeraVe</Link>
+                                <Link href="/shop?brand=cetaphil" className="block px-4 py-2 hover:bg-teal-50 hover:text-teal-700">Cetaphil</Link>
+                                <Link href="/shop?brand=bioderma" className="block px-4 py-2 hover:bg-teal-50 hover:text-teal-700">Bioderma</Link>
+                            </DropdownMenu>
 
-                        <DropdownMenu title="Skin Care">
-                            <Link href="/shop?category=cleansers" className="block px-4 py-2 hover:bg-teal-50 hover:text-teal-700">Cleansers</Link>
-                            <Link href="/shop?category=moisturizers" className="block px-4 py-2 hover:bg-teal-50 hover:text-teal-700">Moisturizers</Link>
-                            <Link href="/shop?category=sunscreens" className="block px-4 py-2 hover:bg-teal-50 hover:text-teal-700">Sunscreens</Link>
-                        </DropdownMenu>
+                            <DropdownMenu title="Skin Care">
+                                <Link href="/shop?category=cleansers" className="block px-4 py-2 hover:bg-teal-50 hover:text-teal-700">Cleansers</Link>
+                                <Link href="/shop?category=moisturizers" className="block px-4 py-2 hover:bg-teal-50 hover:text-teal-700">Moisturizers</Link>
+                                <Link href="/shop?category=sunscreens" className="block px-4 py-2 hover:bg-teal-50 hover:text-teal-700">Sunscreens</Link>
+                            </DropdownMenu>
 
-                        <DropdownMenu title="Hair Care">
-                            <Link href="/shop?category=shampoo" className="block px-4 py-2 hover:bg-teal-50 hover:text-teal-700">Shampoos</Link>
-                            <Link href="/shop?category=conditioner" className="block px-4 py-2 hover:bg-teal-50 hover:text-teal-700">Conditioners</Link>
-                        </DropdownMenu>
+                            <DropdownMenu title="Hair Care">
+                                <Link href="/shop?category=shampoo" className="block px-4 py-2 hover:bg-teal-50 hover:text-teal-700">Shampoos</Link>
+                                <Link href="/shop?category=conditioner" className="block px-4 py-2 hover:bg-teal-50 hover:text-teal-700">Conditioners</Link>
+                            </DropdownMenu>
 
-                        <Link href="/shop?category=baby-care" className="hover:text-teal-600 transition-colors">Baby Care</Link>
-                        <Link href="/shop" className="hover:text-teal-600 transition-colors">Shop All</Link>
-                    </nav>
+                            <Link href="/shop?category=baby-care" className="hover:text-teal-600 transition-colors">Baby Care</Link>
+                            <Link href="/shop" className="hover:text-teal-600 transition-colors">Shop All</Link>
+                        </nav>
+                    )}
 
                     {/* Search Overlay - Full Cover on Mobile */}
                     <div
@@ -294,16 +301,19 @@ export function Navbar() {
                     {/* Right: Actions (Search Icon, Account, Cart) */}
                     <div className="flex items-center gap-6 shrink-0 relative z-20">
                         {/* Search Trigger */}
-                        <button
-                            onClick={() => setIsSearchOpen(!isSearchOpen)}
-                            className="text-gray-700 hover:text-teal-600 transition-colors"
-                        >
-                            {isSearchOpen ? (
-                                <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 6 6 18" /><path d="m6 6 12 12" /></svg>
-                            ) : (
-                                <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8" /><path d="m21 21-4.3-4.3" /></svg>
-                            )}
-                        </button>
+                        {/* Search Trigger */}
+                        {!isDeliveryPage && (
+                            <button
+                                onClick={() => setIsSearchOpen(!isSearchOpen)}
+                                className="text-gray-700 hover:text-teal-600 transition-colors"
+                            >
+                                {isSearchOpen ? (
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 6 6 18" /><path d="m6 6 12 12" /></svg>
+                                ) : (
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8" /><path d="m21 21-4.3-4.3" /></svg>
+                                )}
+                            </button>
+                        )}
 
                         {/* Admin Dashboard Link */}
                         {user && (user.role === 'admin' || user.role === 'superadmin') && (
@@ -320,16 +330,18 @@ export function Navbar() {
                         )}
 
                         {/* Wishlist Link */}
-                        <Link href="/wishlist" className="relative text-black hover:text-teal-600 transition-colors" title="Wishlist">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-[22px] h-[22px]">
-                                <path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z" />
-                            </svg>
-                            {wishlistCount > 0 && (
-                                <span className="absolute -top-2 -right-2 flex h-4 w-4 items-center justify-center rounded-full bg-teal-600 text-[10px] text-white font-bold">
-                                    {wishlistCount}
-                                </span>
-                            )}
-                        </Link>
+                        {!isDeliveryPage && (
+                            <Link href="/wishlist" className="relative text-black hover:text-teal-600 transition-colors" title="Wishlist">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-[22px] h-[22px]">
+                                    <path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z" />
+                                </svg>
+                                {wishlistCount > 0 && (
+                                    <span className="absolute -top-2 -right-2 flex h-4 w-4 items-center justify-center rounded-full bg-teal-600 text-[10px] text-white font-bold">
+                                        {wishlistCount}
+                                    </span>
+                                )}
+                            </Link>
+                        )}
 
                         {user ? (
                             <div className="flex items-center gap-4">
@@ -337,14 +349,16 @@ export function Navbar() {
                                     <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2" /><circle cx="12" cy="7" r="4" /></svg>
                                     <span className="hidden lg:inline text-sm">Account</span>
                                 </Link>
-                                <Link href="/cart" className="relative text-black hover:text-teal-600 transition-colors">
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="8" cy="21" r="1" /><circle cx="19" cy="21" r="1" /><path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12" /></svg>
-                                    {cartCount > 0 && (
-                                        <span className="absolute -top-2 -right-2 flex h-4 w-4 items-center justify-center rounded-full bg-teal-600 text-[10px] text-white font-bold">
-                                            {cartCount}
-                                        </span>
-                                    )}
-                                </Link>
+                                {!isDeliveryPage && (
+                                    <Link href="/cart" className="relative text-black hover:text-teal-600 transition-colors">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="8" cy="21" r="1" /><circle cx="19" cy="21" r="1" /><path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12" /></svg>
+                                        {cartCount > 0 && (
+                                            <span className="absolute -top-2 -right-2 flex h-4 w-4 items-center justify-center rounded-full bg-teal-600 text-[10px] text-white font-bold">
+                                                {cartCount}
+                                            </span>
+                                        )}
+                                    </Link>
+                                )}
                             </div>
                         ) : (
                             <div className="flex items-center gap-4">
