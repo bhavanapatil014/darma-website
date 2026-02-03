@@ -150,7 +150,15 @@ export default function DeliveryDashboard() {
                 <div>
                     <h2 className="text-xl font-semibold mb-4 text-blue-600">Active Deliveries ({activeOrders.length})</h2>
                     {activeOrders.length === 0 ? (
-                        <p className="text-gray-500 italic">No active deliveries assigned.</p>
+                        <div className="text-gray-500 italic space-y-2">
+                            <p>No active deliveries assigned.</p>
+                            {(user?.role === 'admin' || user?.role === 'superadmin') && (
+                                <p className="text-xs text-blue-500 bg-blue-50 p-2 rounded">
+                                    💡 <strong>Admin Tip:</strong> Only orders assigned to YOU appear here.
+                                    Go to <a href="/admin/orders" className="underline">Admin Orders</a>, click Manage, assign yourself as Partner, and set status to 'Shipped'.
+                                </p>
+                            )}
+                        </div>
                     ) : (
                         <div className="space-y-4">
                             {activeOrders.map(order => (
