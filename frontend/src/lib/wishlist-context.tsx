@@ -33,17 +33,19 @@ export function WishlistProvider({ children }: { children: React.ReactNode }) {
         const syncServerWishlist = async () => {
             try {
                 const token = localStorage.getItem('token');
-                const res = await fetch('https://darma-website.onrender.com/api/user/wishlist', {
+                const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000';
+                const res = await fetch(`${apiUrl}/api/user/wishlist`, {
                     headers: { 'Authorization': `Bearer ${token}` }
                 });
+
+
+                if (res.status === 401) {
+                    localStorage.removeItem('token');
+                    return;
+                }
+
                 if (res.ok) {
                     const serverWishlist = await res.json();
-
-                    // Check local guest wishlist (if you want to support guest wishlist persisting)
-                    // Currently getWishlistKey returned null for guest, meaning guest wishlist wasn't strictly supported in previous code
-                    // (previous code: if(!user) setItems([]); return;)
-                    // So we can assume no guest merging needed for wishlist based on previous logic.
-                    // Just set server wishlist.
                     setItems(serverWishlist);
                 }
             } catch (e) {
@@ -60,11 +62,18 @@ export function WishlistProvider({ children }: { children: React.ReactNode }) {
             if (key) localStorage.setItem(key, JSON.stringify(items));
 
             const token = localStorage.getItem('token');
-            fetch('https://darma-website.onrender.com/api/user/wishlist', {
+            const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000';
+            fetch(`${apiUrl}/api/user/wishlist`, {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
                 body: JSON.stringify({ items })
-            }).catch(e => console.error("Failed to save wishlist", e));
+            })
+                .then(res => {
+                    if (res.status === 401) {
+                        localStorage.removeItem('token');
+                    }
+                })
+                .catch(e => console.error("Failed to save wishlist", e));
         }
     }, [items, user]);
 

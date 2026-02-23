@@ -135,7 +135,7 @@ router.post('/register', async (req, res) => {
         // Send Login Notification (REMOVED as per user request)
         // await sendLoginNotification(user, "Registration Auto-Login");
 
-        const token = jwt.sign({ id: user._id, role: user.role }, process.env.JWT_SECRET || 'secretkey', { expiresIn: '24h' });
+        const token = jwt.sign({ id: user._id, role: user.role }, process.env.JWT_SECRET || 'secretkey', { expiresIn: '30d' });
 
         res.status(201).json({ auth: true, token, user: { id: user._id, name: user.name, email: user.email, role: user.role } });
     } catch (error) {
@@ -249,7 +249,7 @@ router.post('/verify-otp', async (req, res) => {
         user.otpExpires = undefined;
         await user.save();
 
-        const token = jwt.sign({ id: user._id, role: user.role }, process.env.JWT_SECRET || 'secretkey', { expiresIn: '24h' });
+        const token = jwt.sign({ id: user._id, role: user.role }, process.env.JWT_SECRET || 'secretkey', { expiresIn: '30d' });
 
         res.json({ auth: true, token, user: { id: user._id, name: user.name, email: user.email, role: user.role } });
 
@@ -289,7 +289,7 @@ router.post('/login-with-phone', async (req, res) => {
 
         if (user.isDeleted) return res.status(403).json({ message: "Account deleted." });
 
-        const token = jwt.sign({ id: user._id, role: user.role }, process.env.JWT_SECRET || 'secretkey', { expiresIn: '7d' });
+        const token = jwt.sign({ id: user._id, role: user.role }, process.env.JWT_SECRET || 'secretkey', { expiresIn: '30d' });
 
         res.json({
             auth: true,
@@ -359,7 +359,7 @@ router.post('/login', async (req, res) => {
             const passwordIsValid = await bcrypt.compare(password, user.password);
             if (!passwordIsValid) return res.status(401).json({ auth: false, token: null, message: 'Invalid password' });
 
-            const token = jwt.sign({ id: user._id, role: user.role }, process.env.JWT_SECRET || 'secretkey', { expiresIn: '7d' });
+            const token = jwt.sign({ id: user._id, role: user.role }, process.env.JWT_SECRET || 'secretkey', { expiresIn: '30d' });
 
             // Send Login Notification (REMOVED as per user request)
 
@@ -400,6 +400,30 @@ router.post('/create-admin', verifyToken, async (req, res) => {
         res.status(500).json({ message: 'Failed to create admin', error: error.message });
     }
 });
+// PUT /api/auth/users/:id/role (Super Admin Only)
+router.put('/users/:id/role', verifyToken, async (req, res) => {
+    if (req.userRole !== 'superadmin') {
+        return res.status(403).json({ message: 'Require Super Admin Role' });
+    }
+
+    try {
+        const { role } = req.body;
+        if (!['user', 'admin', 'superadmin', 'delivery_partner'].includes(role)) {
+            return res.status(400).json({ message: 'Invalid role' });
+        }
+
+        const user = await User.findById(req.params.id);
+        if (!user) return res.status(404).json({ message: 'User not found' });
+
+        user.role = role;
+        await user.save();
+
+        res.json({ message: 'Role updated successfully', user });
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+});
+
 // DELETE /api/auth/users/:id (Super Admin Only)
 router.delete('/users/:id', verifyToken, async (req, res) => {
     console.log(`DELETE User Request: ID ${req.params.id} by ${req.userId} (Role: ${req.userRole})`);

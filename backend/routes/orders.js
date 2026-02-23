@@ -207,14 +207,18 @@ router.post('/', async (req, res) => {
 // PUT Update Order Status (Admin)
 router.put('/:id', async (req, res) => {
     try {
-        const { status, trackingNumber, courierName } = req.body;
+        const { status, trackingNumber, courierName, deliveryAgentId } = req.body;
 
         const updateData = { status };
         if (trackingNumber) updateData.trackingNumber = trackingNumber;
         if (courierName) updateData.courierName = courierName;
+        if (deliveryAgentId) updateData.deliveryAgentId = deliveryAgentId;
 
         if (status === 'shipped') {
             updateData.shippedAt = Date.now();
+        } else if (status === 'out_for_delivery') {
+            // Auto-generate OTP if moving to Out for Delivery (for Agent App compatibility)
+            updateData.deliveryOtp = Math.floor(1000 + Math.random() * 9000).toString();
         } else if (status === 'delivered') {
             updateData.deliveredAt = Date.now();
         }

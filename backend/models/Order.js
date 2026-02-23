@@ -15,13 +15,35 @@ const orderSchema = new mongoose.Schema({
     totalAmount: { type: Number, required: true },
     status: {
         type: String,
-        enum: ['pending', 'processing', 'shipped', 'delivered', 'cancelled'],
+        enum: ['pending', 'confirmed', 'processing', 'packed', 'shipped', 'out_for_delivery', 'delivered', 'failed', 'returned', 'cancelled'],
         default: 'pending'
     },
-    trackingNumber: { type: String },
+
+    // --- Logistics & Packing ---
+    warehouseId: { type: String },
+    invoiceNumber: { type: String },
+    qrCodeData: { type: String }, // For scanning
+
+    // --- Delivery Assignment ---
     courierName: { type: String },
+    trackingNumber: { type: String },
+    deliveryAgentId: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
+
+    // --- Last Mile Delivery Logic ---
+    deliveryOtp: { type: String },
+    deliveryAttempts: [{
+        timestamp: { type: Date, default: Date.now },
+        status: { type: String, enum: ['failed', 'rescheduled'] },
+        reason: String,
+        agentId: { type: mongoose.Schema.Types.ObjectId }
+    }],
+    proofOfDelivery: { type: String }, // URL to image
+
+    // --- Timestamps ---
     shippedAt: { type: Date },
     deliveredAt: { type: Date },
+
+    // --- Payment Verification ---
     paymentMethod: {
         type: String,
         enum: ['card', 'upi', 'cod', 'razorpay'],
@@ -31,6 +53,16 @@ const orderSchema = new mongoose.Schema({
         type: String,
         enum: ['pending', 'paid', 'failed'],
         default: 'pending'
+    },
+    codAmountToCollect: { type: Number, default: 0 }, // Specific field for Agent App
+    codCollected: { type: Boolean, default: false },
+
+    // --- Returns ---
+    returnRequest: {
+        requestedAt: Date,
+        reason: String,
+        status: { type: String, enum: ['requested', 'approved', 'rejected', 'picked', 'refunded'] },
+        pickupAgentId: { type: mongoose.Schema.Types.ObjectId, ref: 'User' }
     }
 }, { timestamps: true });
 

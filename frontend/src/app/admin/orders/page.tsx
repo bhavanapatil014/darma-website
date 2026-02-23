@@ -19,6 +19,16 @@ interface Order {
         quantity: number
         priceAtPurchase: number
     }>
+    deliveryAgentId?: string
+    deliveryOtp?: string
+    deliveryAttempts?: { timestamp: string, reason: string, status: string }[]
+
+}
+
+interface User {
+    _id: string
+    name: string
+    email: string
 }
 
 export default function OrdersPage() {
@@ -39,9 +49,28 @@ export default function OrdersPage() {
     const [trackingNumber, setTrackingNumber] = useState("")
     const [courierName, setCourierName] = useState("")
 
+    const [deliveryPartners, setDeliveryPartners] = useState<User[]>([])
+    const [selectedPartner, setSelectedPartner] = useState("")
+
     useEffect(() => {
         loadOrders()
+        loadPartners()
     }, [])
+
+    async function loadPartners() {
+        try {
+            const token = localStorage.getItem('token')
+            const res = await fetch('https://darma-website.onrender.com/api/user/delivery-partners', {
+                headers: { 'Authorization': `Bearer ${token}` }
+            })
+            if (res.ok) {
+                const data = await res.json()
+                setDeliveryPartners(data)
+            }
+        } catch (error) {
+            console.error(error)
+        }
+    }
 
     async function loadOrders() {
         setLoading(true)
@@ -60,6 +89,7 @@ export default function OrdersPage() {
         setNewStatus(order.status)
         setTrackingNumber(order.trackingNumber || "")
         setCourierName(order.courierName || "")
+        setSelectedPartner(order.deliveryAgentId || "")
         setIsModalOpen(true)
     }
 
@@ -76,6 +106,7 @@ export default function OrdersPage() {
                 status: newStatus,
                 trackingNumber: newStatus === 'shipped' ? trackingNumber : undefined,
                 courierName: newStatus === 'shipped' ? courierName : undefined,
+                deliveryAgentId: selectedPartner || undefined
             }
 
             await fetch(`https://darma-website.onrender.com/api/orders/${selectedOrder._id}`, {
@@ -362,13 +393,13 @@ export default function OrdersPage() {
             {/* Manage Order Modal */}
             {isModalOpen && selectedOrder && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-in fade-in duration-200">
-                    <div className="bg-white rounded-xl shadow-xl w-full max-w-md overflow-hidden animate-in zoom-in-95 duration-200">
-                        <div className="p-6 border-b">
+                    <div className="bg-white rounded-xl shadow-xl w-full max-w-xl max-h-[90vh] flex flex-col overflow-hidden animate-in zoom-in-95 duration-200">
+                        <div className="p-6 border-b shrink-0">
                             <h2 className="text-xl font-semibold">Manage Order #{selectedOrder._id.slice(-6)}</h2>
                             <p className="text-sm text-gray-500 mt-1">Update status and delivery details.</p>
                         </div>
 
-                        <div className="p-6 space-y-4">
+                        <div className="p-6 space-y-4 flex-1 overflow-y-auto">
                             <div className="space-y-2">
                                 <label className="text-sm font-medium text-gray-700">Order Status</label>
                                 <select
@@ -384,15 +415,31 @@ export default function OrdersPage() {
                                 </select>
                             </div>
 
+                            {/* Assign Delivery Partner (Always Visible) */}
+                            <div className="space-y-2 pt-2 border-t mt-4">
+                                <label className="text-sm font-medium text-gray-700">Assign Delivery Partner</label>
+                                <select
+                                    className="w-full p-2 border rounded-md"
+                                    value={selectedPartner}
+                                    onChange={(e) => setSelectedPartner(e.target.value)}
+                                >
+                                    <option value="">-- Select Partner --</option>
+                                    {deliveryPartners.map(p => (
+                                        <option key={p._id} value={p._id}>{p.name} ({p.email})</option>
+                                    ))}
+                                </select>
+                            </div>
+
                             {/* Show Delivery Fields ONLY when status is SHIPPED */}
                             {newStatus === 'shipped' && (
-                                <div className="space-y-4 pt-2 border-t mt-4">
+                                <div className="space-y-4 pt-2 border-t mt-2">
+                                    <p className="text-xs text-gray-500 font-semibold uppercase">External Courier Details (Optional)</p>
                                     <div className="space-y-2">
                                         <label className="text-sm font-medium text-gray-700">Courier Name</label>
                                         <input
                                             type="text"
                                             className="w-full p-2 border rounded-md"
-                                            placeholder="e.g. FedEx, DHL, Local Courier"
+                                            placeholder="e.g. FedEx, DHL"
                                             value={courierName}
                                             onChange={(e) => setCourierName(e.target.value)}
                                         />
@@ -408,9 +455,38 @@ export default function OrdersPage() {
                                         />
                                     </div>
                                 </div>
-                            )}
-                        </div>
 
+                            )}
+
+                            {/* Delivery Timeline & OTP */}
+                            <div className="pt-4 border-t mt-4">
+                                <h3 className="text-sm font-semibold text-gray-900 mb-2">Delivery Details</h3>
+
+                                {selectedOrder.status === 'out_for_delivery' && selectedOrder.deliveryOtp && (
+                                    <div className="bg-yellow-50 border border-yellow-200 p-3 rounded-md mb-3 flex justify-between items-center">
+                                        <span className="text-sm text-yellow-800 font-medium">Current OTP</span>
+                                        <span className="text-xl font-bold text-yellow-900 tracking-widest">{selectedOrder.deliveryOtp}</span>
+                                    </div>
+                                )}
+
+                                {selectedOrder.deliveryAttempts && selectedOrder.deliveryAttempts.length > 0 ? (
+                                    <div className="space-y-3">
+                                        {selectedOrder.deliveryAttempts.map((attempt, index) => (
+                                            <div key={index} className="flex gap-3 text-sm border-l-2 border-red-200 pl-3">
+                                                <div className="flex-1">
+                                                    <div className="font-medium text-red-600 capitalize">{attempt.status} Attempt</div>
+                                                    <div className="text-gray-600">{attempt.reason || 'No reason provided'}</div>
+                                                    <div className="text-xs text-gray-400 mt-1">{new Date(attempt.timestamp).toLocaleString()}</div>
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                ) : (
+                                    <p className="text-xs text-gray-400 italic">No delivery attempts recorded yet.</p>
+                                )}
+                            </div>
+
+                        </div>
                         <div className="p-6 border-t bg-gray-50 flex justify-end gap-3">
                             <Button variant="outline" onClick={closeUpdateModal}>Cancel</Button>
                             <Button onClick={handleUpdateStatus}>Save Changes</Button>

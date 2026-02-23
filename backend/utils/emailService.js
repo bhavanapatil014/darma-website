@@ -78,16 +78,19 @@ const getTransporter = async () => {
 
 // Template for Order Confirmation (User)
 const formatOrderEmail = (order) => {
-    const itemsList = order.products.map(item =>
-        `<li>${item.name} x ${item.quantity} - ₹${item.priceAtPurchase.toFixed(2)}</li>`
-    ).join('');
+    const itemsList = order.products.map(item => {
+        const price = typeof item.priceAtPurchase === 'number' ? item.priceAtPurchase : 0;
+        return `<li>${item.name} x ${item.quantity || 1} - ₹${price.toFixed(2)}</li>`
+    }).join('');
+
+    const total = typeof order.totalAmount === 'number' ? order.totalAmount : 0;
 
     return `
         <h1>Order Confirmation</h1>
         <p>Thank you for your order, ${order.customerName}!</p>
         <p><strong>Order ID:</strong> ${order._id}</p>
-        <p><strong>Total Amount:</strong> ₹${order.totalAmount.toFixed(2)}</p>
-        <p><strong>Payment Method:</strong> ${order.paymentMethod.toUpperCase()}</p>
+        <p><strong>Total Amount:</strong> ₹${total.toFixed(2)}</p>
+        <p><strong>Payment Method:</strong> ${(order.paymentMethod || 'Unknown').toUpperCase()}</p>
         
         <h3>Items:</h3>
         <ul>${itemsList}</ul>
@@ -103,16 +106,19 @@ const formatOrderEmail = (order) => {
 
 // Template for Admin Notification
 const formatAdminEmail = (order, customer) => {
-    const itemsList = order.products.map(item =>
-        `<li>${item.name} x ${item.quantity} - ₹${item.priceAtPurchase.toFixed(2)}</li>`
-    ).join('');
+    const itemsList = order.products.map(item => {
+        const price = typeof item.priceAtPurchase === 'number' ? item.priceAtPurchase : 0;
+        return `<li>${item.name} x ${item.quantity || 1} - ₹${price.toFixed(2)}</li>`
+    }).join('');
+
+    const total = typeof order.totalAmount === 'number' ? order.totalAmount : 0;
 
     return `
         <h1>New Order Received</h1>
         <p><strong>Customer:</strong> ${order.customerName} (${order.email})</p>
         <p><strong>Order ID:</strong> ${order._id}</p>
-        <p><strong>Amount:</strong> ₹${order.totalAmount.toFixed(2)}</p>
-        <p><strong>Payment Method:</strong> ${order.paymentMethod}</p>
+        <p><strong>Amount:</strong> ₹${total.toFixed(2)}</p>
+        <p><strong>Payment Method:</strong> ${order.paymentMethod || 'N/A'}</p>
         
         <h3>Items Ordered:</h3>
         <ul>${itemsList}</ul>
@@ -307,4 +313,77 @@ const formatAdminLoginAlert = (user, time, method) => {
 
 
 
-module.exports = { sendOrderEmails, sendWelcomeEmails, sendOtp, sendLoginNotification };
+// Template for Delivery Updates
+const formatDeliveryEmail = (order, type) => {
+    const trackingLink = `${process.env.FRONTEND_URL || 'https://venkataderma.com'}/account/orders/${order._id}`;
+
+    if (type === 'out_for_delivery') {
+        return `
+            <div style="font-family: Arial, sans-serif; color: #333;">
+                <h1 style="color: #0d9488;">🚚 Out for Delivery!</h1>
+                <p>Hello ${order.customerName},</p>
+                <p>Your order <strong>#${order._id.toString().slice(-6)}</strong> is on its way!</p>
+                
+                <div style="background: #f0fdf4; border: 1px solid #16a34a; padding: 15px; border-radius: 8px; margin: 20px 0;">
+                    <p style="margin: 0; font-size: 14px; color: #166534;">Share this OTP with the delivery agent:</p>
+                    <h2 style="margin: 10px 0 0 0; font-size: 32px; letter-spacing: 5px; color: #15803d;">${order.deliveryOtp}</h2>
+                </div>
+
+                <p><strong>Courier:</strong> ${order.courierName || 'Venkata Express'}</p>
+                <p><strong>Payment to Collect:</strong> ₹${order.paymentMethod === 'cod' && order.paymentStatus === 'pending' ? order.totalAmount : '0 (Prepaid)'}</p>
+                
+                <a href="${trackingLink}" style="display: inline-block; background: #0f766e; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px;">Track Order</a>
+            </div>
+        `;
+    }
+
+    if (type === 'delivered') {
+        return `
+            <div style="font-family: Arial, sans-serif; color: #333;">
+                <h1 style="color: #16a34a;">✅ Delivered Successfully</h1>
+                <p>Hello ${order.customerName},</p>
+                <p>Your order <strong>#${order._id.toString().slice(-6)}</strong> has been delivered.</p>
+                <p>We hope you enjoy your products!</p>
+                <br>
+                <a href="${trackingLink}" style="color: #0f766e;">View Order Details</a>
+            </div>
+        `;
+    }
+
+    if (type === 'failed') {
+        const lastAttempt = order.deliveryAttempts && order.deliveryAttempts.length > 0
+            ? order.deliveryAttempts[order.deliveryAttempts.length - 1]
+            : { reason: 'Unknown' };
+
+        return `
+            <div style="font-family: Arial, sans-serif; color: #333;">
+                <h1 style="color: #dc2626;">❌ Delivery Attempt Failed</h1>
+                <p>Hello ${order.customerName},</p>
+                <p>We tried to deliver your order <strong>#${order._id.toString().slice(-6)}</strong> but failed.</p>
+                <p><strong>Reason:</strong> ${lastAttempt.reason}</p>
+                <p>We will attempt delivery again soon.</p>
+            </div>
+        `;
+    }
+};
+
+const sendDeliveryUpdateEmail = async (order, type) => {
+    try {
+        if (!isDummyEmail(order.email)) {
+            let subject = "";
+            if (type === 'out_for_delivery') subject = `🚚 Out for Delivery: Order #${order._id.toString().slice(-6)}`;
+            else if (type === 'delivered') subject = `✅ Delivered: Order #${order._id.toString().slice(-6)}`;
+            else if (type === 'failed') subject = `❌ Delivery Failed: Order #${order._id.toString().slice(-6)}`;
+
+            await sendEmailWrapper({
+                to: order.email,
+                subject: subject,
+                html: formatDeliveryEmail(order, type)
+            });
+        }
+    } catch (error) {
+        console.error("Error sending delivery email:", error);
+    }
+}
+
+module.exports = { sendOrderEmails, sendWelcomeEmails, sendOtp, sendLoginNotification, sendDeliveryUpdateEmail };

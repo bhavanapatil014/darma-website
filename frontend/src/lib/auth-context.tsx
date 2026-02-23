@@ -33,18 +33,46 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         fetch(`https://darma-website.onrender.com/api/settings`).catch(() => { });
 
         const token = localStorage.getItem('token');
+        const lastActive = localStorage.getItem('lastActive');
+        const now = Date.now();
+        const ONE_DAY_MS = 24 * 60 * 60 * 1000;
+
+        // 1. Check Inactivity (Simulated Session Timeout)
+        if (token && lastActive) {
+            const timeDiff = now - parseInt(lastActive, 10);
+            if (timeDiff > ONE_DAY_MS) {
+                console.warn("User inactive for > 1 day. Logging out.");
+                localStorage.removeItem('token');
+                localStorage.removeItem('lastActive');
+                setUser(null);
+                setIsLoading(false);
+                return; // Stop further checks
+            }
+        }
+
+        // 2. Update Activity Timestamp (on every hard reload/initial visit)
         if (token) {
-            fetch(`https://darma-website.onrender.com/api/auth/me`, {
+            localStorage.setItem('lastActive', now.toString());
+        }
+
+        // 3. Verify Token Validity with Backend
+        if (token) {
+            // Standardize URL logic
+            const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000';
+            fetch(`${apiUrl}/api/auth/me`, {
                 headers: { 'Authorization': `Bearer ${token}` }
             })
                 .then(async res => {
                     if (res.ok) {
                         const data = await res.json();
                         setUser(data.user);
+                        // Confirm active session
+                        localStorage.setItem('lastActive', Date.now().toString());
                     } else if (res.status === 401 || res.status === 403) {
                         // Only remove token if explicitly unauthorized
                         console.warn("Token expired or invalid (401/403). Logging out.");
                         localStorage.removeItem('token');
+                        localStorage.removeItem('lastActive');
                         setUser(null);
                     } else {
                         console.warn(`Auth check failed with status ${res.status}. Preserving token.`);
@@ -76,7 +104,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             const data = await res.json();
             setUser(data.user);
             localStorage.setItem('token', data.token);
-            router.push(redirectPath || "/account");
+            if (data.user.role === 'delivery_partner') {
+                router.push("/delivery/dashboard");
+            } else {
+                router.push(redirectPath || "/account");
+            }
         } catch (error: any) {
             console.error(error);
             toast.error(error.message || "Login failed.");
@@ -157,7 +189,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             const data = await res.json();
             setUser(data.user);
             localStorage.setItem('token', data.token);
-            router.push(redirectPath || "/account");
+            if (data.user.role === 'delivery_partner') {
+                router.push("/delivery/dashboard");
+            } else {
+                router.push(redirectPath || "/account");
+            }
         } catch (error: any) {
             console.error(error);
             toast.error(error.message || "Verification failed.");
