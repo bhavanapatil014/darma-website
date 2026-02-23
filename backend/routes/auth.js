@@ -332,10 +332,16 @@ router.post('/login', async (req, res) => {
             const allUsers = await User.find({});
             const manualMatch = allUsers.find(u => u.email.toLowerCase() === email.toLowerCase());
 
+            // Escape email to prevent Regex DoS
+            const escapeRegExp = (string) => {
+                return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+            };
+            const safeEmail = escapeRegExp(email);
+
             if (manualMatch) {
                 console.log("MANUAL MATCH FOUND! ID:", manualMatch._id);
                 // Check regex search result
-                const user = await User.findOne({ email: { $regex: new RegExp(`^${email}$`, 'i') } });
+                const user = await User.findOne({ email: { $regex: new RegExp(`^${safeEmail}$`, 'i') } });
                 if (!user) {
                     console.log("CRITICAL: Manual match found but Mongoose Regex failed.");
                 } else {
@@ -346,7 +352,7 @@ router.post('/login', async (req, res) => {
                 // allUsers.forEach(u => console.log(`- ${u.email}`)); // Reduce noise
             }
 
-            const user = await User.findOne({ email: { $regex: new RegExp(`^${email}$`, 'i') } });
+            const user = await User.findOne({ email: { $regex: new RegExp(`^${safeEmail}$`, 'i') } });
             if (!user) {
                 console.log(`Debug ID 852: User ${email} not found in DB.`);
                 return res.status(404).json({ message: 'User not found' });

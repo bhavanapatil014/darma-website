@@ -20,7 +20,8 @@ router.post('/', async (req, res) => {
         name = name.trim();
 
         // Check if exists
-        const existing = await Brand.findOne({ name: { $regex: new RegExp(`^${name}$`, 'i') } });
+        const escapeRegExp = (string) => string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+        const existing = await Brand.findOne({ name: { $regex: new RegExp(`^${escapeRegExp(name)}$`, 'i') } });
         if (existing) {
             return res.status(400).json({ message: 'Brand already exists' });
         }

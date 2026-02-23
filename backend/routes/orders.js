@@ -25,11 +25,13 @@ router.get('/my-orders', verifyToken, async (req, res) => {
 
         console.log(`Fetching orders - UserID: ${req.userId}, Email: ${user.email}`);
 
+        const escapeRegExp = (string) => string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+
         // Robust Query: Match userId string OR case-insensitive email
         const orders = await Order.find({
             $or: [
                 { userId: req.userId.toString() }, // Ensure string match
-                { email: { $regex: new RegExp(`^${user.email}$`, 'i') } } // Case-insensitive email match
+                { email: { $regex: new RegExp(`^${escapeRegExp(user.email)}$`, 'i') } } // Case-insensitive email match
             ]
         }).sort({ createdAt: -1 });
 
