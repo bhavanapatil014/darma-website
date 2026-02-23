@@ -18,7 +18,7 @@ async function getProducts() {
 }
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-    const baseUrl = 'https://venkataderma.com'; // Replace with actual domain when available or use Render URL
+    const baseUrl = 'https://venkata-derma.vercel.app'; // Reverted to Vercel App URL
 
     // 1. Static Routes
     const routes = [

@@ -22,7 +22,7 @@ export interface Product {
     }[];
 }
 
-let API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://darma-website.onrender.com/api';
+let API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000/api';
 API_URL = API_URL.replace(/\/$/, ""); // Remove trailing slash
 if (!API_URL.endsWith('/api')) {
     API_URL += '/api';

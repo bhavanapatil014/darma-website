@@ -43,16 +43,21 @@ router.get('/', async (req, res) => {
                 query.category = category;
             }
         }
+        const escapeRegExp = (string) => {
+            return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); // $& means the whole matched string
+        };
+
         if (brand) {
-            query.brand = { $regex: new RegExp(brand, 'i') }; // Flexible "Contains" match
+            query.brand = { $regex: new RegExp(escapeRegExp(brand), 'i') }; // Flexible "Contains" match
             console.log(`Applying Brand Filter: ${brand} -> Regex: ${query.brand}`);
         }
         if (search) {
+            const safeSearch = escapeRegExp(search);
             query.$or = [
-                { name: { $regex: search, $options: 'i' } },
-                { description: { $regex: search, $options: 'i' } },
-                { brand: { $regex: search, $options: 'i' } },
-                { category: { $regex: search, $options: 'i' } }
+                { name: { $regex: safeSearch, $options: 'i' } },
+                { description: { $regex: safeSearch, $options: 'i' } },
+                { brand: { $regex: safeSearch, $options: 'i' } },
+                { category: { $regex: safeSearch, $options: 'i' } }
             ];
         }
 

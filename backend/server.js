@@ -43,7 +43,7 @@ app.use(limiter);
 
 // 5. CORS (Hardened)
 app.use(cors({
-    origin: process.env.FRONTEND_URL || '*', // Ideally set strict origin in PROD
+    origin: process.env.FRONTEND_URL || ['http://localhost:3000', 'https://venkata-derma.vercel.app'], // Secure fallbacks
     methods: ['GET', 'POST', 'PUT', 'DELETE'],
     credentials: true,
 }));
@@ -116,5 +116,7 @@ const startServer = async () => {
         console.error("Failed to start server:", error);
     }
 };
+
+
 
 startServer();
