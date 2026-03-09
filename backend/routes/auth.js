@@ -224,7 +224,10 @@ router.post('/send-otp', async (req, res) => {
                 console.log(`📲 SMS SIMULATION (Fast2SMS Failed/Not Configured)`);
                 console.log(`To: ${identifier}`);
                 console.log(`💬 Your OTP is: ${otp}`);
-                console.log(`Error msg:`, smsError.message || smsError);
+                console.log(`Error msg:`, smsError.message);
+                if (smsError.response && smsError.response.data) {
+                    console.log(`Fast2SMS Response Data:`, JSON.stringify(smsError.response.data));
+                }
                 console.log(`----------------------------------------`);
             }
         }
