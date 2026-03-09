@@ -186,31 +186,37 @@ router.post('/send-otp', async (req, res) => {
             await sendOtp(user.email, otp);
             console.log(`Debug: OTP for ${user.email} is ${otp}`);
         } else {
-            // Phone (Twilio Integration)
-
-            // 🔥 ALSO Send to User's Email if it's a real email (not fallback @dermakart.local)
-            if (user.email && !user.email.includes('@dermakart.local')) {
-                console.log(`Sending backup OTP email to: ${user.email}`);
-                await sendOtp(user.email, otp);
-            }
-
+            // Phone (Fast2SMS Integration using free limits)
             try {
-                if (process.env.TWILIO_SID && process.env.TWILIO_AUTH && process.env.TWILIO_PHONE) {
-                    const client = require('twilio')(process.env.TWILIO_SID, process.env.TWILIO_AUTH);
-                    await client.messages.create({
-                        body: `Your DermaKart Login OTP is ${otp}`,
-                        from: process.env.TWILIO_PHONE,
-                        to: identifier.startsWith('+') ? identifier : `+91${identifier}` // Default to India +91 if not provided
-                    });
-                    console.log(`✅ SMS sent to ${identifier} via Twilio`);
+                // If the username is a standard Indian 10-digit format
+                const cleanPhone = identifier.replace(/^\+91/, '').replace(/\D/g, '');
+
+                if (cleanPhone.length === 10) {
+                    if (process.env.FAST2SMS_AUTH) {
+                        const axios = require('axios');
+                        const response = await axios.get('https://www.fast2sms.com/dev/bulkV2', {
+                            headers: {
+                                'authorization': process.env.FAST2SMS_AUTH
+                            },
+                            params: {
+                                'variables_values': otp,
+                                'route': 'otp',
+                                'numbers': cleanPhone
+                            }
+                        });
+                        console.log(`✅ Fast2SMS SMS sent to ${cleanPhone}:`, response.data);
+                    } else {
+                        throw new Error("FAST2SMS_AUTH key missing from environment variables.");
+                    }
                 } else {
-                    throw new Error("Twilio credentials missing");
+                    throw new Error(`Invalid Indian phone number length for Fast2SMS: ${cleanPhone}`);
                 }
             } catch (smsError) {
                 console.log(`----------------------------------------`);
-                console.log(`📲 SMS SIMULATION (Twilio Failed/Not Configured)`);
+                console.log(`📲 SMS SIMULATION (Fast2SMS Failed/Not Configured)`);
                 console.log(`To: ${identifier}`);
                 console.log(`💬 Your OTP is: ${otp}`);
+                console.log(`Error msg:`, smsError.message || smsError);
                 console.log(`----------------------------------------`);
             }
         }
