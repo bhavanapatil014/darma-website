@@ -171,7 +171,15 @@ router.post('/send-otp', async (req, res) => {
             sendWelcomeEmails(user).catch(err => console.error("Welcome Email Failed (OTP):", err));
         }
         if (user.isDeleted) {
-            return res.status(403).json({ message: "Account is deleted. Please contact support." });
+            // Restore deleted account automatically if they try to login again
+            user.isDeleted = false;
+            user.deletedAt = undefined;
+            user.deletedBy = undefined;
+            if (user.originalEmail) {
+                user.email = user.originalEmail;
+                user.originalEmail = undefined;
+            }
+            await user.save();
         }
         // If user already existed, we skip sendWelcomeEmails and just send OTP below
         // Generate OTP
