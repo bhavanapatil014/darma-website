@@ -257,9 +257,10 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
                                     ...item,
                                     price: variant.price,
                                     mrp: variant.mrp,
-                                    // image: productData.image, // Usually images are same, or could look up variant image if supported
-                                    // name: `${productData.name} (${variant.size})`, // Ensure name is consistent
-                                    stockQuantity: variant.stock // Update variant specific stock if available
+                                    // image: productData.image,
+                                    // name: `${productData.name} (${variant.size})`,
+                                    stockQuantity: variant.stock,
+                                    brand: productData.brand
                                 };
                             }
                         }
@@ -271,7 +272,8 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
                             mrp: productData.mrp,
                             image: productData.image,
                             name: productData.name,
-                            stockQuantity: productData.stockQuantity
+                            stockQuantity: productData.stockQuantity,
+                            brand: productData.brand
                         };
                     }
                     return item; // Keep old if fetch fails (fallback)

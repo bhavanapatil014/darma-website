@@ -475,10 +475,11 @@ export default function CartPage() {
                                         const meetsMinOrder = currentSubtotal >= minAmount;
                                         const amountNeeded = Math.max(0, minAmount - currentSubtotal);
 
-                                        // 2. Check Product/Category Constraints
+                                        // 2. Check Product/Category/Brand Constraints
                                         const appProds = (c.applicableProducts || c.eligibleItemIds || []).map((id: any) => String(id).trim());
                                         const appCats = (c.applicableCategories || []).map((cat: any) => String(cat).trim().toLowerCase());
-                                        const hasConstraints = appProds.length > 0 || appCats.length > 0;
+                                        const appBrands = (c.applicableBrands || []).map((brand: any) => String(brand).trim().toLowerCase());
+                                        const hasConstraints = appProds.length > 0 || appCats.length > 0 || appBrands.length > 0;
 
                                         let meetsConstraints = true;
                                         if (hasConstraints) {
@@ -486,7 +487,12 @@ export default function CartPage() {
                                                 const iId = String(item.id).trim();
                                                 const iMongo = String((item as any)._id || "").trim();
                                                 const iCat = String(item.category || "").trim().toLowerCase();
-                                                return appProds.includes(iId) || appProds.includes(iMongo) || appCats.includes(iCat);
+                                                const iBrand = String((item as any).brand || "").trim().toLowerCase();
+
+                                                return appProds.includes(iId) ||
+                                                    appProds.includes(iMongo) ||
+                                                    appCats.includes(iCat) ||
+                                                    (iBrand && appBrands.includes(iBrand));
                                             });
                                         }
 

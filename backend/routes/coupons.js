@@ -41,14 +41,14 @@ router.post('/', async (req, res) => {
 router.put('/:id', async (req, res) => {
     try {
         console.log(`PUT /coupons/${req.params.id} Payload:`, JSON.stringify(req.body, null, 2));
-        const { code, type, value, minOrderAmount, maxDiscountAmount, expirationDate, usageLimit, applicableProducts, applicableCategories, applicableBrands } = req.body;
+        const { code, type, value, minOrderAmount, maxDiscountAmount, expirationDate, usageLimit, applicableProducts, applicableCategories, applicableBrands, isActive } = req.body;
 
         // Validation could be added here similar to Create
 
         const updatedCoupon = await Coupon.findByIdAndUpdate(
             req.params.id,
             {
-                code, type, value, minOrderAmount, maxDiscountAmount, expirationDate, usageLimit, applicableProducts, applicableCategories, applicableBrands
+                code, type, value, minOrderAmount, maxDiscountAmount, expirationDate, usageLimit, applicableProducts, applicableCategories, applicableBrands, isActive
             },
             { new: true }
         );

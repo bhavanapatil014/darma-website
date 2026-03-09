@@ -9,7 +9,7 @@ interface Coupon {
     value: number;
     minOrderAmount: number;
     maxDiscountAmount?: number;
-    expirationDate: string;
+    expirationDate: string | null;
     isActive: boolean;
     applicableProducts: string[];
     applicableCategories: string[];
@@ -39,7 +39,7 @@ export default function CouponsPage() {
 
     const [formData, setFormData] = useState<Partial<Coupon>>({
         code: "", type: "percentage", value: 0, minOrderAmount: 0, maxDiscountAmount: 0, isActive: true,
-        applicableProducts: [], applicableCategories: [], applicableBrands: []
+        applicableProducts: [], applicableCategories: [], applicableBrands: [], expirationDate: null
     })
 
     const [showForm, setShowForm] = useState(false);
@@ -52,11 +52,11 @@ export default function CouponsPage() {
     // Negotiation coupons start with 'DEAL-'
     const negotiationCoupons = coupons.filter(c => c.code.startsWith('DEAL-'));
 
-    // Active coupons are NOT negotiation coupons and are valid
-    const activeCoupons = coupons.filter(c => !c.code.startsWith('DEAL-') && (!c.expirationDate || new Date() <= new Date(c.expirationDate)));
+    // Active coupons are NOT negotiation coupons and are valid and active
+    const activeCoupons = coupons.filter(c => !c.code.startsWith('DEAL-') && c.isActive && (!c.expirationDate || new Date() <= new Date(c.expirationDate)));
 
-    // Expired coupons are NOT negotiation coupons and are expired
-    const expiredCoupons = coupons.filter(c => !c.code.startsWith('DEAL-') && (c.expirationDate && new Date() > new Date(c.expirationDate)));
+    // Expired coupons are NOT negotiation coupons and are either expired or inactive
+    const expiredCoupons = coupons.filter(c => !c.code.startsWith('DEAL-') && (!c.isActive || (c.expirationDate && new Date() > new Date(c.expirationDate))));
 
     const displayedCoupons = activeTab === 'active' ? activeCoupons : activeTab === 'expired' ? expiredCoupons : negotiationCoupons;
 
@@ -188,7 +188,7 @@ export default function CouponsPage() {
     function resetForm() {
         setFormData({
             code: "", type: "percentage", value: 0, minOrderAmount: 0, maxDiscountAmount: 0,
-            expirationDate: "", isActive: true, applicableProducts: [], applicableCategories: [], applicableBrands: []
+            expirationDate: null, isActive: true, applicableProducts: [], applicableCategories: [], applicableBrands: []
         });
         setIsEditing(false);
         setEditId(null);
@@ -388,11 +388,26 @@ export default function CouponsPage() {
                                         if (e.target.value) {
                                             setFormData({ ...formData, expirationDate: new Date(e.target.value).toISOString() })
                                         } else {
-                                            setFormData({ ...formData, expirationDate: undefined })
+                                            setFormData({ ...formData, expirationDate: null })
                                         }
                                     }}
                                 />
                             </div>
+                        </div>
+
+                        {/* Status Toggle */}
+                        <div className="flex items-center gap-3 bg-gray-50 p-4 rounded-lg border border-gray-200">
+                            <label className="text-sm font-semibold text-gray-700">Coupon Status:</label>
+                            <label className="relative inline-flex items-center cursor-pointer">
+                                <input
+                                    type="checkbox"
+                                    className="sr-only peer"
+                                    checked={formData.isActive !== false}
+                                    onChange={(e) => setFormData({ ...formData, isActive: e.target.checked })}
+                                />
+                                <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-sky-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-sky-600"></div>
+                                <span className="ml-3 text-sm font-medium text-gray-700">{formData.isActive !== false ? 'Active' : 'Inactive'}</span>
+                            </label>
                         </div>
 
                         {/* Applicability Selectors */}
@@ -518,16 +533,17 @@ export default function CouponsPage() {
                 <div className="md:hidden">
                     {displayedCoupons.map(coupon => {
                         const isExpired = coupon.expirationDate && new Date() > new Date(coupon.expirationDate);
+                        const isInactive = coupon.isActive === false;
                         const isUsed = activeTab === 'negotiation' && coupon.usedCount && coupon.usageLimit && coupon.usedCount >= coupon.usageLimit;
                         const negotiationDetails = activeTab === 'negotiation'
                             ? negotiations.find(n => n.couponCode === coupon.code)
                             : null;
 
                         return (
-                            <div key={coupon._id} className={`p-4 border-b border-gray-100 flex flex-col gap-3 ${isExpired ? 'bg-gray-50 opacity-70' : ''}`}>
+                            <div key={coupon._id} className={`p-4 border-b border-gray-100 flex flex-col gap-3 ${(isExpired || isInactive) ? 'bg-gray-50 opacity-70' : ''}`}>
                                 <div className="flex justify-between items-start">
                                     <div>
-                                        <div className="font-mono font-bold text-lg text-gray-900">{coupon.code}</div>
+                                        <div className="font-mono font-bold text-lg text-gray-900">{coupon.code} {isInactive && <span className="text-[10px] bg-gray-200 text-gray-600 px-1.5 py-0.5 rounded ml-2">INACTIVE</span>}</div>
                                         <div className="text-xs text-gray-400 mt-0.5">
                                             {coupon.expirationDate ? `Expires: ${new Date(coupon.expirationDate).toLocaleDateString()}` : 'No Expiry'}
                                         </div>
@@ -605,16 +621,18 @@ export default function CouponsPage() {
                         <tbody className="divide-y divide-gray-100">
                             {displayedCoupons.map(coupon => {
                                 const isExpired = coupon.expirationDate && new Date() > new Date(coupon.expirationDate);
+                                const isInactive = coupon.isActive === false;
                                 const isUsed = activeTab === 'negotiation' && coupon.usedCount && coupon.usageLimit && coupon.usedCount >= coupon.usageLimit;
                                 const negotiationDetails = activeTab === 'negotiation'
                                     ? negotiations.find(n => n.couponCode === coupon.code)
                                     : null;
 
                                 return (
-                                    <tr key={coupon._id} className={`group hover:bg-gray-50/50 transition-colors ${isExpired ? 'bg-gray-50 opacity-50 blur-[0.5px]' : (isUsed ? 'bg-gray-50/40' : '')}`}>
+                                    <tr key={coupon._id} className={`group hover:bg-gray-50/50 transition-colors ${(isExpired || isInactive) ? 'bg-gray-50 opacity-50 blur-[0.5px]' : (isUsed ? 'bg-gray-50/40' : '')}`}>
                                         <td className="py-4 px-6">
                                             <div className="font-mono font-bold text-gray-800 text-base">{coupon.code}</div>
                                             {isExpired && <span className="inline-block mt-1 text-[10px] uppercase font-bold text-red-600 bg-red-100 px-1.5 py-0.5 rounded mr-1">Expired</span>}
+                                            {isInactive && <span className="inline-block mt-1 text-[10px] uppercase font-bold text-gray-600 bg-gray-200 px-1.5 py-0.5 rounded mr-1">Inactive</span>}
                                             {isUsed && <span className="inline-block mt-1 text-[10px] uppercase font-bold text-gray-600 bg-gray-200 px-1.5 py-0.5 rounded">Used</span>}
                                         </td>
                                         <td className="py-4 px-6">
