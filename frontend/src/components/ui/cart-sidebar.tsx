@@ -76,11 +76,13 @@ export function CartSidebar() {
                             // Check if item is eligible for current coupon discount
                             const couponIds = (coupon?.eligibleItemIds || []).map(id => String(id).trim());
                             const itemId = String(item.id || "").trim();
+                            const itemCleanId = itemId.split('-')[0];
                             const itemMongoId = String((item as any)._id || "").trim();
 
                             // Strict check: Item MUST be in the eligible list
                             const isEligible = coupon && couponIds.length > 0 && (
                                 couponIds.includes(itemId) ||
+                                couponIds.includes(itemCleanId) ||
                                 couponIds.includes(itemMongoId)
                             );
 
@@ -96,9 +98,10 @@ export function CartSidebar() {
                                     // Distribute fixed discount proportionally
                                     const eligibleTotal = items.reduce((sum, i) => {
                                         const iId = String(i.id).trim();
+                                        const iCleanId = iId.split('-')[0];
                                         const iMongo = String((i as any)._id).trim();
                                         // Strict check here too
-                                        const iEligible = couponIds.length > 0 && (couponIds.includes(iId) || couponIds.includes(iMongo));
+                                        const iEligible = couponIds.length > 0 && (couponIds.includes(iId) || couponIds.includes(iCleanId) || couponIds.includes(iMongo));
                                         return iEligible ? sum + (i.price * i.quantity) : sum;
                                     }, 0);
 

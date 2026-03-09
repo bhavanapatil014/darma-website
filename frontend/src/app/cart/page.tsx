@@ -149,8 +149,9 @@ export default function CartPage() {
                         // Check eligibility exactly like Sidebar logic
                         const couponIds = (coupon?.eligibleItemIds || []).map(id => String(id).trim());
                         const itemId = String(item.id || "").trim();
+                        const itemCleanId = itemId.split('-')[0];
                         const itemMongoId = String((item as any)._id || "").trim();
-                        const isEligible = coupon && couponIds.length > 0 && (couponIds.includes(itemId) || couponIds.includes(itemMongoId));
+                        const isEligible = coupon && couponIds.length > 0 && (couponIds.includes(itemId) || couponIds.includes(itemCleanId) || couponIds.includes(itemMongoId));
 
                         // Calculate display prices
                         // Calculate display price
@@ -165,9 +166,10 @@ export default function CartPage() {
                                 // Distributed fixed logic
                                 const eligibleTotal = items.reduce((sum, i) => {
                                     const iId = String(i.id).trim();
+                                    const iCleanId = iId.split('-')[0];
                                     const iMongo = String((i as any)._id).trim();
                                     // Strict check here too
-                                    const iEligible = couponIds.length > 0 && (couponIds.includes(iId) || couponIds.includes(iMongo));
+                                    const iEligible = couponIds.length > 0 && (couponIds.includes(iId) || couponIds.includes(iCleanId) || couponIds.includes(iMongo));
                                     return iEligible ? sum + (i.price * i.quantity) : sum;
                                 }, 0);
 
@@ -485,11 +487,13 @@ export default function CartPage() {
                                         if (hasConstraints) {
                                             meetsConstraints = items.some(item => {
                                                 const iId = String(item.id).trim();
+                                                const iCleanId = iId.split('-')[0];
                                                 const iMongo = String((item as any)._id || "").trim();
                                                 const iCat = String(item.category || "").trim().toLowerCase();
                                                 const iBrand = String((item as any).brand || "").trim().toLowerCase();
 
                                                 return appProds.includes(iId) ||
+                                                    appProds.includes(iCleanId) ||
                                                     appProds.includes(iMongo) ||
                                                     appCats.includes(iCat) ||
                                                     (iBrand && appBrands.includes(iBrand));

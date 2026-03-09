@@ -126,21 +126,35 @@ router.post('/verify', async (req, res) => {
             // Fetch fresh product data from DB to ensure valid Category/Brand/Price
             // and to handle stale cart items that might miss the 'brand' field.
             // Note: We use the custom 'id' field (String) which matches frontend Item IDs.
-            const productIds = cartItems.map(item => item.id).filter(Boolean);
-            const dbProducts = await Product.find({ id: { $in: productIds } }).lean();
+            // Strip variant suffixes (e.g. "123-100ml" -> "123")
+            const mongoose = require('mongoose');
+            const cleanQueryIds = cartItems.map(item => String(item.id || item._id || "").split('-')[0]).filter(Boolean);
+            const validObjectIds = cleanQueryIds.filter(id => mongoose.Types.ObjectId.isValid(id));
 
-            // Create a map for quick lookup
+            const dbProducts = await Product.find({
+                $or: [
+                    { id: { $in: cleanQueryIds } },
+                    ...((validObjectIds.length > 0) ? [{ _id: { $in: validObjectIds } }] : [])
+                ]
+            }).lean();
+
+            // Create a map for quick lookup handling both id and MongoDB _id
             const productMap = {};
-            dbProducts.forEach(p => { productMap[p.id] = p; });
+            dbProducts.forEach(p => {
+                if (p.id) productMap[String(p.id)] = p;
+                if (p._id) productMap[String(p._id)] = p;
+            });
 
             // Filter items that match ANY of the criteria
             console.log(`-- Checking ${cartItems.length} items against constraints:`, { prodConstraints, catConstraints, brandConstraints });
 
             eligibleItems = cartItems.filter(item => {
-                const dbProduct = productMap[item.id];
+                const rawId = String(item.id || item._id || "");
+                const cleanId = rawId.split('-')[0];
+                const dbProduct = productMap[cleanId];
 
                 if (!dbProduct) {
-                    console.log(`   [SKIP] Product ${item.id} not found in DB`);
+                    console.log(`   [SKIP] Product ${rawId} (clean: ${cleanId}) not found in DB`);
                     return false;
                 }
 
@@ -185,8 +199,16 @@ router.post('/verify', async (req, res) => {
 
             // Calculate total of only eligible items using DB PRICES for safety
             eligibleAmount = eligibleItems.reduce((sum, item) => {
-                const dbP = productMap[item.id];
-                return sum + (dbP.price * item.quantity);
+                const rawId = String(item.id || item._id || "");
+                const cleanId = rawId.split('-')[0];
+                const dbP = productMap[cleanId];
+
+                // If it's a variant, use the item's current price from cart.
+                // If it's a base product, use DB price for safety.
+                const isVariant = rawId.includes('-');
+                const priceToUse = isVariant ? item.price : dbP.price;
+
+                return sum + (priceToUse * item.quantity);
             }, 0);
         }
 
