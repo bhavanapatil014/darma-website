@@ -6,14 +6,11 @@ import Link from "next/link";
 import { AddToCartButton } from "@/components/ui/add-to-cart-button";
 import { ProductDetails } from "@/components/product-info";
 import { ProductReviews } from "@/components/product-reviews";
-import { ShareButton } from "@/components/share-button";
-import { WishlistButton } from "@/components/wishlist-button";
 import { RecentlyViewed } from "@/components/recently-viewed";
 import { UseViewTracker } from "@/components/view-tracker";
 import { ProductGallery } from "@/components/product-gallery";
 import { Breadcrumb } from "@/components/ui/breadcrumb";
 import { TrustBadges } from "@/components/ui/trust-badges";
-import NegotiationChat from "@/components/negotiation-chat";
 
 export const dynamic = 'force-dynamic';
 
@@ -53,14 +50,6 @@ export default async function ProductPage(props: {
                         <div className="sticky top-24 space-y-8">
                             {/* Header */}
                             <ProductDetails product={product} />
-                            <div className="space-y-6 pt-4">
-                                <NegotiationChat product={product} />
-
-                                <div className="flex items-center justify-center gap-8 text-sm text-gray-500 pt-4">
-                                    {/* <WishlistButton product={product} /> Moved to ProductDetails for variant handling */}
-                                    <ShareButton title={product.name} text={product.description} />
-                                </div>
-                            </div>
                         </div>
                     </div>
                 </div>

@@ -7,7 +7,8 @@ import { useCart } from "@/lib/cart-context"
 import { Product } from "@/lib/data"
 import { ShoppingCart, Check, X } from "lucide-react"
 import { WishlistButton } from "@/components/wishlist-button"
-
+import { ShareButton } from "@/components/share-button"
+import NegotiationChat from "@/components/negotiation-chat"
 export function ProductDetails({ product }: { product: Product }) {
     const { addItem } = useCart()
     const router = useRouter()
@@ -287,7 +288,11 @@ export function ProductDetails({ product }: { product: Product }) {
                     </Button>
                 </div>
 
-                <div className="flex justify-center pt-2">
+                <div className="pt-2">
+                    <NegotiationChat product={product} />
+                </div>
+
+                <div className="flex items-center justify-center gap-8 text-sm text-gray-500 pt-4 border-t mt-6">
                     <WishlistButton product={{
                         ...product,
                         // Ensure we pass the VARIANT SPECIFIC ID and details so wishlist treats it uniquely
@@ -297,6 +302,7 @@ export function ProductDetails({ product }: { product: Product }) {
                         mrp: currentMrp || product.mrp,
                         // We keep the main image or variant image if we had one
                     }} />
+                    <ShareButton title={product.name} text={product.description} />
                 </div>
             </div>
 
