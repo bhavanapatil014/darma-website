@@ -29,8 +29,10 @@ function LoginContent() {
         }
 
         // Use Backend Auth (Supports Simulated/Free SMS)
-        await sendOtp(phoneNumber);
-        setView('otp-verify');
+        const success = await sendOtp(phoneNumber);
+        if (success) {
+            setView('otp-verify');
+        }
     }
 
     const handleVerifyOtp = async (e: React.FormEvent) => {

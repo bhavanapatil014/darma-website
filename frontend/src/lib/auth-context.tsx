@@ -15,7 +15,7 @@ interface AuthContextType {
     login: (email: string, password: string, redirectPath?: string) => Promise<void>
     register: (email: string, password: string, name: string, dateOfBirth?: string, phoneNumber?: string, redirectPath?: string) => Promise<void>
     logout: () => void
-    sendOtp: (identifier: string) => Promise<void>
+    sendOtp: (identifier: string) => Promise<boolean>
     verifyOtp: (identifier: string, otp: string, redirectPath?: string) => Promise<void>
     isLoading: boolean
 }
@@ -148,7 +148,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         }
     }
 
-    const sendOtp = async (identifier: string) => {
+    const sendOtp = async (identifier: string): Promise<boolean> => {
         setIsLoading(true)
         try {
             const res = await fetch(`https://darma-website.onrender.com/api/auth/send-otp`, {
@@ -166,9 +166,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             } else {
                 toast.success("OTP sent successfully!");
             }
+            return true;
         } catch (error: any) {
             console.error(error);
             toast.error(error.message || "Failed to send OTP.");
+            return false;
         } finally {
             setIsLoading(false)
         }

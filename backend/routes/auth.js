@@ -207,8 +207,8 @@ router.post('/send-otp', async (req, res) => {
                                 'authorization': process.env.FAST2SMS_AUTH
                             },
                             params: {
-                                'message': `Your DermaKart OTP is ${otp}`,
-                                'route': 'q',
+                                'variables_values': otp,
+                                'route': 'otp',
                                 'numbers': cleanPhone
                             }
                         });
