@@ -18,10 +18,13 @@ export default function AdminDashboard() {
     useEffect(() => {
         async function loadStats() {
             try {
-                // Fetch all products (limit 2000) for accurate stats
+                let BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'https://darma-website.onrender.com/api';
+                BASE_URL = BASE_URL.replace(/\/$/, "");
+                if (!BASE_URL.endsWith('/api')) BASE_URL += '/api';
+
                 const [prodRes, ordRes] = await Promise.all([
-                    fetch('https://darma-website.onrender.com/api/products?limit=2000'),
-                    fetch('https://darma-website.onrender.com/api/orders')
+                    fetch(`${BASE_URL}/products?limit=2000`),
+                    fetch(`${BASE_URL}/orders`)
                 ])
                 const productData = await prodRes.json()
                 const products = productData.products || [] // Handle paginated response
