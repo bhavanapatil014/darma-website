@@ -90,11 +90,19 @@ export default function ProductForm({ initialData, categories: initialCategories
             // Primary image logic
             const primaryImage = (uploadedImageUrls.length > 0) ? uploadedImageUrls[0] : (formData.image || "")
 
-            // Unsaved variant check
+            // Auto-save any unsaved variant details
+            let currentVariants = formData.variants ? [...formData.variants] : [];
             if (variantInput.size && variantInput.price) {
-                if (!confirm(`You have unsaved details in the "Add New Variant" box (${variantInput.size}). \n\nDo you want to discard them and save the product anyway?`)) {
-                    setLoading(false)
-                    return;
+                const newVariant = {
+                    size: variantInput.size,
+                    price: Number(variantInput.price),
+                    mrp: variantInput.mrp ? Number(variantInput.mrp) : undefined,
+                    stock: variantInput.stock ? Number(variantInput.stock) : 0
+                };
+                if (editingVariantIndex !== null) {
+                    currentVariants[editingVariantIndex] = newVariant;
+                } else {
+                    currentVariants.push(newVariant);
                 }
             }
 
@@ -107,7 +115,7 @@ export default function ProductForm({ initialData, categories: initialCategories
                 price: Number(formData.price),
                 stockQuantity: Number(formData.stockQuantity),
                 mrp: formData.mrp ? Number(formData.mrp) : undefined,
-                variants: formData.variants?.map(v => ({
+                variants: currentVariants.map(v => ({
                     ...v,
                     price: Number(v.price),
                     stock: Number(v.stock),
