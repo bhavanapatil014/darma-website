@@ -47,7 +47,7 @@ export default async function ShopPage(props: {
                 <div className="flex-1 w-full min-w-0">
                     {filteredProducts.length > 0 ? (
                         <>
-                            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
+                            <div className="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6">
                                 {filteredProducts.map((product, index) => (
                                     <ProductCard key={product.id} product={product} priority={index < 4} />
                                 ))}
