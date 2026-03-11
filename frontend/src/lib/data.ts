@@ -51,13 +51,12 @@ export async function fetchProducts(
         if (sort) params.append('sort', sort);
         params.append('page', page.toString());
         params.append('limit', limit.toString());
-        params.append('_t', Date.now().toString()); // Cache buster
-
+        // Removed the aggressive _t cache buster so that Next.js can cache similar queries
         const url = `${API_URL}/products?${params.toString()}`;
 
-        // In server components, fetch caches by default. 
-        // For this dynamic backend demo, we might want no-store if data changes often.
-        const res = await fetch(url, { cache: 'no-store' });
+        // Enable Incremental Static Regeneration (ISR): Cache results for 60 seconds
+        // This stops the frontend from waiting on the Render backend for every single user request.
+        const res = await fetch(url, { next: { revalidate: 60 } });
         if (!res.ok) throw new Error('Failed to fetch products');
 
         const data = await res.json();

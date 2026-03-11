@@ -7,12 +7,11 @@ import Link from "next/link";
 import { FeaturedProducts } from "@/components/home/featured-products";
 import { TrustBadges } from "@/components/ui/trust-badges";
 
-export const dynamic = 'force-dynamic';
-export const revalidate = 0;
+// Caching allowed for faster load times.
 
 async function getSettings() {
   try {
-    const res = await fetch(`https://darma-website.onrender.com/api/settings`, { cache: 'no-store' });
+    const res = await fetch(`https://darma-website.onrender.com/api/settings`, { next: { revalidate: 60 } });
     if (!res.ok) throw new Error("Failed");
     return res.json();
   } catch (error) {

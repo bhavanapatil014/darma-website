@@ -5,7 +5,7 @@ import Link from "next/link";
 import { ProductFilters } from "@/components/ui/product-filters";
 import { Breadcrumb } from "@/components/ui/breadcrumb";
 
-export const dynamic = 'force-dynamic';
+// Removed force-dynamic to allow Page-level caching where appropriate.
 
 type SearchParams = Promise<{ [key: string]: string | string[] | undefined }>
 
