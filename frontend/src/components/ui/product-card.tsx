@@ -61,8 +61,8 @@ export function ProductCard({ product, isWishlist = false, priority = false }: P
         <>
             <div className="group relative bg-white transition-all duration-300 flex flex-col h-full hover:shadow-lg rounded-lg overflow-hidden border border-transparent hover:border-gray-100">
                 {/* Image Section */}
-                <Link href={`/product/${product.id}`} className="block relative aspect-[4/5] bg-gray-100 overflow-hidden">
-                    <div className="absolute inset-0 bg-gray-50 flex items-center justify-center">
+                <Link href={`/product/${product.id}`} className="block relative aspect-square bg-white overflow-hidden border-b border-gray-50">
+                    <div className="absolute inset-0 flex items-center justify-center">
                         {product.image || (product.images && product.images.length > 0) ? (
                             <Image
                                 src={product.image || product.images![0]}
@@ -70,7 +70,7 @@ export function ProductCard({ product, isWishlist = false, priority = false }: P
                                 fill
                                 priority={priority}
                                 sizes="(max-width: 768px) 50vw, (max-width: 1200px) 33vw, 20vw"
-                                className="object-cover group-hover:scale-105 transition-transform duration-700"
+                                className="object-contain p-4 lg:p-6 group-hover:scale-105 transition-transform duration-700 mix-blend-multiply"
                             />
                         ) : (
                             <div className="text-gray-400 font-medium">No Image</div>
