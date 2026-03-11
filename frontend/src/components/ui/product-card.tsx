@@ -59,9 +59,9 @@ export function ProductCard({ product, isWishlist = false, priority = false }: P
 
     return (
         <>
-            <div className="group relative bg-white transition-all duration-300 flex flex-col h-full hover:shadow-lg rounded-lg overflow-hidden border border-transparent hover:border-gray-100">
+            <div className={`group relative bg-white transition-all duration-300 flex flex-col h-full hover:shadow-[0_0_8px_rgba(0,0,0,0.08)] overflow-hidden border ${isWishlist ? 'border-gray-200 rounded-md' : 'border-transparent hover:border-gray-100 rounded-lg'}`}>
                 {/* Image Section */}
-                <Link href={`/product/${product.id}`} className="block relative aspect-square bg-white overflow-hidden border-b border-gray-50">
+                <Link href={`/product/${product.id}`} className="block relative aspect-square bg-white overflow-hidden border-b border-gray-100">
                     <div className="absolute inset-0 flex items-center justify-center">
                         {product.image || (product.images && product.images.length > 0) ? (
                             <Image
@@ -96,30 +96,43 @@ export function ProductCard({ product, isWishlist = false, priority = false }: P
                         </div>
                     )}
 
-                    {/* Wishlist Button */}
-                    <button
-                        onClick={(e) => {
-                            e.preventDefault();
-                            e.stopPropagation();
-                            if (isWishlist || isInWishlist(product.id)) {
+                    {/* Wishlist Button or Delete from Wishlist */}
+                    {isWishlist ? (
+                        <button
+                            onClick={(e) => {
+                                e.preventDefault();
+                                e.stopPropagation();
                                 removeFromWishlist(product.id);
-                            } else {
-                                addToWishlist(product);
-                            }
-                        }}
-                        className={`absolute top-2 right-2 p-1.5 rounded-full transition-all z-20 ${(isWishlist || isInWishlist(product.id))
-                            ? "text-red-500 bg-white shadow-sm"
-                            : "text-gray-600 hover:text-gray-900"
-                            }`}
-                    >
-                        {isWishlist || isInWishlist(product.id) ? (
-                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-5 h-5"><path d="m11.645 20.91-.007-.003-.022-.012a15.247 15.247 0 0 1-.383-.218 25.18 25.18 0 0 1-4.244-3.17C4.688 15.36 2.25 12.174 2.25 8.25 2.25 5.322 4.714 3 7.688 3A5.5 5.5 0 0 1 12 5.052 5.5 5.5 0 0 1 16.313 3c2.973 0 5.437 2.322 5.437 5.25 0 3.925-2.438 7.111-4.739 9.256a25.175 25.175 0 0 1-4.244 3.17 15.247 15.247 0 0 1-.383.219l-.022.012-.007.004-.003.001a.752.752 0 0 1-.704 0l-.003-.001Z" /></svg>
-                        ) : (
-                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5">
-                                <path strokeLinecap="round" strokeLinejoin="round" d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12Z" />
-                            </svg>
-                        )}
-                    </button>
+                            }}
+                            className="absolute top-2 right-2 p-1.5 rounded-full transition-all z-20 bg-gray-100/90 text-gray-500 hover:bg-gray-200 hover:text-gray-800 shadow-sm"
+                        >
+                            <X className="w-4 h-4" />
+                        </button>
+                    ) : (
+                        <button
+                            onClick={(e) => {
+                                e.preventDefault();
+                                e.stopPropagation();
+                                if (isInWishlist(product.id)) {
+                                    removeFromWishlist(product.id);
+                                } else {
+                                    addToWishlist(product);
+                                }
+                            }}
+                            className={`absolute top-2 right-2 p-1.5 rounded-full transition-all z-20 ${isInWishlist(product.id)
+                                ? "text-red-500 bg-white shadow-sm"
+                                : "text-gray-600 hover:text-gray-900 bg-white/50 hover:bg-white shadow-sm"
+                                }`}
+                        >
+                            {isInWishlist(product.id) ? (
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-5 h-5"><path d="m11.645 20.91-.007-.003-.022-.012a15.247 15.247 0 0 1-.383-.218 25.18 25.18 0 0 1-4.244-3.17C4.688 15.36 2.25 12.174 2.25 8.25 2.25 5.322 4.714 3 7.688 3A5.5 5.5 0 0 1 12 5.052 5.5 5.5 0 0 1 16.313 3c2.973 0 5.437 2.322 5.437 5.25 0 3.925-2.438 7.111-4.739 9.256a25.175 25.175 0 0 1-4.244 3.17 15.247 15.247 0 0 1-.383.219l-.022.012-.007.004-.003.001a.752.752 0 0 1-.704 0l-.003-.001Z" /></svg>
+                            ) : (
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5">
+                                    <path strokeLinecap="round" strokeLinejoin="round" d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12Z" />
+                                </svg>
+                            )}
+                        </button>
+                    )}
                 </Link>
 
                 <div className="p-3 pt-4 flex flex-col flex-1">
@@ -159,12 +172,13 @@ export function ProductCard({ product, isWishlist = false, priority = false }: P
                             )}
                         </div>
                     </Link>
+                </div>
 
-                    {/* Add to Cart - Always Visible */}
-                    <div className="mt-auto">
+                {/* Add to Cart / Move to Bag - Always Visible at very bottom */}
+                <div className="mt-auto">
+                    {isWishlist ? (
                         <button
-                            style={{ backgroundColor: '#2563eb', color: '#ffffff' }}
-                            className="w-full shadow-sm font-bold uppercase tracking-wide text-xs h-9 rounded-md flex items-center justify-center transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                            className="w-full border-t border-gray-200 text-[#ff3f6c] font-bold uppercase tracking-wide text-[13px] h-11 flex items-center justify-center transition-colors hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed disabled:text-gray-400"
                             disabled={!displayStock || displayStock <= 0}
                             onClick={(e) => {
                                 e.preventDefault();
@@ -182,7 +196,6 @@ export function ProductCard({ product, isWishlist = false, priority = false }: P
                                         stockQuantity: defaultVariant.stock
                                     };
                                 } else {
-                                    // Even if no variant found (simple product), explicit properties
                                     itemToAdd = {
                                         ...product,
                                         price: displayPrice,
@@ -193,16 +206,53 @@ export function ProductCard({ product, isWishlist = false, priority = false }: P
 
                                 if (displayStock && displayStock > 0) {
                                     addItem(itemToAdd);
-                                    if (isWishlist) {
-                                        removeFromWishlist(product.id);
-                                    }
+                                    removeFromWishlist(product.id);
                                     setShowSuccessPopup(true);
                                 }
                             }}
                         >
-                            {(!displayStock || displayStock <= 0) ? "Out of Stock" : "Add to Cart"}
+                            {(!displayStock || displayStock <= 0) ? "OUT OF STOCK" : "MOVE TO BAG"}
                         </button>
-                    </div>
+                    ) : (
+                        <div className="px-3 pb-3">
+                            <button
+                                style={{ backgroundColor: '#2563eb', color: '#ffffff' }}
+                                className="w-full shadow-sm font-bold uppercase tracking-wide text-xs h-9 rounded-md flex items-center justify-center transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                                disabled={!displayStock || displayStock <= 0}
+                                onClick={(e) => {
+                                    e.preventDefault();
+                                    e.stopPropagation();
+
+                                    let itemToAdd = { ...product };
+
+                                    if (!isAlreadyVariant && defaultVariant) {
+                                        itemToAdd = {
+                                            ...product,
+                                            price: defaultVariant.price,
+                                            mrp: defaultVariant.mrp || product.mrp,
+                                            name: `${product.name} (${defaultVariant.size})`,
+                                            id: `${product.id}-${defaultVariant.size}`,
+                                            stockQuantity: defaultVariant.stock
+                                        };
+                                    } else {
+                                        itemToAdd = {
+                                            ...product,
+                                            price: displayPrice,
+                                            mrp: displayMrp,
+                                            stockQuantity: displayStock
+                                        }
+                                    }
+
+                                    if (displayStock && displayStock > 0) {
+                                        addItem(itemToAdd);
+                                        setShowSuccessPopup(true);
+                                    }
+                                }}
+                            >
+                                {(!displayStock || displayStock <= 0) ? "Out of Stock" : "Add to Cart"}
+                            </button>
+                        </div>
+                    )}
                 </div>
             </div>
 
