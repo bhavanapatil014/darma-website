@@ -85,6 +85,7 @@ router.get('/', async (req, res) => {
         const skip = (page - 1) * limit;
 
         // Parallelize count and finding to reduce overhead
+        const collation = { locale: "en_US", numericOrdering: true };
         const [totalProducts, products] = await Promise.all([
             Product.countDocuments(query),
             Product.find(query, { images: { $slice: 1 } })
