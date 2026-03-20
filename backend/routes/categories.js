@@ -15,7 +15,27 @@ router.get('/', async (req, res) => {
 // POST Create Category
 router.post('/', async (req, res) => {
     try {
-        const newCategory = new Category(req.body);
+        let { name, slug, description } = req.body;
+        if (!name) return res.status(400).json({ message: 'Name is required' });
+
+        // Generate slug if not provided
+        if (!slug) {
+            slug = name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
+        }
+
+        // Check if exists
+        const existing = await Category.findOne({
+            $or: [
+                { name: { $regex: new RegExp(`^${name}$`, 'i') } },
+                { slug: slug }
+            ]
+        });
+
+        if (existing) {
+            return res.status(400).json({ message: 'Category name or slug already exists' });
+        }
+
+        const newCategory = new Category({ name, slug, description });
         const savedCategory = await newCategory.save();
         res.status(201).json(savedCategory);
     } catch (error) {

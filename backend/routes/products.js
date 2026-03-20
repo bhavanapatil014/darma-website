@@ -84,18 +84,18 @@ router.get('/', async (req, res) => {
         const limit = parseInt(req.query.limit) || 12; // Default 12 per page
         const skip = (page - 1) * limit;
 
-        // Count total for pagination meta
-        const totalProducts = await Product.countDocuments(query);
-        const totalPages = Math.ceil(totalProducts / limit);
+        // Parallelize count and finding to reduce overhead
+        const [totalProducts, products] = await Promise.all([
+            Product.countDocuments(query),
+            Product.find(query, { images: { $slice: 1 } })
+                .sort(sortOption)
+                .collation(collation)
+                .skip(skip)
+                .limit(limit)
+                .lean()
+        ]);
 
-        // Use lean() for plain JS objects
-        const collation = { locale: "en_US", numericOrdering: true };
-        const products = await Product.find(query, { images: { $slice: 1 } })
-            .sort(sortOption)
-            .collation(collation)
-            .skip(skip)
-            .limit(limit)
-            .lean();
+        const totalPages = Math.ceil(totalProducts / limit);
 
         if (products.length > 0) {
             console.log(`Sorted Products: ${products.length}. First: ${products[0].price}, Last: ${products[products.length - 1].price}`);

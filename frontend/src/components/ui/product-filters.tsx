@@ -4,19 +4,31 @@ import { useRouter, useSearchParams } from "next/navigation"
 import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { createPortal } from "react-dom"
+import { Category, Brand } from "@/lib/data"
 
-export function ProductFilters() {
+interface ProductFiltersProps {
+    dynamicCategories?: Category[];
+    dynamicBrands?: Brand[];
+}
+
+export function ProductFilters({ dynamicCategories, dynamicBrands }: ProductFiltersProps) {
     const router = useRouter()
     const searchParams = useSearchParams()
 
     // --- Valid Options ---
-    const categories = [
+    // Merge hardcoded base options with dynamic backend options
+    const baseCategories = [
         { name: "All Products", value: "all" },
-        { name: "Skincare", value: "skincare" },
-        { name: "Hair Care", value: "hair-care" },
-        { name: "Baby Care", value: "baby-care" },
-        { name: "Treatments", value: "treatments" },
-        { name: "Bundles", value: "bundles" },
+    ]
+    const categories = [
+        ...baseCategories,
+        ...(dynamicCategories?.map(c => ({ name: c.name, value: c.slug })) || [
+            { name: "Skincare", value: "skincare" },
+            { name: "Hair Care", value: "hair-care" },
+            { name: "Baby Care", value: "baby-care" },
+            { name: "Treatments", value: "treatments" },
+            { name: "Bundles", value: "bundles" },
+        ])
     ]
 
     const sortOptions = [
@@ -26,7 +38,7 @@ export function ProductFilters() {
         { label: "Popularity", val: "rating_desc" }
     ]
 
-    const brands = ["CeraVe", "Cetaphil", "The Ordinary", "Bioderma", "Neutrogena", "La Roche-Posay"];
+    const brands = dynamicBrands?.map(b => b.name) || ["CeraVe", "Cetaphil", "The Ordinary", "Bioderma", "Neutrogena", "La Roche-Posay"];
 
 
     // --- URL Derived State (Source of Truth for Desktop / Initial Mobile) ---

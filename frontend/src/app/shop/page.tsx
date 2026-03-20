@@ -1,4 +1,4 @@
-import { fetchProducts } from "@/lib/data";
+import { fetchProducts, fetchCategories, fetchBrands } from "@/lib/data";
 import { ProductCard } from "@/components/ui/product-card";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
@@ -21,10 +21,15 @@ export default async function ShopPage(props: {
     const sort = typeof searchParams.sort === 'string' ? searchParams.sort : undefined;
     const page = typeof searchParams.page === 'string' ? Number(searchParams.page) : 1;
 
-    // fetchProducts now needs to accept brand. I assume I will update lib/data.ts next.
-    // The previous signature was: (category, search, min, max, sort, page)
-    // I will insert brand after category to keep it logical: (category, brand, search, min, max, sort, page)
-    const { products: filteredProducts, pagination } = await fetchProducts(category, brand, search, minPrice, maxPrice, sort, page);
+    const [
+        { products: filteredProducts, pagination },
+        dynamicCategories,
+        dynamicBrands
+    ] = await Promise.all([
+        fetchProducts(category, brand, search, minPrice, maxPrice, sort, page),
+        fetchCategories(),
+        fetchBrands()
+    ]);
 
     const breadcrumbItems = [
         { label: "Shop", href: category || brand ? "/shop" : undefined },
@@ -40,7 +45,10 @@ export default async function ShopPage(props: {
 
                 {/* Sidebar */}
                 <aside className="w-full lg:w-[280px] flex-shrink-0 sticky top-24 self-start">
-                    <ProductFilters />
+                    <ProductFilters
+                        dynamicCategories={dynamicCategories}
+                        dynamicBrands={dynamicBrands}
+                    />
                 </aside>
 
                 {/* Main Content */}

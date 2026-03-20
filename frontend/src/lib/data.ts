@@ -22,6 +22,18 @@ export interface Product {
     }[];
 }
 
+export interface Category {
+    _id: string;
+    name: string;
+    slug: string;
+    description?: string;
+}
+
+export interface Brand {
+    _id: string;
+    name: string;
+}
+
 let API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000/api';
 API_URL = API_URL.replace(/\/$/, ""); // Remove trailing slash
 if (!API_URL.endsWith('/api')) {
@@ -81,5 +93,25 @@ export async function fetchProductById(id: string): Promise<Product | undefined>
         return data;
     } catch (error) {
         return undefined;
+    }
+}
+
+export async function fetchCategories(): Promise<Category[]> {
+    try {
+        const res = await fetch(`${API_URL}/categories`, { next: { revalidate: 3600 } });
+        if (!res.ok) return [];
+        return await res.json();
+    } catch (error) {
+        return [];
+    }
+}
+
+export async function fetchBrands(): Promise<Brand[]> {
+    try {
+        const res = await fetch(`${API_URL}/brands`, { next: { revalidate: 3600 } });
+        if (!res.ok) return [];
+        return await res.json();
+    } catch (error) {
+        return [];
     }
 }

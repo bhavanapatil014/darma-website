@@ -24,4 +24,11 @@ const productSchema = new mongoose.Schema({
     }]
 }, { timestamps: true });
 
+// Indexes for faster filtering and sorting
+productSchema.index({ category: 1 });
+productSchema.index({ brand: 1 });
+productSchema.index({ price: 1 });
+productSchema.index({ rating: -1 });
+productSchema.index({ createdAt: -1 });
+
 module.exports = mongoose.model('Product', productSchema);
