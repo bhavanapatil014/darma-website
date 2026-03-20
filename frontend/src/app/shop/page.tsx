@@ -1,4 +1,4 @@
-import { fetchProducts, fetchCategories, fetchBrands } from "@/lib/data";
+import { fetchProducts, fetchCategories, fetchBrands, Product } from "@/lib/data";
 import { ProductCard } from "@/components/ui/product-card";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
@@ -56,7 +56,7 @@ export default async function ShopPage(props: {
                     {filteredProducts.length > 0 ? (
                         <>
                             <div className="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6">
-                                {filteredProducts.map((product, index) => (
+                                {filteredProducts.map((product: Product, index: number) => (
                                     <ProductCard key={product.id} product={product} priority={index < 4} />
                                 ))}
                             </div>
