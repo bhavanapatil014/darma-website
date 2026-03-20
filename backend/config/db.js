@@ -1,6 +1,4 @@
 const mongoose = require('mongoose');
-const { MongoMemoryServer } = require('mongodb-memory-server');
-const path = require('path');
 
 const connectDB = async () => {
     try {
