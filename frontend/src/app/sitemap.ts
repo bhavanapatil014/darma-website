@@ -1,4 +1,5 @@
 import { MetadataRoute } from 'next'
+export const dynamic = 'force-static'
 
 // Fetch all products to generate dynamic routes
 async function getProducts() {

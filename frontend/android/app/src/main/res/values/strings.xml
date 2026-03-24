@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">Darma Shop</string>
+    <string name="title_activity_main">Darma Shop</string>
+    <string name="package_name">com.darma.shop</string>
+    <string name="custom_url_scheme">com.darma.shop</string>
+</resources>
